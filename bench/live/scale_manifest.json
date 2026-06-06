@@ -1,0 +1,182 @@
+[
+  {
+    "id": "db.pagination.test1",
+    "table": "articles",
+    "cols": [
+      "id",
+      "headline",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.pagination.test2",
+    "table": "tickets",
+    "cols": [
+      "id",
+      "subject",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.pagination.test3",
+    "table": "recipes",
+    "cols": [
+      "id",
+      "name",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.projection.test1",
+    "table": "books",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.projection.test2",
+    "table": "movies",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.projection.test3",
+    "table": "songs",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.filter_pushdown.test1",
+    "table": "invoices",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.filter_pushdown.test2",
+    "table": "shipments",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.filter_pushdown.test3",
+    "table": "payments",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.count_only.test1",
+    "table": "logs",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.count_only.test2",
+    "table": "visits",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.count_only.test3",
+    "table": "clicks",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.top_n.test1",
+    "table": "leaderboard",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.top_n.test2",
+    "table": "rankings",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.top_n.test3",
+    "table": "results",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.in_list.test1",
+    "table": "items",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.in_list.test2",
+    "table": "skus",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  },
+  {
+    "id": "db.in_list.test3",
+    "table": "parts",
+    "cols": [
+      "id",
+      "title",
+      "body",
+      "created_at"
+    ]
+  }
+]

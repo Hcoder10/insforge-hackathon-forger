@@ -1,0 +1,7 @@
+data/out/
+train/sft_out/
+train/grpo_out/
+train/*_adapter/
+*.log
+__pycache__/
+node_modules/

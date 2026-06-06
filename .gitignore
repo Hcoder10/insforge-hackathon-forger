@@ -1,0 +1,14 @@
+node_modules/
+**/node_modules/
+**/.venv/
+**/__pycache__/
+*.log
+.env
+.env.*
+**/.insforge/
+**/.env.local
+**/train/*_adapter/
+**/data/out/
+**/data/out2/
+**/results/_parked*/
+*.tgz

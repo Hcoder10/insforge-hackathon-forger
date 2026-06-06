@@ -1,0 +1,29 @@
+node_modules/
+results/*.json
+!results/.gitkeep
+*.log
+.DS_Store
+.env
+.env.*
+.insforge/
+.agents/
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+
+# CLI-generated
+AGENTS.md
+_chk.cjs
+*.cjs
