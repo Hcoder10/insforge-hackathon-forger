@@ -1967,3 +1967,9 @@ pre {
 .live-demo-bar select{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;background:#0d1418;color:inherit;border:1px solid var(--line,#2a3a44);max-width:340px}
 .live-demo-bar .demo-status{font-size:12px;opacity:.8;margin-left:auto}
 #haiku-code,#forge-code{white-space:pre-wrap;max-height:340px;overflow:auto;font-size:12px;line-height:1.5}
+
+/* --- live run wiring --- */
+.run-task-select{font:inherit;font-size:13px;padding:8px 12px;border-radius:8px;background:#0d1418;color:inherit;border:1px solid var(--line,#2a3a44);max-width:240px}
+.run-live-status{font-size:12px;opacity:.85;margin:8px 0 0}
+.run-output-editor textarea{width:100%;min-height:120px;background:#0b1216;color:inherit;border:1px solid var(--line,#2a3a44);border-radius:8px;font-family:ui-monospace,monospace;font-size:12px;padding:10px}
+#run-input,#run-output{white-space:pre}

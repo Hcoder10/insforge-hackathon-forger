@@ -157,22 +157,19 @@
             <article class="pipe mint"><span>Qwen3.6</span><b>LoRA + GRPO</b></article>
           </section>
 
-          <section class="live-demo-bar" aria-label="Live demo controls">
-            <label for="demo-task">task</label>
-            <select id="demo-task"></select>
-            <button class="pixel-button primary" id="demo-run" type="button"><span class="play"></span>Run live demo</button>
-            <span class="demo-status" id="demo-status">Haiku 4.5 authors → forge-optimizer rewrites → forger-bench grades both</span>
-          </section>
-
           <section class="optimizer-body">
             <div class="editor-pair" aria-label="Optimizer editors">
               <article class="editor input-editor">
-                <header><span>Claude Haiku 4.5</span><b id="haiku-verdict">the "before"</b></header>
-                <pre id="haiku-code">Pick a task and hit Run live demo.</pre>
+                <header><span>input</span><b>correct but wasteful</b></header>
+                <pre>select('*')
+.then(filter)
+.slice(0, 20)</pre>
               </article>
               <article class="editor output-editor">
-                <header><span>forge-optimizer</span><b id="forge-verdict">the "after"</b></header>
-                <pre id="forge-code">—</pre>
+                <header><span>optimized output</span><b>scale-safe</b></header>
+                <pre>select('id,total')
+.eq('user_id', uid)
+.range(0, 19)</pre>
               </article>
             </div>
 
@@ -208,17 +205,23 @@
                 <p>Paste unoptimized agent output, then watch Forger stamp out the scale traps.</p>
               </div>
               <div class="run-actions">
+                <select id="run-task" class="run-task-select" aria-label="Benchmark task"></select>
                 <button class="pixel-button primary run-start" type="button" data-run-start><span class="play"></span>Run optimizer</button>
                 <button class="pixel-button secondary run-reset" type="button" data-run-reset>Reset</button>
               </div>
+              <p class="run-live-status" id="run-status" aria-live="polite">Live: Claude Haiku 4.5 authors → forge-optimizer rewrites → forger-bench grades both.</p>
             </div>
 
             <section class="run-console" aria-label="Optimizer input and resource stats">
               <article class="run-editor" aria-label="Unoptimized code input">
-                <header><span>input</span><b>placeholder agent output</b></header>
-                <textarea spellcheck="false">select('*')
+                <header><span>input</span><b id="run-input-label">Claude Haiku 4.5 output</b></header>
+                <textarea id="run-input" spellcheck="false">select('*')
 .then(rows =&gt; rows.filter(row =&gt; row.user_id === uid))
 .then(rows =&gt; rows.slice(0, 20))</textarea>
+              </article>
+              <article class="run-editor run-output-editor" aria-label="forge-optimizer output">
+                <header><span>forge-optimizer</span><b id="run-output-label">optimized output</b></header>
+                <textarea id="run-output" spellcheck="false" readonly>(run to generate)</textarea>
               </article>
 
               <article class="run-stat-panel stat-before" aria-label="Initial unoptimized resource stats">
@@ -287,6 +290,7 @@
       </div>
     </main>
     <script src="./app.js"></script>
+    <script>window.FORGER_API="https://vbulletin-larger-pine-facts.trycloudflare.com";</script>
     <script src="./demo.js"></script>
   </body>
 </html>
