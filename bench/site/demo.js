@@ -13,7 +13,8 @@
   const forgeVerdict = document.getElementById('forge-verdict');
   if (!sel || !runBtn) return;
 
-  const API = location.origin;
+  // Demo API base: window.FORGER_API (set by a tiny inline config) or same-origin.
+  const API = (window.FORGER_API || '').replace(/\/$/, '') || location.origin;
   const verdict = (g) => g.error ? 'error'
     : `${g.correct ? '✓ correct' : '✗ wrong'} · score ${g.score} · ${g.metrics.dbOps} ops / ${g.metrics.bytesRead}B`;
 
@@ -22,7 +23,7 @@
       const r = await fetch(`${API}/api/tasks`);
       const tasks = await r.json();
       // prioritize the demo-friendly failing concepts first
-      const order = ['count_only', 'pagination', 'owner_scope', 'no_base64_in_db', 'batch_embed'];
+      const order = ['pagination', 'count_only', 'owner_scope', 'no_base64_in_db', 'batch_embed'];
       tasks.sort((a, b) => (order.indexOf(a.concept) + 1 || 99) - (order.indexOf(b.concept) + 1 || 99));
       sel.innerHTML = '';
       for (const t of tasks) {
