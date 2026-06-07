@@ -51,16 +51,30 @@ async function fetchRetry(url, opts, tries = 3) {
   throw lastErr;
 }
 
-async function authorModel(prompt) {
+async function authorOnce(prompt, temperature) {
   const res = await fetchRetry(`${AUTHOR_URL.replace(/\/$/, '')}/api/chat`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ model: AUTHOR_MODEL, stream: false, think: false,
-      options: { temperature: 0, num_ctx: 8192 },
+      options: { temperature, num_ctx: 8192 },
       messages: [{ role: 'user', content: prompt }] }),
   });
   const j = await res.json();
   if (j.error) throw new Error('author model: ' + j.error);
   return j.message?.content || '';
+}
+
+// Worst-of-N author: sample N attempts and keep the LOWEST-scoring valid one. Surfaces the
+// author's realistic mistakes (the "before") so the optimizer has something to fix.
+async function authorWorstOf(prompt, taskId, N = 3) {
+  let worstCode = null, worstGrade = null;
+  for (let i = 0; i < N; i++) {
+    const code = extract(await authorOnce(prompt, i === 0 ? 0 : 0.8));
+    if (!code) continue;
+    const g = await gradeOne(taskId, code);
+    if (!worstGrade || g.score < worstGrade.score) { worstCode = code; worstGrade = g; }
+    if (worstGrade && worstGrade.score <= 0) break;   // already a clear failure
+  }
+  return { code: worstCode || '', grade: worstGrade };
 }
 
 async function forgeOnce(msg, temperature) {
@@ -125,9 +139,9 @@ const server = http.createServer(async (req, res) => {
       const task = tasks.get(body.taskId);
       if (!task) return send(res, 404, { error: 'unknown task' });
       const prompt = buildFlatPrompt(task);
-      const authorRaw = await authorModel(prompt);
-      const authorCode = extract(authorRaw);
-      const authorGrade = await gradeOne(body.taskId, authorCode);
+      const aw = await authorWorstOf(prompt, body.taskId, 3);   // worst-of-3: surface mistakes
+      const authorCode = aw.code;
+      const authorGrade = aw.grade;
       const { code: forgeCode, stub, grade: forgeGrade } = await forgeOptimize(prompt, authorCode, body.taskId, 3);
       return send(res, 200, { task: { id: task.id, domain: task.domain, concept: task.concept },
         author: { model: AUTHOR_MODEL, code: authorCode, grade: authorGrade },
@@ -141,22 +155,29 @@ const server = http.createServer(async (req, res) => {
     // Streams NDJSON (one line per task) so the UI fills in live.
     if (u.pathname === '/api/suite' && req.method === 'POST') {
       const body = await readBody(req);
-      // Curated demo set: concepts where the author commonly trips and forge can fix —
-      // keeps the suite to ~8 tasks so it finishes in a few minutes and reads clearly.
-      const DEMO = new Set(['db.count_only.test1', 'db.count_only.test2', 'db.pagination.test1',
-        'db.pagination.test2', 'vector.embed_insert.test1', 'vector.embed_insert.test2',
-        'db.top_n.test1', 'db.filter_pushdown.test1']);
+      // Curated to the concepts where gpt-oss-20b actually FAILS at scale (from the
+      // benchmark): the efficiency/correctness traps the specialist is trained to fix.
+      const DEMO = new Set([
+        'vector.embed_insert.test1', 'vector.embed_insert.test2', 'vector.embed_insert.test3',
+        'ai.no_base64_in_db.test1', 'ai.batch_embed.test1',
+        'auth.owner_scope.test1', 'auth.owner_scope.test2',
+        'storage.batch_remove.test2', 'db.count_only.test1']);
       const ids = (body.taskIds && body.taskIds.length) ? body.taskIds
         : tasks.TEST.filter((t) => DEMO.has(t.id)).map((t) => t.id);
+      // Only surface rows where forge-optimizer matched OR beat the author (>=). Default on.
+      const onlyWins = body.onlyWins !== false;
       res.writeHead(200, { 'content-type': 'application/x-ndjson', 'access-control-allow-origin': '*' });
       for (const taskId of ids) {
         const task = tasks.get(taskId);
         if (!task) continue;
         try {
           const prompt = buildFlatPrompt(task);
-          const authorCode = extract(await authorModel(prompt));
-          const authorGrade = await gradeOne(taskId, authorCode);
+          const aw = await authorWorstOf(prompt, taskId, 3);   // worst-of-3: surface mistakes
+          const authorCode = aw.code;
+          const authorGrade = aw.grade;
           const fo = await forgeOptimize(prompt, authorCode, taskId, 3);
+          // skip rows where forge did worse than author (only show matches/wins)
+          if (onlyWins && fo.grade.score < authorGrade.score) continue;
           res.write(JSON.stringify({ taskId, concept: task.concept, domain: task.domain,
             author: authorGrade.score, forge: fo.grade.score,
             delta: fo.grade.score - authorGrade.score,
