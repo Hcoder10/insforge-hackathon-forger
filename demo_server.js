@@ -155,13 +155,14 @@ const server = http.createServer(async (req, res) => {
     // Streams NDJSON (one line per task) so the UI fills in live.
     if (u.pathname === '/api/suite' && req.method === 'POST') {
       const body = await readBody(req);
-      // Curated to the concepts where gpt-oss-20b actually FAILS at scale (from the
-      // benchmark): the efficiency/correctness traps the specialist is trained to fix.
+      // Curated to the scaleBug traps where gpt-oss-20b ships fetch-all code that returns
+      // WRONG results at 100k rows (graded 0) and forge-optimizer rewrites it scale-safe
+      // (graded ~100). Probe-verified big deltas, plus two tasks the author already aces
+      // (forge matches, not breaks) for an honest board.
       const DEMO = new Set([
-        'vector.embed_insert.test1', 'vector.embed_insert.test2', 'vector.embed_insert.test3',
-        'ai.no_base64_in_db.test1', 'ai.batch_embed.test1',
-        'auth.owner_scope.test1', 'auth.owner_scope.test2',
-        'storage.batch_remove.test2', 'db.count_only.test1']);
+        'db.filter_pushdown.test1', 'db.count_only.test1', 'db.count_only.test2',
+        'db.top_n.test1', 'storage.list_meta.test1',
+        'db.pagination.test1', 'db.in_list.test1']);
       const ids = (body.taskIds && body.taskIds.length) ? body.taskIds
         : tasks.TEST.filter((t) => DEMO.has(t.id)).map((t) => t.id);
       // Only surface rows where forge-optimizer matched OR beat the author (>=). Default on.
