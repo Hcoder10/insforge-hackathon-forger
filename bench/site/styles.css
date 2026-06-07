@@ -1981,3 +1981,56 @@ pre {
 .suite-table th,.suite-table td{text-align:left;padding:5px 10px;border-bottom:1px solid var(--line,#2a3a44)}
 .suite-table tr.win{background:rgba(58,210,159,.14)}
 .suite-table tr.win td:last-child{color:#3ad29f;font-weight:bold}
+
+/* ============================================================
+   RUN PAGE FIXES — make all cards visible, scrollable, fit
+   ============================================================ */
+/* let the active page scroll inside the stage so nothing is clipped */
+.page.active{ overflow-y:auto; overflow-x:hidden; }
+.stage{ overflow:auto; }                 /* allow the stage itself to scroll if needed */
+
+/* run console: responsive grid so input/output/before/after cards wrap + fit */
+.page-run .run-console{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+  align-items:start;
+}
+.page-run .run-editor,.page-run .run-stat-panel{ min-width:0; }     /* prevent overflow */
+.page-run textarea{ width:100%; box-sizing:border-box; max-height:220px; }
+#run-output{ background:#0b1216; }
+
+/* the game lane (Forger guy) — give it real height + keep it in flow/visible */
+.page-run .game-lane{ position:relative; min-height:180px; margin:18px 0; overflow:visible; }
+.page-run .run-forger{ max-height:120px; }
+
+/* suite table scrolls within its own box so it never pushes the mascot off-screen */
+.suite-wrap{ max-height:260px; overflow:auto; border:1px solid var(--line,#2a3a44); border-radius:8px; padding:8px 10px; }
+
+/* tighten run page top padding so more fits above the fold */
+.page-run.page{ padding:96px 56px 48px; }
+
+/* ============================================================
+   SUITE CONSOLE (live benchmark) — real values, fits, scrolls
+   ============================================================ */
+.suite-scoreboard{ font-size:13px; opacity:.92; margin-left:8px }
+.suite-scoreboard b{ color:#3ad29f }
+.suite-console{ display:grid; grid-template-columns:minmax(220px,1fr) minmax(300px,1.4fr); gap:14px; align-items:start }
+.suite-now,.suite-results{ background:rgba(0,0,0,.22); border:1px solid var(--line,#2a3a44); border-radius:10px; padding:12px 14px; min-width:0 }
+.suite-now header,.suite-results header{ display:flex; justify-content:space-between; gap:8px; font-size:12px; text-transform:uppercase; letter-spacing:.08em; opacity:.75; margin-bottom:10px }
+.suite-now-grid{ display:grid; gap:10px }
+.suite-now-grid > div{ display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid rgba(255,255,255,.06); padding-bottom:6px }
+.suite-now-grid span{ font-size:12px; opacity:.7 }
+.suite-now-grid strong{ font-size:22px }
+.suite-results{ max-height:300px; overflow:auto }
+.suite-table{ width:100%; border-collapse:collapse; font-size:12px }
+.suite-table th,.suite-table td{ text-align:left; padding:5px 8px; border-bottom:1px solid var(--line,#2a3a44) }
+.suite-table td.sc{ font-variant-numeric:tabular-nums; text-align:right }
+.suite-table tr.win{ background:rgba(58,210,159,.14) }
+.suite-table td.dwin{ color:#3ad29f; font-weight:bold }
+
+/* live code pair (both models' real output per task) */
+.suite-code-pair{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px }
+.suite-code span{ font-size:11px; text-transform:uppercase; letter-spacing:.07em; opacity:.65 }
+.suite-code pre{ margin:4px 0 0; background:#0b1216; border:1px solid var(--line,#2a3a44); border-radius:6px; padding:8px; font-size:11px; line-height:1.45; max-height:200px; overflow:auto; white-space:pre-wrap; word-break:break-word }
+@media (max-width:900px){ .suite-code-pair{ grid-template-columns:1fr } }

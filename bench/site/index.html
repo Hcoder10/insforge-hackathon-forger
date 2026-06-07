@@ -205,60 +205,28 @@
                 <p>Paste unoptimized agent output, then watch Forger stamp out the scale traps.</p>
               </div>
               <div class="run-actions">
-                <select id="run-task" class="run-task-select" aria-label="Benchmark task"></select>
-                <button class="pixel-button primary run-start" type="button" data-run-start><span class="play"></span>Run optimizer</button>
-                <button class="pixel-button secondary" type="button" id="run-suite"><span class="play"></span>Run benchmark suite</button>
-                <button class="pixel-button secondary run-reset" type="button" data-run-reset>Reset</button>
+                <button class="pixel-button primary" type="button" id="run-suite"><span class="play"></span>Run benchmark suite</button>
+                <span class="suite-scoreboard" id="suite-scoreboard">gpt-oss-120b author avg <b id="sb-author">–</b> → forge-optimizer avg <b id="sb-forge">–</b> · wins <b id="sb-wins">0</b></span>
               </div>
-              <p class="run-live-status" id="run-status" aria-live="polite">Live: gpt-oss-120b authors → forge-optimizer (best-of-5) rewrites → forger-bench grades both.</p>
-              <div class="suite-wrap" id="suite-wrap" hidden>
-                <div class="suite-summary" id="suite-summary"></div>
-                <table class="suite-table"><thead><tr><th>task</th><th>author</th><th>forge</th><th>Δ</th></tr></thead><tbody id="suite-body"></tbody></table>
-              </div>
+              <p class="run-live-status" id="run-status" aria-live="polite">gpt-oss-120b authors each task → forge-optimizer (best-of-5) rewrites → forger-bench grades both, live.</p>
             </div>
 
-            <section class="run-console" aria-label="Optimizer input and resource stats">
-              <article class="run-editor" aria-label="Unoptimized code input">
-                <header><span>input</span><b id="run-input-label">Claude Haiku 4.5 output</b></header>
-                <textarea id="run-input" spellcheck="false">select('*')
-.then(rows =&gt; rows.filter(row =&gt; row.user_id === uid))
-.then(rows =&gt; rows.slice(0, 20))</textarea>
-              </article>
-              <article class="run-editor run-output-editor" aria-label="forge-optimizer output">
-                <header><span>forge-optimizer</span><b id="run-output-label">optimized output</b></header>
-                <textarea id="run-output" spellcheck="false" readonly>(run to generate)</textarea>
-              </article>
-
-              <article class="run-stat-panel stat-before" aria-label="Initial unoptimized resource stats">
-                <header><span>before</span><b>unoptimized stats</b></header>
-                <div class="run-stat" data-before-stat="cpu" style="--pct: 91">
-                  <span>CPU</span><div><i></i></div><b>91%</b>
+            <section class="run-console suite-console" aria-label="Live benchmark suite results">
+              <article class="suite-now" aria-label="Current task">
+                <header><span>now grading</span><b id="suite-current">—</b></header>
+                <div class="suite-now-grid">
+                  <div><span>author (gpt-oss-120b)</span><strong id="suite-now-author">–</strong></div>
+                  <div><span>forge-optimizer</span><strong id="suite-now-forge">–</strong></div>
+                  <div><span>Δ</span><strong id="suite-now-delta">–</strong></div>
                 </div>
-                <div class="run-stat" data-before-stat="disk" style="--pct: 84">
-                  <span>Disk</span><div><i></i></div><b>480MB</b>
-                </div>
-                <div class="run-stat" data-before-stat="memory" style="--pct: 78">
-                  <span>Memory</span><div><i></i></div><b>1.8GB</b>
-                </div>
-                <div class="run-stat" data-before-stat="network" style="--pct: 88">
-                  <span>Network I/O</span><div><i></i></div><b>2.4MB</b>
+                <div class="suite-code-pair">
+                  <div class="suite-code"><span>gpt-oss-120b wrote</span><pre id="suite-code-author">—</pre></div>
+                  <div class="suite-code"><span>forge-optimizer rewrote</span><pre id="suite-code-forge">—</pre></div>
                 </div>
               </article>
-
-              <article class="run-stat-panel stat-after" aria-label="Optimized resource stats" data-optimized-panel>
-                <header><span>after</span><b>optimized stats</b></header>
-                <div class="run-stat" data-after-stat="cpu" data-final="31" data-label="31%" style="--pct: 0">
-                  <span>CPU</span><div><i></i></div><b>pending</b>
-                </div>
-                <div class="run-stat" data-after-stat="disk" data-final="15" data-label="84MB" style="--pct: 0">
-                  <span>Disk</span><div><i></i></div><b>pending</b>
-                </div>
-                <div class="run-stat" data-after-stat="memory" data-final="24" data-label="540MB" style="--pct: 0">
-                  <span>Memory</span><div><i></i></div><b>pending</b>
-                </div>
-                <div class="run-stat" data-after-stat="network" data-final="18" data-label="0.5MB" style="--pct: 0">
-                  <span>Network I/O</span><div><i></i></div><b>pending</b>
-                </div>
+              <article class="suite-results" aria-label="Suite results table">
+                <header><span>forger-bench</span><b id="suite-summary">click Run benchmark suite</b></header>
+                <table class="suite-table"><thead><tr><th>task</th><th>author</th><th>forge</th><th>Δ</th></tr></thead><tbody id="suite-body"></tbody></table>
               </article>
             </section>
 

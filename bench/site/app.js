@@ -245,3 +245,18 @@ function revealOptimizedStats() {
     stat.querySelector("b").textContent = stat.dataset.label || "";
   }
 }
+
+/* --- exposed for the live suite: walk to a waste node and smash it (one per task) --- */
+let smashIdx = 0;
+window.forgerSmash = async function (resultDelta) {
+  if (!wasteNodes.length) return;
+  const node = wasteNodes[smashIdx % wasteNodes.length];
+  const pos = stampTargets[smashIdx % stampTargets.length];
+  smashIdx++;
+  try { await walkTo(pos, runToken); await stampNode(node, pos, runToken); } catch (e) {}
+};
+window.forgerReset = function () {
+  smashIdx = 0;
+  for (const node of wasteNodes) node.classList.remove("active", "stamped", "coded");
+  setRunnerPosition("7%");
+};

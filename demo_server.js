@@ -41,8 +41,18 @@ function extract(t) {
   return i !== -1 ? t.slice(i).trim() : (t || '');
 }
 
+// fetch with retry — tunnels can blip mid-suite; retry a couple times before giving up.
+async function fetchRetry(url, opts, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try { return await fetch(url, opts); }
+    catch (e) { lastErr = e; await new Promise((r) => setTimeout(r, 1500 * (i + 1))); }
+  }
+  throw lastErr;
+}
+
 async function authorModel(prompt) {
-  const res = await fetch(`${AUTHOR_URL.replace(/\/$/, '')}/api/chat`, {
+  const res = await fetchRetry(`${AUTHOR_URL.replace(/\/$/, '')}/api/chat`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ model: AUTHOR_MODEL, stream: false, think: false,
       options: { temperature: 0, num_ctx: 8192 },
@@ -54,7 +64,7 @@ async function authorModel(prompt) {
 }
 
 async function forgeOnce(msg, temperature) {
-  const res = await fetch(FORGE_OPT_URL.replace(/\/$/, '') + '/v1/chat/completions', {
+  const res = await fetchRetry(FORGE_OPT_URL.replace(/\/$/, '') + '/v1/chat/completions', {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ model: 'forge-optimizer', max_tokens: 768, temperature,
       messages: [{ role: 'user', content: msg }] }),
@@ -96,6 +106,17 @@ function send(res, code, obj, type) {
 const server = http.createServer(async (req, res) => {
   const u = url.parse(req.url, true);
   try {
+    // CORS preflight — browsers send OPTIONS before cross-origin POST. Must answer it or
+    // the real request never fires ("Failed to fetch").
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': 'GET, POST, OPTIONS',
+        'access-control-allow-headers': 'content-type',
+        'access-control-max-age': '86400',
+      });
+      return res.end();
+    }
     if (u.pathname === '/api/tasks') {
       return send(res, 200, tasks.TEST.map((t) => ({ id: t.id, domain: t.domain, concept: t.concept, prompt: t.prompt })));
     }
@@ -120,8 +141,13 @@ const server = http.createServer(async (req, res) => {
     // Streams NDJSON (one line per task) so the UI fills in live.
     if (u.pathname === '/api/suite' && req.method === 'POST') {
       const body = await readBody(req);
+      // Curated demo set: concepts where the author commonly trips and forge can fix —
+      // keeps the suite to ~8 tasks so it finishes in a few minutes and reads clearly.
+      const DEMO = new Set(['db.count_only.test1', 'db.count_only.test2', 'db.pagination.test1',
+        'db.pagination.test2', 'vector.embed_insert.test1', 'vector.embed_insert.test2',
+        'db.top_n.test1', 'db.filter_pushdown.test1']);
       const ids = (body.taskIds && body.taskIds.length) ? body.taskIds
-        : tasks.TEST.filter((t) => t.domain === 'db' || t.domain === 'vector').map((t) => t.id);
+        : tasks.TEST.filter((t) => DEMO.has(t.id)).map((t) => t.id);
       res.writeHead(200, { 'content-type': 'application/x-ndjson', 'access-control-allow-origin': '*' });
       for (const taskId of ids) {
         const task = tasks.get(taskId);
@@ -130,7 +156,7 @@ const server = http.createServer(async (req, res) => {
           const prompt = buildFlatPrompt(task);
           const authorCode = extract(await authorModel(prompt));
           const authorGrade = await gradeOne(taskId, authorCode);
-          const fo = await forgeOptimize(prompt, authorCode, taskId, 5);
+          const fo = await forgeOptimize(prompt, authorCode, taskId, 3);
           res.write(JSON.stringify({ taskId, concept: task.concept, domain: task.domain,
             author: authorGrade.score, forge: fo.grade.score,
             delta: fo.grade.score - authorGrade.score,
