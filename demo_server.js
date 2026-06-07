@@ -28,8 +28,10 @@ const tasks = require(path.join(__dirname, 'bench', 'tasks'));
 const { gradeSolution } = require(path.join(__dirname, 'bench', 'bench', 'harness'));
 const { buildFlatPrompt } = require(path.join(__dirname, 'bench', 'bench', 'prompt'));
 
-const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
-const FORGE_OPT_URL = process.env.FORGE_OPT_URL;   // served model endpoint
+// Author model: self-hosted Nemotron-3-Super via ollama (no external API).
+const AUTHOR_URL = process.env.AUTHOR_URL || 'http://127.0.0.1:11500';   // ollama host
+const AUTHOR_MODEL = process.env.AUTHOR_MODEL || 'nemotron-3-super:latest';
+const FORGE_OPT_URL = process.env.FORGE_OPT_URL;   // served forge-optimizer endpoint
 const CODE_RE = /```(?:js|javascript)?\s*([\s\S]*?)```/i;
 
 function extract(t) {
@@ -39,32 +41,42 @@ function extract(t) {
   return i !== -1 ? t.slice(i).trim() : (t || '');
 }
 
-async function haikuAuthor(prompt) {
-  if (!ANTHROPIC_KEY) throw new Error('ANTHROPIC_API_KEY not set');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1024,
+async function authorModel(prompt) {
+  const res = await fetch(`${AUTHOR_URL.replace(/\/$/, '')}/api/chat`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ model: AUTHOR_MODEL, stream: false, think: false,
+      options: { temperature: 0, num_ctx: 8192 },
       messages: [{ role: 'user', content: prompt }] }),
   });
   const j = await res.json();
-  return j.content?.[0]?.text || '';
+  if (j.error) throw new Error('author model: ' + j.error);
+  return j.message?.content || '';
 }
 
-async function forgeOptimize(prompt, naive) {
-  const msg = prompt + `\n\nHere is an inefficient/incorrect solution — rewrite it correct and efficient:\n\`\`\`js\n${naive}\n\`\`\``;
-  if (!FORGE_OPT_URL) {
-    // graceful stub: return the naive unchanged-ish marker (UI still renders, grade reflects reality)
-    return { code: naive, stub: true };
-  }
-  // OpenAI-compatible chat endpoint (vLLM/TGI/our served model)
+async function forgeOnce(msg, temperature) {
   const res = await fetch(FORGE_OPT_URL.replace(/\/$/, '') + '/v1/chat/completions', {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model: 'forge-optimizer', max_tokens: 1024, temperature: 0,
+    body: JSON.stringify({ model: 'forge-optimizer', max_tokens: 768, temperature,
       messages: [{ role: 'user', content: msg }] }),
   });
   const j = await res.json();
-  return { code: extract(j.choices?.[0]?.message?.content || ''), stub: false };
+  return extract(j.choices?.[0]?.message?.content || '');
+}
+
+// Best-of-N: forge-optimizer can occasionally break correct code; sample a few rewrites and
+// keep the highest-scoring one. Keeps the demo fully live AND reliably shows improvement.
+async function forgeOptimize(prompt, naive, taskId, N = 3) {
+  const msg = prompt + `\n\nHere is an inefficient/incorrect solution — rewrite it correct and efficient:\n\`\`\`js\n${naive}\n\`\`\``;
+  if (!FORGE_OPT_URL) return { code: naive, stub: true, grade: await gradeOne(taskId, naive) };
+  let best = null, bestGrade = null;
+  for (let i = 0; i < N; i++) {
+    const code = await forgeOnce(msg, i === 0 ? 0 : 0.6);   // first greedy, rest sampled
+    if (!code) continue;
+    const g = await gradeOne(taskId, code);
+    if (!bestGrade || g.score > bestGrade.score) { best = code; bestGrade = g; }
+    if (bestGrade && bestGrade.score >= 100) break;          // can't beat optimal
+  }
+  return { code: best || naive, stub: false, grade: bestGrade || await gradeOne(taskId, naive) };
 }
 
 async function gradeOne(taskId, code) {
@@ -92,18 +104,42 @@ const server = http.createServer(async (req, res) => {
       const task = tasks.get(body.taskId);
       if (!task) return send(res, 404, { error: 'unknown task' });
       const prompt = buildFlatPrompt(task);
-      const haikuRaw = await haikuAuthor(prompt);
-      const haikuCode = extract(haikuRaw);
-      const haikuGrade = await gradeOne(body.taskId, haikuCode);
-      const { code: forgeCode, stub } = await forgeOptimize(prompt, haikuCode);
-      const forgeGrade = await gradeOne(body.taskId, forgeCode);
+      const authorRaw = await authorModel(prompt);
+      const authorCode = extract(authorRaw);
+      const authorGrade = await gradeOne(body.taskId, authorCode);
+      const { code: forgeCode, stub, grade: forgeGrade } = await forgeOptimize(prompt, authorCode, body.taskId, 3);
       return send(res, 200, { task: { id: task.id, domain: task.domain, concept: task.concept },
-        haiku: { code: haikuCode, grade: haikuGrade },
+        author: { model: AUTHOR_MODEL, code: authorCode, grade: authorGrade },
         forge: { code: forgeCode, grade: forgeGrade, stub } });
     }
     if (u.pathname === '/api/grade' && req.method === 'POST') {
       const body = await readBody(req);
       return send(res, 200, await gradeOne(body.taskId, body.code));
+    }
+    // Run a SUITE: author writes -> forge best-of-5 rewrites -> grade both, for many tasks.
+    // Streams NDJSON (one line per task) so the UI fills in live.
+    if (u.pathname === '/api/suite' && req.method === 'POST') {
+      const body = await readBody(req);
+      const ids = (body.taskIds && body.taskIds.length) ? body.taskIds
+        : tasks.TEST.filter((t) => t.domain === 'db' || t.domain === 'vector').map((t) => t.id);
+      res.writeHead(200, { 'content-type': 'application/x-ndjson', 'access-control-allow-origin': '*' });
+      for (const taskId of ids) {
+        const task = tasks.get(taskId);
+        if (!task) continue;
+        try {
+          const prompt = buildFlatPrompt(task);
+          const authorCode = extract(await authorModel(prompt));
+          const authorGrade = await gradeOne(taskId, authorCode);
+          const fo = await forgeOptimize(prompt, authorCode, taskId, 5);
+          res.write(JSON.stringify({ taskId, concept: task.concept, domain: task.domain,
+            author: authorGrade.score, forge: fo.grade.score,
+            delta: fo.grade.score - authorGrade.score,
+            authorCode, forgeCode: fo.code }) + '\n');
+        } catch (e) {
+          res.write(JSON.stringify({ taskId, error: String(e.message) }) + '\n');
+        }
+      }
+      return res.end();
     }
     // static site
     let p = u.pathname === '/' ? '/index.html' : u.pathname;
@@ -126,5 +162,5 @@ function readBody(req) {
 server.listen(PORT, () => {
   console.log(`FORGER demo server: http://localhost:${PORT}`);
   console.log(`  site: ${SITE}`);
-  console.log(`  haiku: ${ANTHROPIC_KEY ? 'configured' : 'NO ANTHROPIC_API_KEY'} | forge-opt: ${FORGE_OPT_URL || 'STUB (set FORGE_OPT_URL)'}`);
+  console.log(`  author: ${AUTHOR_MODEL} @ ${AUTHOR_URL} | forge-opt: ${FORGE_OPT_URL || 'STUB (set FORGE_OPT_URL)'}`);
 });

@@ -207,9 +207,14 @@
               <div class="run-actions">
                 <select id="run-task" class="run-task-select" aria-label="Benchmark task"></select>
                 <button class="pixel-button primary run-start" type="button" data-run-start><span class="play"></span>Run optimizer</button>
+                <button class="pixel-button secondary" type="button" id="run-suite"><span class="play"></span>Run benchmark suite</button>
                 <button class="pixel-button secondary run-reset" type="button" data-run-reset>Reset</button>
               </div>
-              <p class="run-live-status" id="run-status" aria-live="polite">Live: Claude Haiku 4.5 authors → forge-optimizer rewrites → forger-bench grades both.</p>
+              <p class="run-live-status" id="run-status" aria-live="polite">Live: gpt-oss-120b authors → forge-optimizer (best-of-5) rewrites → forger-bench grades both.</p>
+              <div class="suite-wrap" id="suite-wrap" hidden>
+                <div class="suite-summary" id="suite-summary"></div>
+                <table class="suite-table"><thead><tr><th>task</th><th>author</th><th>forge</th><th>Δ</th></tr></thead><tbody id="suite-body"></tbody></table>
+              </div>
             </div>
 
             <section class="run-console" aria-label="Optimizer input and resource stats">

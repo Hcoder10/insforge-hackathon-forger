@@ -168,6 +168,12 @@ async function runOptimizerDemo() {
   runStart.disabled = true;
   runPage?.setAttribute("data-run-state", "running");
 
+  // Kick off the REAL pipeline in parallel with the animation (window.runForgerDemo lives
+  // in demo.js: Nemotron-3-Super authors -> forge-optimizer rewrites -> forger-bench grades).
+  // The walk/stamp animation is cover for the ~15-20s round-trip; we fill real data when it lands.
+  const livePromise = (window.runForgerDemo ? window.runForgerDemo() : Promise.resolve(null))
+    .catch((e) => ({ error: String(e && e.message || e) }));
+
   for (const [index, node] of wasteNodes.entries()) {
     if (!stillCurrent(token)) return;
     await walkTo(stampTargets[index], token);
@@ -176,7 +182,12 @@ async function runOptimizerDemo() {
   }
 
   if (!stillCurrent(token)) return;
-  revealOptimizedStats();
+  // Wait for the live result before declaring complete (keep walking in place if still pending).
+  const data = await livePromise;
+  if (!stillCurrent(token)) return;
+  if (window.applyForgerResult) window.applyForgerResult(data);   // fills editors + REAL stats + verdict
+  else revealOptimizedStats();
+
   runPage?.setAttribute("data-run-state", "complete");
   runResult?.classList.add("active");
   runLane?.classList.add("cleaning");

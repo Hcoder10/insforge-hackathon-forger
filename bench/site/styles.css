@@ -1973,3 +1973,11 @@ pre {
 .run-live-status{font-size:12px;opacity:.85;margin:8px 0 0}
 .run-output-editor textarea{width:100%;min-height:120px;background:#0b1216;color:inherit;border:1px solid var(--line,#2a3a44);border-radius:8px;font-family:ui-monospace,monospace;font-size:12px;padding:10px}
 #run-input,#run-output{white-space:pre}
+
+/* --- benchmark suite table --- */
+.suite-wrap{margin-top:14px}
+.suite-summary{font-size:13px;margin-bottom:8px;opacity:.9}
+.suite-table{width:100%;border-collapse:collapse;font-size:12px}
+.suite-table th,.suite-table td{text-align:left;padding:5px 10px;border-bottom:1px solid var(--line,#2a3a44)}
+.suite-table tr.win{background:rgba(58,210,159,.14)}
+.suite-table tr.win td:last-child{color:#3ad29f;font-weight:bold}
