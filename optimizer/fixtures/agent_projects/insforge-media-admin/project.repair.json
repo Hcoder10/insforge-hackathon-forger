@@ -1,0 +1,23 @@
+{
+  "name": "insforge-media-admin",
+  "description": "A small InsForge media admin project with generated storage maintenance code.",
+  "agentSources": ["gemini", "devin"],
+  "tests": [
+    {
+      "name": "metadata summary does not download files",
+      "module": "src/storageJobs.js",
+      "exportName": "sumAttachmentBytes",
+      "kind": "storage.listMeta",
+      "config": { "bucket": "attachments", "count": 16, "bytesEach": 4096 },
+      "maxMetrics": { "storageOps": 1, "storageBytes": 0 }
+    },
+    {
+      "name": "exports are removed in one storage operation",
+      "module": "src/storageJobs.js",
+      "exportName": "removeExports",
+      "kind": "storage.batchRemove",
+      "config": { "bucket": "exports", "count": 18, "bytesEach": 2048 },
+      "maxMetrics": { "storageOps": 1 }
+    }
+  ]
+}

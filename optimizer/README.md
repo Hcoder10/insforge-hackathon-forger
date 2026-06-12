@@ -99,8 +99,35 @@ emptyGuard: 0/39 repaired
 ```
 
 This is the repair proof. It shows the repair engine can fix real generated InsForge SDK
-solutions from other agents on the benchmark suite. It is still separate from the raw model
-frontier gate:
+solutions from other agents on the benchmark suite.
+
+The project repair benchmark runs on complete generated InsForge app folders:
+
+```bash
+npm run project-repair:bench
+```
+
+Current artifact: `optimizer/results/project_repair_benchmark.json`.
+
+```text
+projects: 2
+cases: 5
+beforeCorrect: 3
+beforeEfficient: 0
+afterCorrect: 5
+afterEfficient: 5
+fixedCorrectness: 2
+fixedEfficiency: 3
+regressions: 0
+```
+
+Run both repair proofs and the empty-output audit:
+
+```bash
+npm run proof:repair
+```
+
+These repair results are still separate from the raw model frontier gate:
 
 ```bash
 npm run frontier-gate:raw

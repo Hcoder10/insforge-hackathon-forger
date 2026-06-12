@@ -119,6 +119,33 @@ emptyGuard: 0/39 repaired
 This is the current proof that FORGER can repair generated code from other agents on the
 benchmark suite.
 
+The project-folder repair benchmark applies repairs inside complete generated InsForge app
+folders, then reruns before/after tests:
+
+```bash
+npm run project-repair:bench
+```
+
+Current artifact: `optimizer/results/project_repair_benchmark.json`.
+
+```text
+projects: 2
+cases: 5
+beforeCorrect: 3
+beforeEfficient: 0
+afterCorrect: 5
+afterEfficient: 5
+fixedCorrectness: 2
+fixedEfficiency: 3
+regressions: 0
+```
+
+Run the full repair proof suite:
+
+```bash
+npm run proof:repair
+```
+
 ## Raw Model Gate
 
 Use this before claiming the trained adapter beats the frontier baseline:

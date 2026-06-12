@@ -1,0 +1,34 @@
+{
+  "name": "insforge-customer-portal",
+  "description": "A small InsForge customer portal with generated data-loading code from multiple agents.",
+  "agentSources": ["codex", "claude", "qwen"],
+  "tests": [
+    {
+      "name": "feed pagination is one query with count",
+      "module": "src/feed.js",
+      "exportName": "loadFeedPage",
+      "kind": "db.pagination",
+      "config": { "table": "articles", "titleCol": "headline", "total": 57 },
+      "maxMetrics": { "dbOps": 1, "rowsReturned": 10 }
+    },
+    {
+      "name": "profile insert uses SDK array form",
+      "module": "src/profiles.js",
+      "exportName": "createProfile",
+      "kind": "db.insertArray",
+      "config": {
+        "table": "profiles",
+        "profile": { "display_name": "Ada", "plan": "pro" }
+      },
+      "maxMetrics": { "dbOps": 1 }
+    },
+    {
+      "name": "owner rows use current user shape",
+      "module": "src/sessionDocs.js",
+      "exportName": "loadCurrentUserDocs",
+      "kind": "auth.ownerScope",
+      "config": { "table": "docs", "userId": "user_123" },
+      "maxMetrics": { "dbOps": 2, "rowsReturned": 1 }
+    }
+  ]
+}

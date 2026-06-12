@@ -12,6 +12,8 @@
     "frontier-report:plus": "node optimizer/eval/frontier_report.js --score bench/results/score_fo-frontier-plus.json --baseline bench/results/score_codex.json --out optimizer/results/frontier_run.repair_verified.json --model forge-optimizer-frontier-plus:repair-layer-audit --status repair-layer-audit",
     "frontier-audit:repair": "node optimizer/eval/audit_repair_layer.js",
     "agent-repair:bench": "node optimizer/eval/agent_repair_benchmark.js",
+    "project-repair:bench": "node optimizer/eval/project_repair_benchmark.js",
+    "proof:repair": "npm run agent-repair:bench && npm run project-repair:bench && npm run frontier-audit:repair",
     "frontier-gate:raw": "node optimizer/eval/frontier_gate.js --file optimizer/results/frontier_run.json",
     "frontier-validate": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.json",
     "frontier-validate:recorded": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.recorded.json",

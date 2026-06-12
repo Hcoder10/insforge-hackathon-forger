@@ -127,6 +127,7 @@ function createBackend() {
     registerFunction(slug, handler) { fns.set(slug, handler); },
     registerChannel(pattern) { realtimeChannels.add(pattern); },
     rawRows(name) { return (tables.get(name) || { rows: [] }).rows; },
+    rawFiles(name) { return [...(buckets.get(name) || new Map()).keys()]; },
   };
 
   // ---- database -----------------------------------------------------------

@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-12T22:36:03.656Z",
+  "claim": "project-folder repair over agent-written InsForge app files",
+  "repairEngine": "optimizer/eval/project_code_repair.js",
+  "projectCount": 2,
+  "caseCount": 5,
+  "before": {
+    "correct": 3,
+    "efficient": 0
+  },
+  "after": {
+    "correct": 5,
+    "efficient": 5
+  },
+  "fixedCorrectness": [
+    "insforge-customer-portal:profile insert uses SDK array form",
+    "insforge-customer-portal:owner rows use current user shape"
+  ],
+  "fixedEfficiency": [
+    "insforge-customer-portal:feed pagination is one query with count",
+    "insforge-media-admin:metadata summary does not download files",
+    "insforge-media-admin:exports are removed in one storage operation"
+  ],
+  "regressions": [],
+  "projects": [
+    {
+      "name": "insforge-customer-portal",
+      "description": "A small InsForge customer portal with generated data-loading code from multiple agents.",
+      "agentSources": [
+        "codex",
+        "claude",
+        "qwen"
+      ],
+      "before": {
+        "correct": 1,
+        "efficient": 0,
+        "total": 3
+      },
+      "after": {
+        "correct": 3,
+        "efficient": 3,
+        "total": 3
+      },
+      "fixedCorrectness": [
+        "profile insert uses SDK array form",
+        "owner rows use current user shape"
+      ],
+      "fixedEfficiency": [
+        "feed pagination is one query with count"
+      ],
+      "regressions": [],
+      "repairs": {
+        "files": [
+          {
+            "file": "src/feed.js",
+            "repairs": [
+              "database.pagination-count-projection"
+            ]
+          },
+          {
+            "file": "src/profiles.js",
+            "repairs": [
+              "database.insert-array-form"
+            ]
+          },
+          {
+            "file": "src/sessionDocs.js",
+            "repairs": [
+              "auth.get-current-user-shape"
+            ]
+          }
+        ],
+        "repairCount": 3
+      },
+      "cases": [
+        {
+          "name": "feed pagination is one query with count",
+          "kind": "db.pagination",
+          "before": {
+            "correct": true,
+            "efficient": false
+          },
+          "after": {
+            "correct": true,
+            "efficient": true,
+            "metrics": {
+              "dbOps": 1,
+              "bytesRead": 461,
+              "rowsScanned": 57,
+              "rowsReturned": 10,
+              "writes": 0,
+              "bytesWritten": 0,
+              "storageOps": 0,
+              "storageBytes": 0,
+              "aiCalls": 0,
+              "aiTokens": 0,
+              "realtimeMsgs": 0,
+              "fnInvocations": 0,
+              "authOps": 0,
+              "cpuOps": 417,
+              "diskOps": 2,
+              "diskBytes": 15478,
+              "memoryBytes": 15478,
+              "wallMs": 0,
+              "cpuUserMs": 0,
+              "cpuSystemMs": 0,
+              "cpuTotalMs": 0,
+              "peakRSS": 0
+            }
+          }
+        },
+        {
+          "name": "profile insert uses SDK array form",
+          "kind": "db.insertArray",
+          "before": {
+            "correct": false,
+            "efficient": false
+          },
+          "after": {
+            "correct": true,
+            "efficient": true,
+            "metrics": {
+              "dbOps": 1,
+              "bytesRead": 55,
+              "rowsScanned": 0,
+              "rowsReturned": 1,
+              "writes": 1,
+              "bytesWritten": 55,
+              "storageOps": 0,
+              "storageBytes": 0,
+              "aiCalls": 0,
+              "aiTokens": 0,
+              "realtimeMsgs": 0,
+              "fnInvocations": 0,
+              "authOps": 0,
+              "cpuOps": 4,
+              "diskOps": 1,
+              "diskBytes": 55,
+              "memoryBytes": 55,
+              "wallMs": 0,
+              "cpuUserMs": 0,
+              "cpuSystemMs": 0,
+              "cpuTotalMs": 0,
+              "peakRSS": 0
+            }
+          }
+        },
+        {
+          "name": "owner rows use current user shape",
+          "kind": "auth.ownerScope",
+          "before": {
+            "correct": false,
+            "efficient": false
+          },
+          "after": {
+            "correct": true,
+            "efficient": true,
+            "metrics": {
+              "dbOps": 2,
+              "bytesRead": 17,
+              "rowsScanned": 2,
+              "rowsReturned": 1,
+              "writes": 0,
+              "bytesWritten": 0,
+              "storageOps": 0,
+              "storageBytes": 0,
+              "aiCalls": 0,
+              "aiTokens": 0,
+              "realtimeMsgs": 0,
+              "fnInvocations": 0,
+              "authOps": 1,
+              "cpuOps": 6,
+              "diskOps": 2,
+              "diskBytes": 639,
+              "memoryBytes": 54,
+              "wallMs": 0,
+              "cpuUserMs": 0,
+              "cpuSystemMs": 0,
+              "cpuTotalMs": 0,
+              "peakRSS": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "insforge-media-admin",
+      "description": "A small InsForge media admin project with generated storage maintenance code.",
+      "agentSources": [
+        "gemini",
+        "devin"
+      ],
+      "before": {
+        "correct": 2,
+        "efficient": 0,
+        "total": 2
+      },
+      "after": {
+        "correct": 2,
+        "efficient": 2,
+        "total": 2
+      },
+      "fixedCorrectness": [],
+      "fixedEfficiency": [
+        "metadata summary does not download files",
+        "exports are removed in one storage operation"
+      ],
+      "regressions": [],
+      "repairs": {
+        "files": [
+          {
+            "file": "src/storageJobs.js",
+            "repairs": [
+              "storage.metadata-without-download",
+              "storage.batch-remove"
+            ]
+          }
+        ],
+        "repairCount": 2
+      },
+      "cases": [
+        {
+          "name": "metadata summary does not download files",
+          "kind": "storage.listMeta",
+          "before": {
+            "correct": true,
+            "efficient": false
+          },
+          "after": {
+            "correct": true,
+            "efficient": true,
+            "metrics": {
+              "dbOps": 0,
+              "bytesRead": 1144,
+              "rowsScanned": 0,
+              "rowsReturned": 0,
+              "writes": 0,
+              "bytesWritten": 0,
+              "storageOps": 1,
+              "storageBytes": 0,
+              "aiCalls": 0,
+              "aiTokens": 0,
+              "realtimeMsgs": 0,
+              "fnInvocations": 0,
+              "authOps": 0,
+              "cpuOps": 17,
+              "diskOps": 1,
+              "diskBytes": 1144,
+              "memoryBytes": 1144,
+              "wallMs": 0,
+              "cpuUserMs": 0,
+              "cpuSystemMs": 0,
+              "cpuTotalMs": 0,
+              "peakRSS": 0
+            }
+          }
+        },
+        {
+          "name": "exports are removed in one storage operation",
+          "kind": "storage.batchRemove",
+          "before": {
+            "correct": true,
+            "efficient": false
+          },
+          "after": {
+            "correct": true,
+            "efficient": true,
+            "metrics": {
+              "dbOps": 0,
+              "bytesRead": 0,
+              "rowsScanned": 0,
+              "rowsReturned": 0,
+              "writes": 0,
+              "bytesWritten": 0,
+              "storageOps": 1,
+              "storageBytes": 0,
+              "aiCalls": 0,
+              "aiTokens": 0,
+              "realtimeMsgs": 0,
+              "fnInvocations": 0,
+              "authOps": 0,
+              "cpuOps": 19,
+              "diskOps": 1,
+              "diskBytes": 280,
+              "memoryBytes": 280,
+              "wallMs": 0,
+              "cpuUserMs": 0,
+              "cpuSystemMs": 0,
+              "cpuTotalMs": 0,
+              "peakRSS": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

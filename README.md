@@ -133,13 +133,45 @@ Current result over eight saved agent submissions (`codex`, `claude`, `gemini`, 
 - Regressions: `0`
 - Empty-output guard: `0/39` repaired
 
+FORGER also has a project-folder repair benchmark for generated InsForge app code:
+
+```bash
+npm run project-repair:bench
+```
+
+Current project repair result:
+
+- Projects: `2`
+- Cases: `5`
+- Correct before repair: `3/5`
+- Efficient before repair: `0/5`
+- Correct after repair: `5/5`
+- Efficient after repair: `5/5`
+- Fixed correctness failures: `2`
+- Fixed efficiency failures: `3`
+- Regressions: `0`
+
+The project repair benchmark copies full app folders, patches source files, and reruns
+before/after tests against the InsForge SDK mock. It covers database pagination, insert
+array form, current-user auth shape, storage metadata reads, and batch deletes. Add more
+projects under `optimizer/fixtures/agent_projects/`, or pass a project fixture directory with
+`node optimizer/eval/project_repair_benchmark.js --projects <dir>`.
+
+Run the repair proof suite:
+
+```bash
+npm run proof:repair
+```
+
 The raw model frontier gate is intentionally separate:
 
 ```bash
 npm run frontier-gate:raw
 ```
 
-That gate must pass before claiming the trained model itself beats the frontier baseline.
+That gate must pass before claiming the trained model itself beats Codex. It rejects
+repair-labeled artifacts and currently fails on the latest raw run because `53.8` does not
+beat the Codex baseline of `87.2`.
 
 ## Run The Benchmark
 
