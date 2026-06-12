@@ -78,6 +78,37 @@ The deterministic repair layer is tracked separately. It can score `100.0` on th
 benchmark, but `npm run frontier-audit:repair` confirms that it can do that with empty model
 output. Treat it as a verifier/prototype and distillation target, not as a model-only score.
 
+## Agent Code Repair Benchmark
+
+The code-aware repair benchmark uses saved outputs from existing agents and refuses empty
+model output:
+
+```bash
+npm run agent-repair:bench
+```
+
+Current artifact: `optimizer/results/agent_repair_benchmark.json`.
+
+```text
+models: 8
+averageBefore: 69.4
+averageAfter: 100.0
+fixedFailures: 95
+regressions: 0
+emptyGuard: 0/39 repaired
+```
+
+This is the repair proof. It shows the repair engine can fix real generated InsForge SDK
+solutions from other agents on the benchmark suite. It is still separate from the raw model
+frontier gate:
+
+```bash
+npm run frontier-gate:raw
+```
+
+That gate fails until `optimizer/results/frontier_run.json` beats the Codex baseline without
+a repair-labeled artifact.
+
 ## Contamination Control
 
 Training data uses entity names and held-out concepts that are disjoint from the sealed benchmark tasks. `data/contamination_check.js` must pass before training.

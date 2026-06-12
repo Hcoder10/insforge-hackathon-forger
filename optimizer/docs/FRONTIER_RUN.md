@@ -95,6 +95,41 @@ score: 100.0
 The next training pass should distill these repair rules into the adapter so the model emits
 the verified shapes directly.
 
+## Agent-Code Repair Proof
+
+The prompt-only repair layer is useful as a prototype, but it is not enough evidence. The
+code-aware repair benchmark uses saved outputs from other agents, requires non-empty
+InsForge SDK code, extracts identifiers from that code, and refuses empty submissions.
+
+```bash
+npm run agent-repair:bench
+```
+
+Current artifact: `optimizer/results/agent_repair_benchmark.json`.
+
+```text
+models: 8
+averageBefore: 69.4
+averageAfter: 100.0
+fixedFailures: 95
+regressions: 0
+emptyGuard: 0/39 repaired
+```
+
+This is the current proof that FORGER can repair generated code from other agents on the
+benchmark suite.
+
+## Raw Model Gate
+
+Use this before claiming the trained adapter beats the frontier baseline:
+
+```bash
+npm run frontier-gate:raw
+```
+
+The gate rejects repair-labeled artifacts and requires the raw score in
+`optimizer/results/frontier_run.json` to beat `baselineScore`.
+
 ## Manual Report Generation
 
 If you already have a score file:

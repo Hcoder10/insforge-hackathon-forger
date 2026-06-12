@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-12T22:28:30.019Z",
+  "repairEngine": "optimizer/eval/agent_code_repair.js",
+  "claim": "code-aware repair over saved frontier agent submissions",
+  "emptyGuard": {
+    "repaired": 0,
+    "total": 39,
+    "passed": true
+  },
+  "modelCount": 8,
+  "averageBefore": 69.4,
+  "averageAfter": 100,
+  "totalFixedFailures": 95,
+  "totalRegressions": 0,
+  "models": [
+    {
+      "source": "sub_codex.json",
+      "model": "codex",
+      "before": {
+        "pass": 87.17948717948718,
+        "score": 87.17948717948718,
+        "eff": 1
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 12.8,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "ai.batch_embed.test1",
+        "ai.batch_embed.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_claude.json",
+      "model": "claude",
+      "before": {
+        "pass": 82.05128205128204,
+        "score": 82.05128205128206,
+        "eff": 1
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 17.9,
+      "repairStats": {
+        "repaired": 37,
+        "skipped": 2,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "ai.batch_embed.test1",
+        "ai.batch_embed.test2",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_gemini.json",
+      "model": "gemini",
+      "before": {
+        "pass": 71.7948717948718,
+        "score": 71.7948717948718,
+        "eff": 1
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 28.2,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "vector.similarity.test2",
+        "vector.similarity.test3",
+        "storage.batch_remove.test1",
+        "storage.batch_remove.test2",
+        "storage.batch_remove.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test2",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_gpt-oss-120b.json",
+      "model": "gpt-oss:120b",
+      "before": {
+        "pass": 71.7948717948718,
+        "score": 71.7948717948718,
+        "eff": 1
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 28.2,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "vector.embed_insert.test1",
+        "vector.embed_insert.test2",
+        "vector.embed_insert.test3",
+        "storage.batch_remove.test2",
+        "storage.batch_remove.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test2",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_nemotron-3-super.json",
+      "model": "nemotron-3-super:latest",
+      "before": {
+        "pass": 61.53846153846154,
+        "score": 59.99978352259315,
+        "eff": 0.9499929644842773
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 40,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "db.count_only.test1",
+        "db.count_only.test2",
+        "db.count_only.test3",
+        "vector.embed_insert.test1",
+        "vector.embed_insert.test2",
+        "vector.embed_insert.test3",
+        "storage.list_meta.test1",
+        "storage.list_meta.test2",
+        "storage.list_meta.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test2",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_qwen3.6.json",
+      "model": "qwen3.6:latest",
+      "before": {
+        "pass": 56.41025641025641,
+        "score": 56.339438339438345,
+        "eff": 0.9974891774891774
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 43.7,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "db.pagination.test1",
+        "db.pagination.test2",
+        "db.pagination.test3",
+        "db.filter_pushdown.test2",
+        "db.count_only.test1",
+        "db.count_only.test2",
+        "db.count_only.test3",
+        "storage.list_meta.test2",
+        "ai.batch_embed.test1",
+        "ai.batch_embed.test2",
+        "ai.batch_embed.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test2",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_devin.json",
+      "model": "devin-swe-1.6",
+      "before": {
+        "pass": 71.7948717948718,
+        "score": 71.7948717948718,
+        "eff": 1
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 28.2,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "db.count_only.test2",
+        "storage.list_meta.test1",
+        "storage.list_meta.test3",
+        "ai.batch_embed.test1",
+        "ai.batch_embed.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test2",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    },
+    {
+      "source": "sub_fo-frontier.json",
+      "model": "forge-optimizer:frontier",
+      "before": {
+        "pass": 53.84615384615385,
+        "score": 53.84615384615385,
+        "eff": 1
+      },
+      "after": {
+        "pass": 100,
+        "score": 100,
+        "eff": 1
+      },
+      "delta": 46.2,
+      "repairStats": {
+        "repaired": 39,
+        "skipped": 0,
+        "reasons": {
+          "db.pagination": 3,
+          "db.projection": 3,
+          "db.filter_pushdown": 3,
+          "db.count_only": 3,
+          "db.top_n": 3,
+          "db.in_list": 3,
+          "vector.similarity": 3,
+          "vector.embed_insert": 3,
+          "storage.batch_remove": 3,
+          "storage.list_meta": 3,
+          "ai.batch_embed": 3,
+          "ai.no_base64_in_db": 3,
+          "auth.owner_scope": 3
+        }
+      },
+      "fixedFailures": [
+        "db.pagination.test1",
+        "db.pagination.test2",
+        "db.pagination.test3",
+        "db.filter_pushdown.test1",
+        "db.filter_pushdown.test2",
+        "db.filter_pushdown.test3",
+        "db.count_only.test1",
+        "db.count_only.test2",
+        "db.count_only.test3",
+        "ai.batch_embed.test1",
+        "ai.batch_embed.test2",
+        "ai.batch_embed.test3",
+        "ai.no_base64_in_db.test1",
+        "ai.no_base64_in_db.test2",
+        "ai.no_base64_in_db.test3",
+        "auth.owner_scope.test1",
+        "auth.owner_scope.test2",
+        "auth.owner_scope.test3"
+      ],
+      "regressions": []
+    }
+  ]
+}

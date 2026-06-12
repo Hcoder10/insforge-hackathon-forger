@@ -114,6 +114,33 @@ model-only score: `npm run frontier-audit:repair` shows that the deterministic r
 can solve the sealed prompts even when the model output is empty. Treat that artifact as a
 verifier/prototype result, not as proof that the trained adapter beat the frontier baseline.
 
+## Agent Code Repair
+
+The code-aware repair path is separate from the prompt-only repair audit. It requires real
+agent code as input, extracts the InsForge table, bucket, or RPC target from that code, and
+refuses empty submissions.
+
+```bash
+npm run agent-repair:bench
+```
+
+Current result over eight saved agent submissions (`codex`, `claude`, `gemini`, `gpt-oss`,
+`nemotron`, `qwen3.6`, `devin`, and the raw forge-optimizer run):
+
+- Average score before repair: `69.4`
+- Average score after repair: `100.0`
+- Fixed failures: `95`
+- Regressions: `0`
+- Empty-output guard: `0/39` repaired
+
+The raw model frontier gate is intentionally separate:
+
+```bash
+npm run frontier-gate:raw
+```
+
+That gate must pass before claiming the trained model itself beats the frontier baseline.
+
 ## Run The Benchmark
 
 ```bash
