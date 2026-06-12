@@ -63,19 +63,20 @@ Judge Mode prefers that live artifact. If it is missing, the demo shows `optimiz
 
 See [docs/FRONTIER_RUN.md](docs/FRONTIER_RUN.md) for the full runbook.
 
-Latest judge run:
+Latest audited raw GPU model run:
 
 ```text
-model: forge-optimizer-frontier-plus:repair-verified
-score: 100.0
+model: forge-optimizer-frontier:raw-gpu
+score: 53.8
 baseline: codex 87.2
-delta: +12.8
+delta: -33.4
 tasks: 39
-domains: db, vector, storage, ai, auth all 100.0
+domains: db 50.0, vector 100.0, storage 100.0, ai 0.0, auth 0.0
 ```
 
-The run combines the live GPU model output with a deterministic repair layer for stable
-InsForge SDK response shapes. The next training pass distills those repairs into the adapter.
+The deterministic repair layer is tracked separately. It can score `100.0` on the sealed
+benchmark, but `npm run frontier-audit:repair` confirms that it can do that with empty model
+output. Treat it as a verifier/prototype and distillation target, not as a model-only score.
 
 ## Contamination Control
 

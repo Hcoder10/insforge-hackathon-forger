@@ -100,18 +100,19 @@ The live run writes `optimizer/results/frontier_run.json`. Judge Mode uses that 
 exists, otherwise it shows the clearly marked recorded demo target. See
 [optimizer/docs/FRONTIER_RUN.md](optimizer/docs/FRONTIER_RUN.md).
 
-Latest judge run:
+Latest audited raw GPU model run:
 
-- Model: `forge-optimizer-frontier-plus:repair-verified`
-- Score: `100.0` on 39 sealed benchmark tasks
+- Model: `forge-optimizer-frontier:raw-gpu`
+- Score: `53.8` on 39 sealed benchmark tasks
 - Baseline shown in Judge Mode: `codex` at `87.2`
-- Delta: `+12.8`
-- Domains: database, vector, storage, AI, and auth all pass at `100.0`
+- Delta: `-33.4`
+- Domains: database `50.0`, vector `100.0`, storage `100.0`, AI `0.0`, auth `0.0`
 
-This artifact starts from the live GPU model output and applies a deterministic repair layer
-for stable InsForge SDK shapes: top-level counts, embedding response mapping, storage
-metadata, current-user id extraction, and array-returning database queries. The repair layer
-is in `optimizer/eval/repair_solution.js` and is used by `npm run frontier-plus`.
+There is also a repair-layer audit artifact at
+`optimizer/results/frontier_run.repair_verified.json`. It scores `100.0`, but it is not a
+model-only score: `npm run frontier-audit:repair` shows that the deterministic repair layer
+can solve the sealed prompts even when the model output is empty. Treat that artifact as a
+verifier/prototype result, not as proof that the trained adapter beat the frontier baseline.
 
 ## Run The Benchmark
 

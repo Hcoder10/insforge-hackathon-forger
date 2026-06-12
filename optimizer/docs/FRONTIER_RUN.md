@@ -41,40 +41,55 @@ optimizer/results/frontier_run.recorded.json
 
 The recorded file is a demo target, not a replacement for the GPU result.
 
-## Latest Judge Result
+## Latest Audited Result
 
-The June 12, 2026 GPU run completed SFT, GRPO, sealed evaluation, artifact validation, and
-repair-verified scoring.
+The June 12, 2026 GPU run completed SFT, GRPO, sealed evaluation, and artifact validation.
+The raw model output is the judge-safe score to report as model performance.
 
 ```text
-model: forge-optimizer-frontier-plus:repair-verified
-score: 100.0
+model: forge-optimizer-frontier:raw-gpu
+score: 53.8
 baseline: codex 87.2
-delta: +12.8
+delta: -33.4
 tasks: 39
-status: live-run-plus-repair
+status: live-run-raw
 ```
 
 Domain scores:
 
 ```text
-db: 100.0
+db: 50.0
 vector: 100.0
 storage: 100.0
-ai: 100.0
-auth: 100.0
+ai: 0.0
+auth: 0.0
 ```
 
-The repair-verified artifact passes all benchmark domains. The repair layer fixes stable
-InsForge SDK shapes that the raw model missed: top-level counts, embedding response mapping,
-storage metadata, current-user id extraction, and array-returning database queries.
+The repair-verified artifact is tracked separately at
+`optimizer/results/frontier_run.repair_verified.json`. It passes all benchmark domains, but
+it should not be reported as a model-only score. The repair layer fixes stable InsForge SDK
+shapes that the raw model missed: top-level counts, embedding response mapping, storage
+metadata, current-user id extraction, and array-returning database queries.
 
 Regenerate the repair-verified artifact:
 
 ```bash
 npm run frontier-plus
 npm run frontier-report:plus
-npm run frontier-validate
+node tools/forger.js frontier-validate --file optimizer/results/frontier_run.repair_verified.json
+```
+
+Audit whether the repair layer is solving the benchmark without model output:
+
+```bash
+npm run frontier-audit:repair
+```
+
+Current audit result:
+
+```text
+REPAIR_LAYER_CAN_SOLVE_SEALED_TASKS_WITHOUT_MODEL_OUTPUT
+score: 100.0
 ```
 
 The next training pass should distill these repair rules into the adapter so the model emits
