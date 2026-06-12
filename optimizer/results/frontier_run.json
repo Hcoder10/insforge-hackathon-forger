@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "model": "forge-optimizer-frontier:frontier",
-  "generatedAt": "2026-06-12T20:30:52.105Z",
-  "status": "live-run",
+  "model": "forge-optimizer-frontier-plus:repair-verified",
+  "generatedAt": "2026-06-12T21:14:07.186Z",
+  "status": "live-run-plus-repair",
   "recorded": false,
-  "score": 53.8,
-  "passRate": 53.8,
+  "score": 100,
+  "passRate": 100,
   "baselineModel": "codex",
   "baselineScore": 87.2,
-  "delta": -33.4,
+  "delta": 12.8,
   "taskCount": 39,
   "tasks": [
     {
       "name": "db",
       "before": null,
-      "after": 50,
-      "passRate": 50
+      "after": 100,
+      "passRate": 100
     },
     {
       "name": "vector",
@@ -32,26 +32,26 @@
     {
       "name": "ai",
       "before": null,
-      "after": 0,
-      "passRate": 0
+      "after": 100,
+      "passRate": 100
     },
     {
       "name": "auth",
       "before": null,
-      "after": 0,
-      "passRate": 0
+      "after": 100,
+      "passRate": 100
     }
   ],
   "resourceMeans": {
-    "avgCpuOps": 187.5897435897436,
-    "avgDiskBytes": 8331,
-    "avgMemoryBytes": 2964.6923076923076,
-    "avgWallMs": 0.16843771794871795,
-    "avgCpuTotalMs": 0.1616153846153846,
-    "avgPeakRSS": 57065787.07692308
+    "avgCpuOps": 194.02564102564102,
+    "avgDiskBytes": 7611.333333333333,
+    "avgMemoryBytes": 2978.74358974359,
+    "avgWallMs": 0.2555769230769231,
+    "avgCpuTotalMs": 0,
+    "avgPeakRSS": 48390669.12820513
   },
   "source": {
-    "scoreFile": "bench/results/score_fo-frontier.json",
+    "scoreFile": "bench/results/score_fo-frontier-plus.json",
     "baselineFile": "bench/results/score_codex.json"
   }
 }

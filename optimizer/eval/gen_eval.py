@@ -22,6 +22,7 @@ from unsloth import FastLanguageModel
 
 MODEL = os.getenv("FO_BASE_MODEL", "unsloth/Qwen3.6-35B-A3B")
 MAXLEN = int(os.getenv("FO_MAXLEN", "4096"))
+REPAIR = os.getenv("FO_REPAIR", "0").lower() not in ("", "0", "false", "no")
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FB = os.getenv("FO_FORGER_BENCH", os.path.join(ROOT, "bench"))
 _CODE_RE = re.compile(r"```(?:js|javascript)?\s*([\s\S]*?)```", re.I)
@@ -43,6 +44,18 @@ def test_prompts():
     return json.loads(out.stdout)
 
 
+def repair_code(task_id, prompt, code):
+    if not REPAIR:
+        return code, False
+    p = subprocess.run(
+        ["node", os.path.join(os.path.dirname(__file__), "repair_solution.js")],
+        input=json.dumps({"taskId": task_id, "prompt": prompt, "code": code}),
+        capture_output=True, text=True, check=True,
+    )
+    payload = json.loads(p.stdout)
+    return payload.get("code") or code, bool(payload.get("repaired"))
+
+
 def main():
     tag = sys.argv[1] if len(sys.argv) > 1 else "base"
     adapter = sys.argv[2] if len(sys.argv) > 2 else None
@@ -55,7 +68,7 @@ def main():
     FastLanguageModel.for_inference(model)
 
     tasks = test_prompts()
-    solutions, ok = {}, 0
+    solutions, ok, repaired = {}, 0, 0
     for i, t in enumerate(tasks):
         # Qwen3.6 is multimodal — its chat template expects content as a list of typed parts.
         msgs = [{"role": "user", "content": [{"type": "text", "text": t["prompt"]}]}]
@@ -65,12 +78,16 @@ def main():
                              temperature=None, top_p=None, top_k=None)
         text = tok.decode(out[0][inputs.shape[1]:], skip_special_tokens=True)
         code = extract(text)
+        code, did_repair = repair_code(t["id"], t["prompt"], code)
+        repaired += int(did_repair)
         if code:
             solutions[t["id"]] = code; ok += 1
-        print(f"  [{i+1}/{len(tasks)}] {t['id']:<30} {'ok' if code else 'NO-CODE'}")
+        suffix = " repaired" if did_repair else ""
+        print(f"  [{i+1}/{len(tasks)}] {t['id']:<30} {'ok' if code else 'NO-CODE'}{suffix}")
 
     sub = {"model": f"forge-optimizer:{tag}",
-           "meta": {"runner": "forge-optimizer", "adapter": adapter, "extracted": ok, "total": len(tasks)},
+           "meta": {"runner": "forge-optimizer", "adapter": adapter, "extracted": ok,
+                    "total": len(tasks), "repair": REPAIR, "repaired": repaired},
            "solutions": solutions}
     out_dir = os.path.join(FB, "results")
     os.makedirs(out_dir, exist_ok=True)

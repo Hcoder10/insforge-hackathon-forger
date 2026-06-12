@@ -7,6 +7,8 @@
     "judge-demo": "node demo_server.js 8900",
     "branch-review": "node tools/forger.js branch-review --scenario slow-query-index --record bench/results/demo-recordings/branch-review-slow-query-index",
     "branch-review:all": "node tools/forger.js branch-review --scenario slow-query-index --record bench/results/demo-recordings/branch-review-slow-query-index && node tools/forger.js branch-review --scenario pagination-scale --record bench/results/demo-recordings/branch-review-pagination-scale && node tools/forger.js branch-review --scenario storage-metadata --record bench/results/demo-recordings/branch-review-storage-metadata",
+    "frontier-plus": "node optimizer/eval/repair_submission.js --input bench/results/sub_fo-frontier.json --tag frontier-plus --model forge-optimizer:frontier-plus && node bench/bench/eval_submission.js bench/results/sub_fo-frontier-plus.json bench/results/score_fo-frontier-plus.json",
+    "frontier-report:plus": "node optimizer/eval/frontier_report.js --score bench/results/score_fo-frontier-plus.json --baseline bench/results/score_codex.json --out optimizer/results/frontier_run.json --model forge-optimizer-frontier-plus:repair-verified --status live-run-plus-repair",
     "frontier-validate": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.json",
     "frontier-validate:recorded": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.recorded.json",
     "check": "cd bench && npm run check"

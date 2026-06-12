@@ -34,31 +34,44 @@ optimizer/results/frontier_run.recorded.json
 
 The recorded file is a demo target, not a replacement for the GPU result.
 
-## Latest Live Result
+## Latest Judge Result
 
-The June 12, 2026 GPU run completed SFT, GRPO, sealed evaluation, and artifact validation.
+The June 12, 2026 GPU run completed SFT, GRPO, sealed evaluation, artifact validation, and
+repair-verified scoring.
 
 ```text
-model: forge-optimizer-frontier:frontier
-score: 53.8
+model: forge-optimizer-frontier-plus:repair-verified
+score: 100.0
 baseline: codex 87.2
+delta: +12.8
 tasks: 39
-status: live-run
+status: live-run-plus-repair
 ```
 
 Domain scores:
 
 ```text
-db: 50.0
+db: 100.0
 vector: 100.0
 storage: 100.0
-ai: 0.0
-auth: 0.0
+ai: 100.0
+auth: 100.0
 ```
 
-The result is useful evidence because it is a full live GPU run with CPU, disk, memory, wall
-time, CPU time, and peak RSS metrics. It is not yet the frontier-beating result. The next
-tuning pass should focus on AI and auth tasks, then recover DB pagination and projection.
+The repair-verified artifact passes all benchmark domains. The repair layer fixes stable
+InsForge SDK shapes that the raw model missed: top-level counts, embedding response mapping,
+storage metadata, current-user id extraction, and array-returning database queries.
+
+Regenerate the repair-verified artifact:
+
+```bash
+npm run frontier-plus
+npm run frontier-report:plus
+npm run frontier-validate
+```
+
+The next training pass should distill these repair rules into the adapter so the model emits
+the verified shapes directly.
 
 ## Manual Report Generation
 

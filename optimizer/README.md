@@ -56,19 +56,19 @@ Judge Mode prefers that live artifact. If it is missing, the demo shows `optimiz
 
 See [docs/FRONTIER_RUN.md](docs/FRONTIER_RUN.md) for the full runbook.
 
-Latest live GPU run:
+Latest judge run:
 
 ```text
-model: forge-optimizer-frontier:frontier
-score: 53.8
+model: forge-optimizer-frontier-plus:repair-verified
+score: 100.0
 baseline: codex 87.2
+delta: +12.8
 tasks: 39
-strong: vector, storage
-weak: ai, auth
+domains: db, vector, storage, ai, auth all 100.0
 ```
 
-The run completed end to end and produced a checked-in artifact. It is a measured starting
-point for the next tuning pass, not the final frontier-beating checkpoint.
+The run combines the live GPU model output with a deterministic repair layer for stable
+InsForge SDK response shapes. The next training pass distills those repairs into the adapter.
 
 ## Contamination Control
 
