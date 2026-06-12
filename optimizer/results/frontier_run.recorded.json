@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "model": "forge-optimizer-frontier:qwen3.6-35b-a3b-lora-grpo",
+  "generatedAt": "2026-06-12T00:00:00.000Z",
+  "status": "recorded-demo-target",
+  "recorded": true,
+  "score": 91.4,
+  "passRate": 94.2,
+  "baselineModel": "codex",
+  "baselineScore": 87.2,
+  "delta": 4.2,
+  "taskCount": 52,
+  "tasks": [
+    {
+      "name": "db.filter_pushdown",
+      "before": 58,
+      "after": 100
+    },
+    {
+      "name": "db.count_only",
+      "before": 62,
+      "after": 100
+    },
+    {
+      "name": "db.pagination",
+      "before": 55,
+      "after": 96
+    },
+    {
+      "name": "storage.list_meta",
+      "before": 68,
+      "after": 100
+    },
+    {
+      "name": "vector.top_k",
+      "before": 72,
+      "after": 95
+    }
+  ],
+  "resourceDeltas": {
+    "cpuOpsPct": -61.8,
+    "diskBytesPct": -73.4,
+    "memoryBytesPct": -58.9,
+    "dbOpsPct": -38.2,
+    "bytesReadPct": -66.1
+  },
+  "notes": "Recorded demo target for Judge Mode. Replace with optimizer/results/frontier_run.json after the live GPU training and evaluation run."
+}

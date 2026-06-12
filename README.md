@@ -16,6 +16,7 @@ limits hide scale bugs.
   inefficient backend code into more scale-safe code.
 - `bench/site/` and `demo_server.js`: a local demo that runs an author model, sends the code
   through forge-optimizer, and grades both outputs with forger-bench.
+- `tools/forger.js`: project CLI for branch reviews and frontier artifact validation.
 
 ## What The Benchmark Measures
 
@@ -32,43 +33,78 @@ into the score when they vary cleanly across a task's reference solutions.
 The live resource benchmark measures server-side CPU work, disk/cache blocks, memory
 footprint, sequential scans, and throughput under load.
 
-## Run The Demo
+## Judge Demo
 
-Install the benchmark dependencies:
+The local judge demo includes:
+
+- `Dashboard`: benchmark results and CPU, disk, memory, row, and request metrics.
+- `Optimizer`: the forge-optimizer training and reward loop.
+- `Judge Mode`: branch review evidence, annotated merge SQL, frontier run status, and benchmark leaderboard.
+- `Run`: live author model output, optimizer rewrite, and forger-bench grading.
+
+Install dependencies and start the server:
 
 ```bash
 cd bench
 npm install
 cd ..
+npm run judge-demo
 ```
 
-Start the optimizer service on a GPU host if you want live rewrites:
+Then open `http://localhost:8900`.
 
-```bash
-cd optimizer
-python serve_model.py
-```
-
-Start the demo server:
+If you have the optimizer service running on a GPU host, pass it into the demo:
 
 ```bash
 AUTHOR_URL=http://127.0.0.1:11500 \
 AUTHOR_MODEL=nemotron-3-super:latest \
 FORGE_OPT_URL=http://127.0.0.1:8901 \
-node demo_server.js 8900
+npm run judge-demo
 ```
 
-Then open `http://localhost:8900`.
-
 `AUTHOR_URL` should point at an Ollama-compatible `/api/chat` server. `FORGE_OPT_URL` should
-point at the OpenAI-compatible optimizer server. If `FORGE_OPT_URL` is unset, the demo skips
-the rewrite step and still runs the benchmark flow.
+point at the OpenAI-compatible optimizer server. If `FORGE_OPT_URL` is unset, the demo still
+runs the benchmark flow.
+
+## Branch Review
+
+Run recorded branch-review evidence:
+
+```bash
+npm run branch-review:all
+```
+
+Run against a real InsForge branch:
+
+```bash
+node tools/forger.js branch-review \
+  --scenario slow-query-index \
+  --live \
+  --branch forger-demo \
+  --mode schema-only
+```
+
+Branch Review writes `result.json`, `report.md`, `timeline.json`, and `annotated-merge.sql`
+under `bench/results/demo-recordings/`. See [docs/BRANCH_REVIEW.md](docs/BRANCH_REVIEW.md).
+
+## Frontier Optimizer Run
+
+The GPU path for the optimizer is:
+
+```bash
+cd optimizer
+FO_DATA_N=80 FO_MODEL_TAG=frontier bash scripts/frontier_run.sh
+```
+
+The live run writes `optimizer/results/frontier_run.json`. Judge Mode uses that file when it
+exists, otherwise it shows the clearly marked recorded demo target. See
+[optimizer/docs/FRONTIER_RUN.md](optimizer/docs/FRONTIER_RUN.md).
 
 ## Run The Benchmark
 
 ```bash
-cd bench
 npm run check
+cd bench
 npm run demo
 ```
 
@@ -85,6 +121,7 @@ See [bench/live/README.md](bench/live/README.md) for the live setup.
 ```text
 bench/          benchmark tasks, scoring, mock backend, live resource checks, site assets
 optimizer/      data generation, SFT/GRPO/RFT scripts, evaluation, model server
+tools/          branch review and artifact validation CLI
 demo_server.js  local demo server for the benchmark site
 ```
 

@@ -7,6 +7,9 @@
 //   GET  /api/tasks                      -> [{id, domain, concept, prompt}]   (sealed test set)
 //   POST /api/demo  {taskId}             -> { task, haiku:{code,grade}, forge:{code,grade} }
 //   POST /api/grade {taskId, code}       -> grade one solution (used for manual paste)
+//   GET  /api/branch-review              -> recorded or live branch-review evidence
+//   GET  /api/frontier                   -> frontier optimizer run artifact
+//   GET  /api/benchmark                  -> benchmark leaderboard and resource snapshot
 //
 // Config (env):
 //   AUTHOR_URL          Ollama-compatible author endpoint
@@ -34,6 +37,8 @@ const AUTHOR_URL = process.env.AUTHOR_URL || 'http://127.0.0.1:11500';   // olla
 const AUTHOR_MODEL = process.env.AUTHOR_MODEL || 'nemotron-3-super:latest';
 const FORGE_OPT_URL = process.env.FORGE_OPT_URL;   // served forge-optimizer endpoint
 const CODE_RE = /```(?:js|javascript)?\s*([\s\S]*?)```/i;
+const RESULT_DIR = path.join(__dirname, 'bench', 'results');
+const FRONTIER_DIR = path.join(__dirname, 'optimizer', 'results');
 
 function extract(t) {
   const m = (t || '').match(CODE_RE);
@@ -109,7 +114,71 @@ async function gradeOne(taskId, code) {
   if (!task) return { error: 'unknown task' };
   const g = await gradeSolution(task, code);
   return { correct: g.correct, score: Math.round(g.score), eff: g.eff,
-           metrics: { dbOps: g.metrics.dbOps, bytesRead: g.metrics.bytesRead, rowsReturned: g.metrics.rowsReturned } };
+           metrics: {
+             dbOps: g.metrics.dbOps,
+             bytesRead: g.metrics.bytesRead,
+             rowsReturned: g.metrics.rowsReturned,
+             cpuOps: g.metrics.cpuOps,
+             diskOps: g.metrics.diskOps,
+             diskBytes: g.metrics.diskBytes,
+             memoryBytes: g.metrics.memoryBytes,
+             wallMs: g.metrics.wallMs,
+             cpuTotalMs: g.metrics.cpuTotalMs,
+             peakRSS: g.metrics.peakRSS,
+           } };
+}
+
+function safeReadJson(file) {
+  try {
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function listBranchReviews() {
+  const root = path.join(RESULT_DIR, 'demo-recordings');
+  if (!fs.existsSync(root)) return [];
+  return fs.readdirSync(root)
+    .filter((name) => name.startsWith('branch-review-'))
+    .map((name) => {
+      const dir = path.join(root, name);
+      const result = safeReadJson(path.join(dir, 'result.json'));
+      if (!result) return null;
+      const annotatedSql = fs.existsSync(path.join(dir, 'annotated-merge.sql'))
+        ? fs.readFileSync(path.join(dir, 'annotated-merge.sql'), 'utf8')
+        : result.mergeSql || '';
+      return { ...result, artifacts: { dir: path.relative(__dirname, dir), annotatedSql } };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.workload.name.localeCompare(b.workload.name));
+}
+
+function readFrontierArtifact() {
+  const candidates = [
+    path.join(FRONTIER_DIR, 'frontier_run.json'),
+    path.join(FRONTIER_DIR, 'frontier_run.recorded.json'),
+  ];
+  for (const file of candidates) {
+    const data = safeReadJson(file);
+    if (data) return { ...data, artifactPath: path.relative(__dirname, file) };
+  }
+  return null;
+}
+
+function readBenchmarkSnapshot() {
+  const leaderboard = safeReadJson(path.join(RESULT_DIR, 'leaderboard.json'));
+  const resource = safeReadJson(path.join(RESULT_DIR, 'resource_leaderboard.json'));
+  return {
+    leaderboard: leaderboard?.ranking || [],
+    resource: resource?.ranking || resource || null,
+    headline: {
+      tasks: tasks.TEST.length,
+      domains: [...new Set(tasks.TEST.map((t) => t.domain))].length,
+      resourceAxes: ['cpuOps', 'diskBytes', 'memoryBytes', 'wallMs', 'cpuTotalMs', 'peakRSS'],
+    },
+  };
 }
 
 function send(res, code, obj, type) {
@@ -134,6 +203,20 @@ const server = http.createServer(async (req, res) => {
     }
     if (u.pathname === '/api/tasks') {
       return send(res, 200, tasks.TEST.map((t) => ({ id: t.id, domain: t.domain, concept: t.concept, prompt: t.prompt })));
+    }
+    if (u.pathname === '/api/branch-review') {
+      const reviews = listBranchReviews();
+      return send(res, reviews.length ? 200 : 404, {
+        active: reviews.find((r) => r.workload.name === 'slow-query-index') || reviews[0] || null,
+        reviews,
+      });
+    }
+    if (u.pathname === '/api/frontier') {
+      const artifact = readFrontierArtifact();
+      return send(res, artifact ? 200 : 404, artifact || { error: 'frontier artifact not found' });
+    }
+    if (u.pathname === '/api/benchmark') {
+      return send(res, 200, readBenchmarkSnapshot());
     }
     if (u.pathname === '/api/demo' && req.method === 'POST') {
       const body = await readBody(req);

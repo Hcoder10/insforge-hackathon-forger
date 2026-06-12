@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-12T07:27:40.922Z",
+  "workload": {
+    "name": "slow-query-index",
+    "kind": "postgres-explain",
+    "description": "Reviews a branch migration that adds a customer lookup index to a large orders table."
+  },
+  "executionMode": "recorded",
+  "branch": {
+    "name": "forger-slow-query-index",
+    "mode": "schema-only"
+  },
+  "baseline": {
+    "nodeType": "Seq Scan",
+    "seqScans": 1,
+    "indexScans": 0,
+    "actualTimeMs": 132.4,
+    "cpuTimeMs": 129.6,
+    "diskBytes": 18874368,
+    "memoryBytes": 42139648,
+    "actualRows": 1000,
+    "buffers": 5144
+  },
+  "candidate": {
+    "nodeType": "Bitmap Heap Scan",
+    "seqScans": 0,
+    "indexScans": 1,
+    "actualTimeMs": 8.9,
+    "cpuTimeMs": 8.1,
+    "diskBytes": 524288,
+    "memoryBytes": 3145728,
+    "actualRows": 1000,
+    "buffers": 384
+  },
+  "verdict": {
+    "status": "pass",
+    "failures": [],
+    "warnings": [],
+    "metrics": {
+      "actualTimeMs": {
+        "baseline": 132.4,
+        "candidate": 8.9,
+        "delta": -123.5,
+        "pct": -93.27794561933534
+      },
+      "cpuTimeMs": {
+        "baseline": 129.6,
+        "candidate": 8.1,
+        "delta": -121.5,
+        "pct": -93.75
+      },
+      "diskBytes": {
+        "baseline": 18874368,
+        "candidate": 524288,
+        "delta": -18350080,
+        "pct": -97.22222222222221
+      },
+      "memoryBytes": {
+        "baseline": 42139648,
+        "candidate": 3145728,
+        "delta": -38993920,
+        "pct": -92.53499222395023
+      },
+      "seqScans": {
+        "baseline": 1,
+        "candidate": 0,
+        "delta": -1,
+        "pct": -100
+      }
+    }
+  },
+  "mergeSql": "CREATE INDEX idx_forger_orders_customer_id ON forger_orders(customer_id);",
+  "timeline": [
+    {
+      "status": "ok",
+      "label": "loaded workload slow-query-index"
+    },
+    {
+      "status": "ok",
+      "label": "using recorded branch evidence"
+    }
+  ]
+}

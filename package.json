@@ -1,0 +1,14 @@
+{
+  "name": "insforge-hackathon-forger",
+  "version": "0.2.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "judge-demo": "node demo_server.js 8900",
+    "branch-review": "node tools/forger.js branch-review --scenario slow-query-index --record bench/results/demo-recordings/branch-review-slow-query-index",
+    "branch-review:all": "node tools/forger.js branch-review --scenario slow-query-index --record bench/results/demo-recordings/branch-review-slow-query-index && node tools/forger.js branch-review --scenario pagination-scale --record bench/results/demo-recordings/branch-review-pagination-scale && node tools/forger.js branch-review --scenario storage-metadata --record bench/results/demo-recordings/branch-review-storage-metadata",
+    "frontier-validate": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.recorded.json",
+    "check": "cd bench && npm run check"
+  },
+  "license": "MIT"
+}

@@ -1,4 +1,4 @@
-const routes = ["landing", "dashboard", "optimizer", "run"];
+const routes = ["landing", "dashboard", "optimizer", "judge", "run"];
 const stage = document.querySelector(".stage");
 const pages = new Map(routes.map((route) => [route, document.getElementById(route)]));
 const links = [...document.querySelectorAll("[data-route]")];
@@ -137,7 +137,9 @@ function stopWalkCycle() {
 function clearRunState() {
   stopWalkCycle();
   runPage?.setAttribute("data-run-state", "idle");
-  runStart.disabled = false;
+  if (runStart) {
+    runStart.disabled = false;
+  }
   runLane?.classList.remove("cleaning");
   runResult?.classList.remove("active");
   impactBurst?.classList.remove("active");
@@ -165,7 +167,9 @@ async function runOptimizerDemo() {
   const token = runToken + 1;
   runToken = token;
   clearRunState();
-  runStart.disabled = true;
+  if (runStart) {
+    runStart.disabled = true;
+  }
   runPage?.setAttribute("data-run-state", "running");
 
   // Kick off the REAL pipeline in parallel with the animation (window.runForgerDemo lives
@@ -194,7 +198,9 @@ async function runOptimizerDemo() {
 
   await walkTo("112%", token);
   if (!stillCurrent(token)) return;
-  runStart.disabled = false;
+  if (runStart) {
+    runStart.disabled = false;
+  }
 }
 
 async function walkTo(position, token) {

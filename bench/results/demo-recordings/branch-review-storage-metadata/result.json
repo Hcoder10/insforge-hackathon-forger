@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-12T07:27:42.150Z",
+  "workload": {
+    "name": "storage-metadata",
+    "kind": "postgres-explain",
+    "description": "Reviews a branch migration that indexes storage object metadata for bucket and owner lookups."
+  },
+  "executionMode": "recorded",
+  "branch": {
+    "name": "forger-storage-metadata",
+    "mode": "schema-only"
+  },
+  "baseline": {
+    "nodeType": "Limit",
+    "seqScans": 1,
+    "indexScans": 0,
+    "actualTimeMs": 96.8,
+    "cpuTimeMs": 94.2,
+    "diskBytes": 13369344,
+    "memoryBytes": 33030144,
+    "actualRows": 23,
+    "buffers": 4032
+  },
+  "candidate": {
+    "nodeType": "Limit",
+    "seqScans": 0,
+    "indexScans": 1,
+    "actualTimeMs": 5.4,
+    "cpuTimeMs": 5,
+    "diskBytes": 262144,
+    "memoryBytes": 1310720,
+    "actualRows": 23,
+    "buffers": 160
+  },
+  "verdict": {
+    "status": "pass",
+    "failures": [],
+    "warnings": [],
+    "metrics": {
+      "actualTimeMs": {
+        "baseline": 96.8,
+        "candidate": 5.4,
+        "delta": -91.39999999999999,
+        "pct": -94.42148760330578
+      },
+      "cpuTimeMs": {
+        "baseline": 94.2,
+        "candidate": 5,
+        "delta": -89.2,
+        "pct": -94.69214437367303
+      },
+      "diskBytes": {
+        "baseline": 13369344,
+        "candidate": 262144,
+        "delta": -13107200,
+        "pct": -98.0392156862745
+      },
+      "memoryBytes": {
+        "baseline": 33030144,
+        "candidate": 1310720,
+        "delta": -31719424,
+        "pct": -96.03174603174604
+      },
+      "seqScans": {
+        "baseline": 1,
+        "candidate": 0,
+        "delta": -1,
+        "pct": -100
+      }
+    }
+  },
+  "mergeSql": "CREATE INDEX idx_forger_storage_bucket_owner_updated ON forger_storage_objects(bucket_id, owner_id, updated_at DESC);",
+  "timeline": [
+    {
+      "status": "ok",
+      "label": "loaded workload storage-metadata"
+    },
+    {
+      "status": "ok",
+      "label": "using recorded branch evidence"
+    }
+  ]
+}

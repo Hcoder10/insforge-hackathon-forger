@@ -1,0 +1,53 @@
+{
+  "name": "slow-query-index",
+  "kind": "postgres-explain",
+  "description": "Reviews a branch migration that adds a customer lookup index to a large orders table.",
+  "branchMode": "schema-only",
+  "setup": {
+    "sql": [
+      "DROP TABLE IF EXISTS forger_orders;",
+      "CREATE TABLE forger_orders (id bigserial PRIMARY KEY, customer_id text NOT NULL, status text NOT NULL, total_cents integer NOT NULL, created_at timestamptz NOT NULL DEFAULT now());",
+      "INSERT INTO forger_orders (customer_id, status, total_cents, created_at) SELECT 'c' || (g % 100)::text, CASE WHEN g % 7 = 0 THEN 'refunded' ELSE 'paid' END, 1000 + (g % 9000), now() - (g || ' seconds')::interval FROM generate_series(1, 100000) AS g;"
+    ]
+  },
+  "baselineSql": "SELECT id, total_cents FROM forger_orders WHERE customer_id = 'c42';",
+  "candidateSql": "SELECT id, total_cents FROM forger_orders WHERE customer_id = 'c42';",
+  "candidate": {
+    "migration": "CREATE INDEX idx_forger_orders_customer_id ON forger_orders(customer_id);"
+  },
+  "correctness": {
+    "expectedMinRows": 1
+  },
+  "thresholds": {
+    "actualTimeMsMaxIncreasePct": 10,
+    "cpuTimeMsMaxIncreasePct": 10,
+    "diskBytesMaxIncreasePct": 10,
+    "memoryBytesMaxIncreasePct": 10,
+    "seqScansMax": 0
+  },
+  "recorded": {
+    "baselinePlan": {
+      "nodeType": "Seq Scan",
+      "seqScans": 1,
+      "indexScans": 0,
+      "actualTimeMs": 132.4,
+      "cpuTimeMs": 129.6,
+      "diskBytes": 18874368,
+      "memoryBytes": 42139648,
+      "actualRows": 1000,
+      "buffers": 5144
+    },
+    "candidatePlan": {
+      "nodeType": "Bitmap Heap Scan",
+      "seqScans": 0,
+      "indexScans": 1,
+      "actualTimeMs": 8.9,
+      "cpuTimeMs": 8.1,
+      "diskBytes": 524288,
+      "memoryBytes": 3145728,
+      "actualRows": 1000,
+      "buffers": 384
+    },
+    "mergeSql": "CREATE INDEX idx_forger_orders_customer_id ON forger_orders(customer_id);"
+  }
+}

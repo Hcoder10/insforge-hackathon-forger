@@ -11,6 +11,8 @@
     "contamination": "node bench/contamination.js",
     "demo": "node bench/demo.js",
     "audit": "node live/audit.js",
+    "judge-demo": "node ../demo_server.js 8900",
+    "branch-review": "node ../tools/forger.js branch-review --scenario slow-query-index --record results/demo-recordings/branch-review-slow-query-index",
     "check": "node mock/smoke.js && node bench/calibrate.js && node bench/verify.js && node bench/contamination.js"
   },
   "license": "MIT",

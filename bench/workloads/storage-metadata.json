@@ -1,0 +1,53 @@
+{
+  "name": "storage-metadata",
+  "kind": "postgres-explain",
+  "description": "Reviews a branch migration that indexes storage object metadata for bucket and owner lookups.",
+  "branchMode": "schema-only",
+  "setup": {
+    "sql": [
+      "DROP TABLE IF EXISTS forger_storage_objects;",
+      "CREATE TABLE forger_storage_objects (id bigserial PRIMARY KEY, bucket_id text NOT NULL, owner_id text NOT NULL, name text NOT NULL, size_bytes bigint NOT NULL, content_type text NOT NULL, updated_at timestamptz NOT NULL);",
+      "INSERT INTO forger_storage_objects (bucket_id, owner_id, name, size_bytes, content_type, updated_at) SELECT 'bucket-' || (g % 12)::text, 'owner-' || (g % 500)::text, 'file-' || g::text || '.json', 2000 + (g % 250000), 'application/json', now() - (g || ' seconds')::interval FROM generate_series(1, 140000) AS g;"
+    ]
+  },
+  "baselineSql": "SELECT id, name, size_bytes FROM forger_storage_objects WHERE bucket_id = 'bucket-4' AND owner_id = 'owner-88' ORDER BY updated_at DESC LIMIT 25;",
+  "candidateSql": "SELECT id, name, size_bytes FROM forger_storage_objects WHERE bucket_id = 'bucket-4' AND owner_id = 'owner-88' ORDER BY updated_at DESC LIMIT 25;",
+  "candidate": {
+    "migration": "CREATE INDEX idx_forger_storage_bucket_owner_updated ON forger_storage_objects(bucket_id, owner_id, updated_at DESC);"
+  },
+  "correctness": {
+    "expectedMinRows": 1
+  },
+  "thresholds": {
+    "actualTimeMsMaxIncreasePct": 10,
+    "cpuTimeMsMaxIncreasePct": 10,
+    "diskBytesMaxIncreasePct": 10,
+    "memoryBytesMaxIncreasePct": 10,
+    "seqScansMax": 0
+  },
+  "recorded": {
+    "baselinePlan": {
+      "nodeType": "Limit",
+      "seqScans": 1,
+      "indexScans": 0,
+      "actualTimeMs": 96.8,
+      "cpuTimeMs": 94.2,
+      "diskBytes": 13369344,
+      "memoryBytes": 33030144,
+      "actualRows": 23,
+      "buffers": 4032
+    },
+    "candidatePlan": {
+      "nodeType": "Limit",
+      "seqScans": 0,
+      "indexScans": 1,
+      "actualTimeMs": 5.4,
+      "cpuTimeMs": 5.0,
+      "diskBytes": 262144,
+      "memoryBytes": 1310720,
+      "actualRows": 23,
+      "buffers": 160
+    },
+    "mergeSql": "CREATE INDEX idx_forger_storage_bucket_owner_updated ON forger_storage_objects(bucket_id, owner_id, updated_at DESC);"
+  }
+}

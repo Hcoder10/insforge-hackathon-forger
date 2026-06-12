@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-12T07:27:41.523Z",
+  "workload": {
+    "name": "pagination-scale",
+    "kind": "postgres-explain",
+    "description": "Reviews a branch migration that replaces offset-heavy pagination with indexed keyset pagination."
+  },
+  "executionMode": "recorded",
+  "branch": {
+    "name": "forger-pagination-scale",
+    "mode": "schema-only"
+  },
+  "baseline": {
+    "nodeType": "Limit",
+    "seqScans": 1,
+    "indexScans": 0,
+    "actualTimeMs": 247.2,
+    "cpuTimeMs": 240.8,
+    "diskBytes": 30932992,
+    "memoryBytes": 67387392,
+    "actualRows": 50,
+    "buffers": 8226
+  },
+  "candidate": {
+    "nodeType": "Limit",
+    "seqScans": 0,
+    "indexScans": 1,
+    "actualTimeMs": 12.6,
+    "cpuTimeMs": 11.9,
+    "diskBytes": 786432,
+    "memoryBytes": 4194304,
+    "actualRows": 50,
+    "buffers": 512
+  },
+  "verdict": {
+    "status": "pass",
+    "failures": [],
+    "warnings": [],
+    "metrics": {
+      "actualTimeMs": {
+        "baseline": 247.2,
+        "candidate": 12.6,
+        "delta": -234.6,
+        "pct": -94.90291262135922
+      },
+      "cpuTimeMs": {
+        "baseline": 240.8,
+        "candidate": 11.9,
+        "delta": -228.9,
+        "pct": -95.05813953488372
+      },
+      "diskBytes": {
+        "baseline": 30932992,
+        "candidate": 786432,
+        "delta": -30146560,
+        "pct": -97.45762711864407
+      },
+      "memoryBytes": {
+        "baseline": 67387392,
+        "candidate": 4194304,
+        "delta": -63193088,
+        "pct": -93.7758327255045
+      },
+      "seqScans": {
+        "baseline": 1,
+        "candidate": 0,
+        "delta": -1,
+        "pct": -100
+      }
+    }
+  },
+  "mergeSql": "CREATE INDEX idx_forger_events_tenant_created ON forger_events(tenant_id, created_at DESC);",
+  "timeline": [
+    {
+      "status": "ok",
+      "label": "loaded workload pagination-scale"
+    },
+    {
+      "status": "ok",
+      "label": "using recorded branch evidence"
+    }
+  ]
+}

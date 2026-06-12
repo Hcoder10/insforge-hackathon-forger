@@ -18,6 +18,7 @@
             <a href="#landing" data-route="landing">Landing</a>
             <a href="#dashboard" data-route="dashboard">Dashboard</a>
             <a href="#optimizer" data-route="optimizer">Optimizer</a>
+            <a href="#judge" data-route="judge">Judge Mode</a>
             <a href="#run" data-route="run">Run</a>
           </nav>
           <div class="pixel-menu" aria-hidden="true">
@@ -196,6 +197,88 @@
           </footer>
         </section>
 
+        <section id="judge" class="page page-judge" aria-label="Judge Mode">
+          <div class="judge-shell">
+            <div class="page-head judge-head">
+              <p class="eyebrow">judge mode</p>
+              <h1>Evidence board</h1>
+              <p>Branch reviews, resource metrics, optimizer run artifacts, and benchmark results in one view.</p>
+            </div>
+
+            <section class="judge-kpis" aria-label="Judge evidence summary">
+              <article>
+                <span>branch gate</span>
+                <strong id="judge-branch-status">loading</strong>
+              </article>
+              <article>
+                <span>frontier score</span>
+                <strong id="judge-frontier-score">-</strong>
+              </article>
+              <article>
+                <span>benchmark tasks</span>
+                <strong id="judge-benchmark-tasks">-</strong>
+              </article>
+            </section>
+
+            <section class="judge-grid" aria-label="Judge evidence details">
+              <article class="judge-panel branch-review-panel">
+                <header>
+                  <span>FORGER Branch Review</span>
+                  <b id="judge-branch-name">-</b>
+                </header>
+                <p id="judge-branch-description">Loading branch review evidence.</p>
+                <div class="judge-tabs" id="judge-scenario-tabs" aria-label="Branch review scenarios"></div>
+                <div class="judge-meta">
+                  <span>mode <b id="judge-branch-mode">-</b></span>
+                  <span>execution <b id="judge-execution-mode">-</b></span>
+                </div>
+                <table class="judge-table">
+                  <thead><tr><th>metric</th><th>baseline</th><th>candidate</th><th>change</th></tr></thead>
+                  <tbody id="judge-metric-body"></tbody>
+                </table>
+              </article>
+
+              <article class="judge-panel frontier-panel">
+                <header>
+                  <span>frontier optimizer</span>
+                  <b id="judge-frontier-status">-</b>
+                </header>
+                <div class="frontier-score">
+                  <span id="judge-frontier-model">-</span>
+                  <strong id="judge-frontier-score-main">-</strong>
+                </div>
+                <div class="frontier-stats">
+                  <div><span>pass rate</span><b id="judge-frontier-pass">-</b></div>
+                  <div><span>baseline</span><b id="judge-frontier-baseline">-</b></div>
+                  <div><span>delta</span><b id="judge-frontier-delta">-</b></div>
+                </div>
+                <ul class="frontier-tasks" id="judge-frontier-tasks"></ul>
+                <p class="artifact-path" id="judge-frontier-artifact">-</p>
+              </article>
+
+              <article class="judge-panel benchmark-panel">
+                <header>
+                  <span>forger-bench</span>
+                  <b>resource axis</b>
+                </header>
+                <div class="benchmark-meta">
+                  <div><span>domains</span><b id="judge-benchmark-domains">-</b></div>
+                  <div><span>axes</span><b id="judge-benchmark-axes">-</b></div>
+                </div>
+                <ol class="judge-leaderboard" id="judge-leaderboard"></ol>
+              </article>
+
+              <article class="judge-panel sql-panel">
+                <header>
+                  <span>annotated merge SQL</span>
+                  <b id="judge-sql-verdict">-</b>
+                </header>
+                <pre id="judge-merge-sql">Loading SQL preview.</pre>
+              </article>
+            </section>
+          </div>
+        </section>
+
         <section id="run" class="page page-run" aria-label="Run forge-optimizer">
           <div class="run-shell">
             <div class="run-top">
@@ -263,7 +346,8 @@
       </div>
     </main>
     <script src="./app.js"></script>
-    <script>window.FORGER_API="https://vbulletin-larger-pine-facts.trycloudflare.com";</script>
+    <script>window.FORGER_API = window.FORGER_API || location.origin;</script>
     <script src="./demo.js"></script>
+    <script src="./judge.js"></script>
   </body>
 </html>

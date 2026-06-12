@@ -1,0 +1,53 @@
+{
+  "name": "pagination-scale",
+  "kind": "postgres-explain",
+  "description": "Reviews a branch migration that replaces offset-heavy pagination with indexed keyset pagination.",
+  "branchMode": "schema-only",
+  "setup": {
+    "sql": [
+      "DROP TABLE IF EXISTS forger_events;",
+      "CREATE TABLE forger_events (id bigserial PRIMARY KEY, tenant_id text NOT NULL, event_type text NOT NULL, created_at timestamptz NOT NULL, payload jsonb NOT NULL DEFAULT '{}'::jsonb);",
+      "INSERT INTO forger_events (tenant_id, event_type, created_at, payload) SELECT 't' || (g % 20)::text, CASE WHEN g % 5 = 0 THEN 'deploy' ELSE 'request' END, now() - (g || ' seconds')::interval, jsonb_build_object('n', g) FROM generate_series(1, 160000) AS g;"
+    ]
+  },
+  "baselineSql": "SELECT id, created_at FROM forger_events WHERE tenant_id = 't7' ORDER BY created_at DESC OFFSET 5000 LIMIT 50;",
+  "candidateSql": "SELECT id, created_at FROM forger_events WHERE tenant_id = 't7' AND created_at < now() - interval '5000 seconds' ORDER BY created_at DESC LIMIT 50;",
+  "candidate": {
+    "migration": "CREATE INDEX idx_forger_events_tenant_created ON forger_events(tenant_id, created_at DESC);"
+  },
+  "correctness": {
+    "expectedMinRows": 50
+  },
+  "thresholds": {
+    "actualTimeMsMaxIncreasePct": 15,
+    "cpuTimeMsMaxIncreasePct": 15,
+    "diskBytesMaxIncreasePct": 15,
+    "memoryBytesMaxIncreasePct": 15,
+    "seqScansMax": 0
+  },
+  "recorded": {
+    "baselinePlan": {
+      "nodeType": "Limit",
+      "seqScans": 1,
+      "indexScans": 0,
+      "actualTimeMs": 247.2,
+      "cpuTimeMs": 240.8,
+      "diskBytes": 30932992,
+      "memoryBytes": 67387392,
+      "actualRows": 50,
+      "buffers": 8226
+    },
+    "candidatePlan": {
+      "nodeType": "Limit",
+      "seqScans": 0,
+      "indexScans": 1,
+      "actualTimeMs": 12.6,
+      "cpuTimeMs": 11.9,
+      "diskBytes": 786432,
+      "memoryBytes": 4194304,
+      "actualRows": 50,
+      "buffers": 512
+    },
+    "mergeSql": "CREATE INDEX idx_forger_events_tenant_created ON forger_events(tenant_id, created_at DESC);"
+  }
+}
