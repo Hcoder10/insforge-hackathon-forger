@@ -17,6 +17,10 @@ env:
 """
 import os, json
 
+# Unsloth on WSL/Blackwell can reject the default PyTorch allocator config.
+# Clear it before importing torch or unsloth so the rig run is reproducible.
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = ""
+
 import torch
 from unsloth import FastLanguageModel
 from unsloth.chat_templates import get_chat_template

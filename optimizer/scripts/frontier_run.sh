@@ -3,6 +3,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+export PYTORCH_CUDA_ALLOC_CONF=""
+
 DATA_N="${FO_DATA_N:-80}"
 MODEL_TAG="${FO_MODEL_TAG:-frontier}"
 ADAPTER="${FO_ADAPTER:-train/grpo_adapter}"

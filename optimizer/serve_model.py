@@ -9,6 +9,11 @@ call it. Loads base + LoRA adapter once, greedy decode, thinking off.
 Run: python serve_model.py
 """
 import os, re, json
+
+# Unsloth on WSL/Blackwell can reject the default PyTorch allocator config.
+# Clear it before importing torch or unsloth so serving works on the rig.
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = ""
+
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import torch
 from unsloth import FastLanguageModel

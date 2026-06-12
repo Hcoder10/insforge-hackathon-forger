@@ -16,6 +16,10 @@ env: FO_GRPO_STEPS (default 200), FO_INIT_ADAPTER (default train/sft_adapter)
 """
 import os, re, json, subprocess, pathlib
 
+# Unsloth on WSL/Blackwell can reject the default PyTorch allocator config.
+# Clear it before importing torch or unsloth so the rig run is reproducible.
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = ""
+
 import torch
 from unsloth import FastLanguageModel
 from datasets import Dataset
