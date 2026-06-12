@@ -1,6 +1,6 @@
-// insforge-hackathon-forger — LIVE DEMO server.
+// insforge-hackathon-forger live demo server.
 //
-// Powers the site's Optimizer page: pick a task -> Claude Haiku 4.5 authors a solution ->
+// Powers the site's Optimizer page: pick a task -> author model writes a solution ->
 // forge-optimizer rewrites it -> forger-bench grades BOTH -> return the before/after.
 //
 // Endpoints:
@@ -9,7 +9,8 @@
 //   POST /api/grade {taskId, code}       -> grade one solution (used for manual paste)
 //
 // Config (env):
-//   ANTHROPIC_API_KEY   for Haiku author
+//   AUTHOR_URL          Ollama-compatible author endpoint
+//   AUTHOR_MODEL        author model name
 //   FORGE_OPT_URL       HTTP endpoint of the served forge-optimizer model (OpenAI-compatible
 //                       /v1/chat/completions or a simple {prompt}->{code} server). If unset,
 //                       the optimizer step is stubbed with the oracle so the UI still demos.
@@ -41,7 +42,7 @@ function extract(t) {
   return i !== -1 ? t.slice(i).trim() : (t || '');
 }
 
-// fetch with retry — tunnels can blip mid-suite; retry a couple times before giving up.
+// Fetch with retry. Tunnels can blip mid-suite; retry a couple times before giving up.
 async function fetchRetry(url, opts, tries = 3) {
   let lastErr;
   for (let i = 0; i < tries; i++) {
@@ -90,7 +91,7 @@ async function forgeOnce(msg, temperature) {
 // Best-of-N: forge-optimizer can occasionally break correct code; sample a few rewrites and
 // keep the highest-scoring one. Keeps the demo fully live AND reliably shows improvement.
 async function forgeOptimize(prompt, naive, taskId, N = 3) {
-  const msg = prompt + `\n\nHere is an inefficient/incorrect solution — rewrite it correct and efficient:\n\`\`\`js\n${naive}\n\`\`\``;
+  const msg = prompt + `\n\nHere is an inefficient or incorrect solution. Rewrite it to be correct and efficient:\n\`\`\`js\n${naive}\n\`\`\``;
   if (!FORGE_OPT_URL) return { code: naive, stub: true, grade: await gradeOne(taskId, naive) };
   let best = null, bestGrade = null;
   for (let i = 0; i < N; i++) {
@@ -120,7 +121,7 @@ function send(res, code, obj, type) {
 const server = http.createServer(async (req, res) => {
   const u = url.parse(req.url, true);
   try {
-    // CORS preflight — browsers send OPTIONS before cross-origin POST. Must answer it or
+    // CORS preflight: browsers send OPTIONS before cross-origin POST. Must answer it or
     // the real request never fires ("Failed to fetch").
     if (req.method === 'OPTIONS') {
       res.writeHead(204, {
@@ -155,7 +156,7 @@ const server = http.createServer(async (req, res) => {
     // Streams NDJSON (one line per task) so the UI fills in live.
     if (u.pathname === '/api/suite' && req.method === 'POST') {
       const body = await readBody(req);
-      // Curated to the scaleBug traps where gpt-oss-20b ships fetch-all code that returns
+      // Curated to the scaleBug traps where author models can ship fetch-all code that returns
       // WRONG results at 100k rows (graded 0) and forge-optimizer rewrites it scale-safe
       // (graded ~100). Probe-verified big deltas, plus two tasks the author already aces
       // (forge matches, not breaks) for an honest board.

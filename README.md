@@ -1,44 +1,89 @@
-# insforge-hackathon-forger
+# FORGER
 
-**FORGER** — benchmark and optimize AI-generated full-stack code before it hits scale.
-Built for the InsForge hackathon. Two halves + a live demo:
+FORGER is a hackathon project for measuring and improving generated full-stack code on
+InsForge. It combines a benchmark, an optimizer model, and a small web demo.
 
-- **`bench/`** — **forger-bench**: an efficiency-aware benchmark for AI-generated InsForge
-  SDK code. Scores correctness AND efficiency, and uniquely **real server cost at 100k-row
-  scale**. 52 tasks / 13 concepts / 5 domains. Leaderboard: codex 87, claude 82, gemini/
-  gpt-oss/devin 72, nemotron 60, qwen3.6 56, gemma3 5. Headline finding: frontier models
-  ship **scaleBugs** (fetch-all code that returns WRONG results at 100k rows due to the
-  PostgREST 1000-row cap) and drop from 82-87 to ~54 on the resource axis.
-- **`optimizer/`** — **forge-optimizer**: Qwen3.6-35B-A3B (MoE) fine-tuned (Unsloth SFT +
-  agentic GRPO, CUDA-Agent-style milestone reward) to turn unoptimized backend code into
-  efficient code. Base 56.4 → trained 61.5. Live on HF:
-  `squaredcuber/forge-optimizer-qwen3.6-35b-a3b`.
-- **`demo_server.js`** + **`bench/site/`** — the live demo: pick a task on the Optimizer
-  page → **Claude Haiku 4.5 authors** a solution → **forge-optimizer rewrites** it →
-  **forger-bench grades both** → see the before/after, live.
+The project focuses on a common production failure mode: code that returns the right answer
+on small data, but wastes backend resources or breaks when tables grow. The benchmark grades
+both correctness and efficiency, including live 100k-row checks for cases where API response
+limits hide scale bugs.
 
-## Run the live demo
-```bash
-cd bench && npm install && cd ..
-# serve the model (on a GPU box) -> optimizer/serve_model.py, expose as FORGE_OPT_URL
-ANTHROPIC_API_KEY=sk-... FORGE_OPT_URL=http://<model-host>:8901 node demo_server.js 8900
-# open http://localhost:8900  -> Optimizer page -> Run live demo
-```
-Without `FORGE_OPT_URL` the optimizer step is stubbed (the rest of the demo still runs).
+## Components
 
-## Run the benchmark
+- `bench/`: forger-bench, an efficiency-aware benchmark for InsForge SDK code.
+  It covers database, vector, storage, AI, and auth tasks across 52 task instances.
+- `optimizer/`: forge-optimizer, a Qwen3.6-35B-A3B LoRA trained with SFT and GRPO to rewrite
+  inefficient backend code into more scale-safe code.
+- `bench/site/` and `demo_server.js`: a local demo that runs an author model, sends the code
+  through forge-optimizer, and grades both outputs with forger-bench.
+
+## What The Benchmark Measures
+
+forger-bench scores a solution in two steps:
+
+1. It verifies the returned result for a task.
+2. If the result is correct, it scores resource use against the task's oracle, naive, and
+   mid-tier reference solutions.
+
+The mock benchmark measures request count, bytes read, rows returned, writes, storage calls,
+and AI calls. The live resource benchmark can also measure server-side work such as rows
+scanned, buffers touched, sequential scans, and throughput under load.
+
+## Run The Demo
+
+Install the benchmark dependencies:
+
 ```bash
 cd bench
-npm run smoke && npm run calibrate && npm run demo      # request-cost
-node live/run_resource_bench.js 3 3000                  # resource axis (needs a live InsForge)
+npm install
+cd ..
 ```
 
-## Layout
-```
-bench/        forger-bench (mock, tasks, scoring, live resource bench, runners, site, deck, docs)
-optimizer/    forge-optimizer (data gen, SFT/GRPO/RFT, agent_env, eval, serve_model, demo)
-demo_server.js   live demo backend wiring Haiku -> forge-optimizer -> forger-bench
+Start the optimizer service on a GPU host if you want live rewrites:
+
+```bash
+cd optimizer
+python serve_model.py
 ```
 
-See `bench/docs/RESULTS.md`, `optimizer/docs/FINAL_SUMMARY.md`, and
-`optimizer/docs/ABLATIONS_RESULTS.md` for full results.
+Start the demo server:
+
+```bash
+AUTHOR_URL=http://127.0.0.1:11500 \
+AUTHOR_MODEL=nemotron-3-super:latest \
+FORGE_OPT_URL=http://127.0.0.1:8901 \
+node demo_server.js 8900
+```
+
+Then open `http://localhost:8900`.
+
+`AUTHOR_URL` should point at an Ollama-compatible `/api/chat` server. `FORGE_OPT_URL` should
+point at the OpenAI-compatible optimizer server. If `FORGE_OPT_URL` is unset, the demo skips
+the rewrite step and still runs the benchmark flow.
+
+## Run The Benchmark
+
+```bash
+cd bench
+npm run check
+npm run demo
+```
+
+The live resource axis needs a linked InsForge project and seeded live tables:
+
+```bash
+node live/run_resource_bench.js 3 3000
+```
+
+See [bench/live/README.md](bench/live/README.md) for the live setup.
+
+## Repository Layout
+
+```text
+bench/          benchmark tasks, scoring, mock backend, live resource checks, site assets
+optimizer/      data generation, SFT/GRPO/RFT scripts, evaluation, model server
+demo_server.js  local demo server for the benchmark site
+```
+
+Detailed results are in [bench/docs/RESULTS.md](bench/docs/RESULTS.md) and
+[optimizer/docs/FINAL_SUMMARY.md](optimizer/docs/FINAL_SUMMARY.md).

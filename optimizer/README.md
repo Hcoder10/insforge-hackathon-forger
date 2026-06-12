@@ -1,7 +1,7 @@
 # forge-optimizer
 
-A specialized model that **turns unoptimized backend code into efficient, optimized code** —
-the skill measured by [forger-bench](../forger-bench). Base **Qwen3.6-35B-A3B** (MoE, ~3B
+A specialized model that **turns unoptimized backend code into efficient, optimized code**.
+It is measured by [forger-bench](../bench). Base **Qwen3.6-35B-A3B** (MoE, ~3B
 active), trained with **Unsloth** (fast SFT + agentic GRPO) on an RTX PRO 6000 (96GB).
 
 Architecture borrows from **CUDA-Agent** (BytedTsinghua-SIA, arXiv 2602.24286): an agentic
@@ -53,7 +53,7 @@ node data/gen_data.js 60 data/out && node data/contamination_check.js data/out  
 python train/sft.py                                                              # Stage 1
 python train/grpo.py                                                             # Stage 3
 python eval/gen_eval.py sft train/sft_adapter                                    # eval
-node ../forger-bench/bench/eval_submission.js ../forger-bench/results/sub_fo-sft.json
+node ../bench/bench/eval_submission.js ../bench/results/sub_fo-sft.json
 ```
 
 Status: scaffolding complete; rig has Unsloth + torch cu128 on the Blackwell; base model

@@ -8,7 +8,7 @@ Three deliverables, all shipped. Built in one session across a laptop + a remote
 ## 1. forger-bench — efficiency benchmark for AI backend code
 Repo: `github.com/Hcoder10/forger-bench`
 
-"Mercury, but for the backend cost model." Scores AI-generated InsForge SDK code on
+Mercury-inspired scoring for the backend cost model. Scores generated InsForge SDK code on
 **correctness AND efficiency** — and, uniquely, on **real server cost at 100k-row scale**.
 
 - **52 tasks / 13 concepts / 5 domains** (db, vector, storage, ai, auth), 39 sealed test

@@ -17,6 +17,7 @@ env:
 """
 import os, json
 
+import torch
 from unsloth import FastLanguageModel
 from unsloth.chat_templates import get_chat_template
 from datasets import Dataset
@@ -35,8 +36,8 @@ def main():
     model, tok = FastLanguageModel.from_pretrained(
         model_name=MODEL,
         max_seq_length=MAXLEN,
+        dtype=torch.bfloat16,
         load_in_4bit=False,        # MoE: NEVER 4-bit (BitsandBytes limitation)
-        load_in_16bit=True,        # bf16 LoRA for MoE
         full_finetuning=False,
     )
     model = FastLanguageModel.get_peft_model(

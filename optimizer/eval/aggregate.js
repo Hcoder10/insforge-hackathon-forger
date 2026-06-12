@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const FB = path.join(__dirname, '..', '..', 'forger-bench');
+const FB = process.env.FO_FORGER_BENCH || path.join(__dirname, '..', '..', 'bench');
 const RESULTS = path.join(FB, 'results');
 
 const ABLATION_LABELS = {

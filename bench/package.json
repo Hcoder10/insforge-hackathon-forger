@@ -2,7 +2,7 @@
   "name": "forger-bench",
   "version": "0.1.0",
   "private": true,
-  "description": "Efficiency-aware benchmark for AI-generated backend & frontend code on the InsForge SDK. Mercury, but for the backend cost model.",
+  "description": "Efficiency-aware benchmark for generated app code on the InsForge SDK.",
   "type": "commonjs",
   "scripts": {
     "smoke": "node mock/smoke.js",
@@ -11,7 +11,7 @@
     "contamination": "node bench/contamination.js",
     "demo": "node bench/demo.js",
     "audit": "node live/audit.js",
-    "check": "node mock/smoke.js && node bench/calibrate.js && node bench/verify.js >/dev/null && node bench/contamination.js"
+    "check": "node mock/smoke.js && node bench/calibrate.js && node bench/verify.js && node bench/contamination.js"
   },
   "license": "MIT",
   "dependencies": {

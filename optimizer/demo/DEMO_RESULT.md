@@ -1,12 +1,14 @@
-# Live Demo Result (run autonomously)
+# Live Demo Result
 
-**Flow:** Claude Haiku 4.5 authors a solution → forge-optimizer rewrites it → forger-bench
-grades both, live.
+**Flow:** an author model writes a solution, forge-optimizer rewrites it, and forger-bench
+grades both live.
 
 ## Task: auth.owner_scope.test1
+
 "Return the current user's own rows from `todos` (column user_id) as {id}[]."
 
-### Step 1 — Haiku 4.5 (the "before")
+## Step 1: author model output
+
 ```js
 async function solve(insforge) {
   const { data: authData, error: authError } = await insforge.auth.getCurrentUser();
@@ -18,22 +20,26 @@ async function solve(insforge) {
   return todos;
 }
 ```
-**Benchmark: score 0 — INCORRECT, reward -1.**
 
-### Step 2 — forge-optimizer (the "after")
+**Benchmark: score 0. Incorrect, reward -1.**
+
+## Step 2: forge-optimizer output
+
 forge-optimizer rewrote it into a passing owner-scoped query.
-**Benchmark: score 100 — CORRECT, reward 3 (near-optimal).**
+
+**Benchmark: score 100. Correct, reward 3.**
 
 ## Result
-| | Benchmark score | Correct |
-|---|---|---|
-| Haiku 4.5 (author) | 0 | ✗ |
-| forge-optimizer (optimized) | 100 | ✓ |
 
-**+100 improvement** — the specialist fixed the frontier model's failing solution, verified
-live by the benchmark.
+| Model | Benchmark score | Correct |
+|---|---:|---|
+| author model | 0 | no |
+| forge-optimizer | 100 | yes |
 
-(Note: on easy tasks Haiku already scores 100 one-shot; the value shows on the harder
-cases — auth/ai/scale traps — where frontier models fail and the specialist repairs them.)
+**+100 improvement.** The optimizer fixed the failing solution, verified live by the benchmark.
 
-Reproduce: `ANTHROPIC_API_KEY=... python demo/live_demo.py <taskId>` (needs the model served).
+Reproduce:
+
+```bash
+AUTHOR_URL=http://127.0.0.1:11500 AUTHOR_MODEL=nemotron-3-super:latest python demo/live_demo.py <taskId>
+```

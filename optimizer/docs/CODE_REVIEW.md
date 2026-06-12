@@ -5,9 +5,8 @@ only surface at runtime (TRL/Unsloth API drift, reward-fn signature, Node subpro
 contract). Static/style issues are out of scope. Source files were NOT edited.
 
 Reference checks performed:
-- forger-bench is a sibling of forge-optimizer (`/c/Users/sarta/forger-bench`), and
-  `agent_env.js`'s `path.join(__dirname,'..','..','forger-bench')` resolves correctly
-  (`train -> forge-optimizer -> sarta -> forger-bench`). **Path is fine.**
+- forger-bench now lives inside this repository at `bench/`. Optimizer scripts should use
+  `FO_FORGER_BENCH` or the local `bench/` default when loading task and harness files.
 - `forger-bench/bench/harness.js` exports `gradeSolution(task, code)` and returns
   `{correct, score, eff, perMetric, metrics, error}` — matches every field
   `agent_env.js` reads. **Grader contract is fine.**

@@ -29,7 +29,7 @@
           <div class="hero-copy">
             <p class="eyebrow">benchmark / optimize / scale</p>
             <h1>FORGER</h1>
-            <p class="subtitle">Benchmark and optimize AI-generated full-stack code before it hits scale.</p>
+            <p class="subtitle">Benchmark and optimize generated full-stack code before it hits scale.</p>
 
             <div class="cta-row">
               <a class="pixel-button primary" href="#dashboard"><span class="play"></span>Run benchmark</a>
@@ -143,7 +143,7 @@
         <section id="optimizer" class="page page-optimizer" aria-label="forge-optimizer page">
           <div class="page-head optimizer-head">
             <p class="eyebrow">forge-optimizer</p>
-            <h1>An optimization loop for AI-written apps</h1>
+            <h1>An optimization loop for generated apps</h1>
             <p>forger-bench grades waste; forge-optimizer learns scale-safe rewrites.</p>
           </div>
 
@@ -206,27 +206,27 @@
               </div>
               <div class="run-actions">
                 <button class="pixel-button primary" type="button" id="run-suite"><span class="play"></span>Run benchmark suite</button>
-                <span class="suite-scoreboard" id="suite-scoreboard">gpt-oss-120b author avg <b id="sb-author">–</b> → forge-optimizer avg <b id="sb-forge">–</b> · wins <b id="sb-wins">0</b></span>
+                <span class="suite-scoreboard" id="suite-scoreboard">author avg <b id="sb-author">-</b> -> forge-optimizer avg <b id="sb-forge">-</b> | wins <b id="sb-wins">0</b></span>
               </div>
-              <p class="run-live-status" id="run-status" aria-live="polite">gpt-oss-120b authors each task → forge-optimizer (best-of-5) rewrites → forger-bench grades both, live.</p>
+              <p class="run-live-status" id="run-status" aria-live="polite">Author model writes each task, forge-optimizer rewrites it, and forger-bench grades both live.</p>
             </div>
 
             <section class="run-console suite-console" aria-label="Live benchmark suite results">
               <article class="suite-now" aria-label="Current task">
-                <header><span>now grading</span><b id="suite-current">—</b></header>
+                <header><span>now grading</span><b id="suite-current">-</b></header>
                 <div class="suite-now-grid">
-                  <div><span>author (gpt-oss-120b)</span><strong id="suite-now-author">–</strong></div>
-                  <div><span>forge-optimizer</span><strong id="suite-now-forge">–</strong></div>
-                  <div><span>Δ</span><strong id="suite-now-delta">–</strong></div>
+                  <div><span>author</span><strong id="suite-now-author">-</strong></div>
+                  <div><span>forge-optimizer</span><strong id="suite-now-forge">-</strong></div>
+                  <div><span>delta</span><strong id="suite-now-delta">-</strong></div>
                 </div>
                 <div class="suite-code-pair">
-                  <div class="suite-code"><span>gpt-oss-120b wrote</span><pre id="suite-code-author">—</pre></div>
-                  <div class="suite-code"><span>forge-optimizer rewrote</span><pre id="suite-code-forge">—</pre></div>
+                  <div class="suite-code"><span>author wrote</span><pre id="suite-code-author">-</pre></div>
+                  <div class="suite-code"><span>forge-optimizer rewrote</span><pre id="suite-code-forge">-</pre></div>
                 </div>
               </article>
               <article class="suite-results" aria-label="Suite results table">
                 <header><span>forger-bench</span><b id="suite-summary">click Run benchmark suite</b></header>
-                <table class="suite-table"><thead><tr><th>task</th><th>author</th><th>forge</th><th>Δ</th></tr></thead><tbody id="suite-body"></tbody></table>
+                <table class="suite-table"><thead><tr><th>task</th><th>author</th><th>forge</th><th>delta</th></tr></thead><tbody id="suite-body"></tbody></table>
               </article>
             </section>
 
@@ -256,7 +256,7 @@
             <section class="run-result" aria-live="polite" data-run-result>
               <article><span>speedup</span><strong>4.7x</strong></article>
               <article><span>Forger inference</span><strong>$0.18</strong></article>
-              <article><span>Claude Opus 4.8</span><strong>$2.90</strong></article>
+              <article><span>Author baseline</span><strong>$2.90</strong></article>
             </section>
           </div>
         </section>

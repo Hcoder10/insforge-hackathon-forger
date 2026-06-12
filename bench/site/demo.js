@@ -1,5 +1,5 @@
-// FORGER — live benchmark-suite runner for the RUN page.
-// Streams /api/suite: gpt-oss-120b authors each task -> forge-optimizer (best-of-5) rewrites
+// FORGER live benchmark-suite runner for the RUN page.
+// Streams /api/suite: the author model writes each task -> forge-optimizer rewrites
 // -> forger-bench grades both. Fills the results table + scoreboard + current-task readout
 // in real time, and makes the Forger mascot smash a waste-bug as each task completes.
 
@@ -24,8 +24,8 @@
     btn.disabled = true;
     body.innerHTML = '';
     if (window.forgerReset) window.forgerReset();
-    summary.textContent = 'running…';
-    status.textContent = 'gpt-oss-120b authoring → forge-optimizer (best-of-5) → grading, live…';
+    summary.textContent = 'running...';
+    status.textContent = 'author model -> forge-optimizer -> forger-bench, live...';
     let n = 0, wins = 0, sumA = 0, sumF = 0;
     try {
       const res = await fetch(`${API}/api/suite`, {
@@ -35,7 +35,7 @@
       const reader = res.body.getReader();
       const dec = new TextDecoder();
       let buf = '';
-      curTask.textContent = 'starting…';
+      curTask.textContent = 'starting...';
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -50,7 +50,7 @@
           n++; sumA += d.author; sumF += d.forge; if (d.delta > 0) wins++;
 
           // current-task readout (real values)
-          curTask.textContent = `${d.domain} · ${d.concept}`;
+          curTask.textContent = `${d.domain} / ${d.concept}`;
           curA.textContent = d.author; curF.textContent = d.forge;
           curD.textContent = (d.delta > 0 ? '+' : '') + d.delta;
           curD.style.color = d.delta > 0 ? '#3ad29f' : (d.delta < 0 ? '#ff6b6b' : '');
@@ -63,7 +63,7 @@
           // results table row (real values)
           const tr = document.createElement('tr');
           if (d.delta > 0) tr.className = 'win';
-          tr.innerHTML = `<td>${d.domain}·${d.concept}</td>${scoreCell(d.author)}${scoreCell(d.forge)}<td class="${d.delta > 0 ? 'dwin' : ''}">${d.delta > 0 ? '+' + d.delta : d.delta}</td>`;
+          tr.innerHTML = `<td>${d.domain} / ${d.concept}</td>${scoreCell(d.author)}${scoreCell(d.forge)}<td class="${d.delta > 0 ? 'dwin' : ''}">${d.delta > 0 ? '+' + d.delta : d.delta}</td>`;
           body.appendChild(tr);
           tr.scrollIntoView({ block: 'nearest' });
 
@@ -71,13 +71,13 @@
           sbA.textContent = (sumA / n).toFixed(0);
           sbF.textContent = (sumF / n).toFixed(0);
           sbW.textContent = String(wins);
-          summary.textContent = `${n} tasks graded · forge improved on ${wins}`;
+          summary.textContent = `${n} tasks graded, forge improved on ${wins}`;
 
           // Forger smashes a bug for each completed task (await so it's visibly real-time)
           if (window.forgerSmash) await window.forgerSmash(d.delta);
         }
       }
-      status.textContent = `Done — ${n} tasks · forge-optimizer improved on ${wins} · author avg ${(sumA / n).toFixed(0)} → forge avg ${(sumF / n).toFixed(0)}`;
+      status.textContent = `Done: ${n} tasks, forge-optimizer improved on ${wins}, author avg ${(sumA / n).toFixed(0)} -> forge avg ${(sumF / n).toFixed(0)}`;
     } catch (e) {
       status.textContent = 'suite error: ' + e.message;
       summary.textContent = 'error';

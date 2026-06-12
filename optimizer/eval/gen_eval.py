@@ -13,11 +13,13 @@ usage: python eval/gen_eval.py <tag> [adapter_dir]
 """
 import os, sys, json, subprocess, re
 
+import torch
 from unsloth import FastLanguageModel
 
 MODEL = os.getenv("FO_BASE_MODEL", "unsloth/Qwen3.6-35B-A3B")
 MAXLEN = int(os.getenv("FO_MAXLEN", "4096"))
-FB = os.getenv("FO_FORGER_BENCH", os.path.join("..", "forger-bench"))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+FB = os.getenv("FO_FORGER_BENCH", os.path.join(ROOT, "bench"))
 _CODE_RE = re.compile(r"```(?:js|javascript)?\s*([\s\S]*?)```", re.I)
 
 
@@ -43,7 +45,7 @@ def main():
 
     model, tok = FastLanguageModel.from_pretrained(
         model_name=MODEL, max_seq_length=MAXLEN,
-        load_in_4bit=False, load_in_16bit=True, full_finetuning=False)
+        dtype=torch.bfloat16, load_in_4bit=False, full_finetuning=False)
     if adapter:
         model.load_adapter(adapter); print(f"[eval] loaded adapter {adapter}")
     FastLanguageModel.for_inference(model)

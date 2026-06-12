@@ -12,7 +12,7 @@
 
 const path = require('path');
 const readline = require('readline');
-const FB = path.join(__dirname, '..', '..', 'forger-bench');
+const FB = process.env.FO_FORGER_BENCH || path.join(__dirname, '..', '..', 'bench');
 const tasks = require(path.join(FB, 'tasks'));
 const { gradeSolution } = require(path.join(FB, 'bench', 'harness'));
 

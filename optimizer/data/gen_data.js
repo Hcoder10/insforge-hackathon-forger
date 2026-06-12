@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Import the forger-bench factories + their POOLS to know the FORBIDDEN (test) entities.
-const FB = path.join(__dirname, '..', '..', 'forger-bench');
+const FB = process.env.FO_FORGER_BENCH || path.join(__dirname, '..', '..', 'bench');
 // Factories aren't individually exported; we re-require the module and rebuild via a shim.
 // Simplest robust path: require the task list and group by concept to recover a factory call
 // surface is not exposed — so we instead import the raw factory file via a small adapter.
