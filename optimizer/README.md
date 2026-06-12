@@ -46,6 +46,13 @@ The judge-ready GPU path is:
 FO_DATA_N=80 FO_MODEL_TAG=frontier bash scripts/frontier_run.sh
 ```
 
+For a repair-verified evaluation, which applies the deterministic SDK-shape verifier after
+model generation:
+
+```bash
+FO_DATA_N=80 FO_MODEL_TAG=frontier-plus-distill FO_REPAIR=1 bash scripts/frontier_run.sh
+```
+
 It writes:
 
 ```text

@@ -11,6 +11,13 @@ cd optimizer
 FO_DATA_N=80 FO_MODEL_TAG=frontier bash scripts/frontier_run.sh
 ```
 
+Run the repair-verified path with:
+
+```bash
+cd optimizer
+FO_DATA_N=80 FO_MODEL_TAG=frontier-plus-distill FO_REPAIR=1 bash scripts/frontier_run.sh
+```
+
 The script runs:
 
 1. Data generation and contamination check.
@@ -82,7 +89,8 @@ node optimizer/eval/frontier_report.js \
   --score bench/results/score_fo-frontier.json \
   --baseline bench/results/score_codex.json \
   --out optimizer/results/frontier_run.json \
-  --model forge-optimizer-frontier:qwen3.6
+  --model forge-optimizer-frontier:qwen3.6 \
+  --status live-run
 ```
 
 Validate the artifact:
