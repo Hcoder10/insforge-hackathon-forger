@@ -27,7 +27,7 @@ async function main() {
     // Inert-axis guard: every WEIGHTED metric must actually vary across the spread,
     // otherwise its weight is handed to every model for free (a silent score inflator).
     const inert = [];
-    for (const metric of Object.keys(task.weights)) {
+    for (const metric of Object.keys(o.weights || task.weights)) {
       if (o.bounds[metric] && o.bounds[metric].lo === o.bounds[metric].hi) inert.push(metric);
     }
     const inertOk = inert.length === 0;

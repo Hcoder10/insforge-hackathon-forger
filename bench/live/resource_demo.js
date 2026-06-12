@@ -28,11 +28,11 @@ function main() {
 
   const summaries = SOLUTIONS.map((s) => ({ ...s, plan: capturePlan(s.sql) }));
 
-  console.log('solution          nodeType            buffers   time(ms)  seqScans');
-  console.log('-'.repeat(72));
+  console.log('solution          nodeType            cpu(ms)  disk(KB)   mem(KB)  seqScans');
+  console.log('-'.repeat(82));
   for (const s of summaries) {
     const p = s.plan;
-    console.log(`${s.name.padEnd(16)} ${(p.nodeType||'').padEnd(18)} ${String(p.buffers).padStart(7)} ${p.actualTimeMs.toFixed(2).padStart(9)} ${String(p.seqScans).padStart(9)}`);
+    console.log(`${s.name.padEnd(16)} ${(p.nodeType||'').padEnd(18)} ${p.actualTimeMs.toFixed(2).padStart(7)} ${String(Math.round((p.diskBytes || 0) / 1024)).padStart(9)} ${String(Math.round((p.memoryBytes || 0) / 1024)).padStart(9)} ${String(p.seqScans).padStart(9)}`);
   }
 
   const bounds = buildResourceSpread(summaries.map((s) => s.plan));
@@ -47,8 +47,7 @@ function main() {
     console.log(`${s.name.padEnd(16)} ${String(requestCost).padStart(16)}   ${rs.score.toFixed(1).padStart(14)}`);
   }
   console.log('\nTakeaway: request-cost scores A and B the SAME (both 1 query, same bytes).');
-  console.log('The resource model exposes B as a seq scan touching ~19x the buffers — the');
-  console.log('difference that decides whether the code survives real data and real load.');
+  console.log('The resource model exposes B as a seq scan with higher CPU, disk, and memory cost.');
 }
 
 main();

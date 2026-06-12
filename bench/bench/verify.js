@@ -6,7 +6,7 @@
 const assert = require('assert');
 const tasks = require('../tasks');
 const { gradeSolution, runSolutionMetrics } = require('./harness');
-const { buildSpread } = require('./score');
+const { buildScoringWeights, buildSpread } = require('./score');
 
 // Independent reimplementation of the scoring formula (don't import scoreTask — we want a
 // second, hand-written witness that must agree with the production path).
@@ -26,7 +26,7 @@ async function main() {
   let failures = 0;
   for (const task of tasks.ALL) {
     console.log('\n' + '='.repeat(78));
-    console.log(`TASK ${task.id}   weights=${JSON.stringify(task.weights)}`);
+    console.log(`TASK ${task.id}   taskWeights=${JSON.stringify(task.weights)}`);
     console.log('='.repeat(78));
 
     const sources = { oracle: task.oracle, naive: task.naive };
@@ -39,11 +39,13 @@ async function main() {
       rawByName[name] = metrics;
     }
 
-    // 2. spread bounds over the weighted metrics
-    const bounds = buildSpread(Object.values(rawByName), task.weights);
+    // 2. spread bounds over the weighted metrics, including the default resource overlay
+    const weights = buildScoringWeights(task.weights, Object.values(rawByName));
+    const bounds = buildSpread(Object.values(rawByName), weights);
 
     // 3. print raw metrics (only the weighted ones) + the bounds
-    const wm = Object.keys(task.weights);
+    const wm = Object.keys(weights);
+    console.log(`effectiveWeights=${JSON.stringify(weights)}`);
     console.log('\nRAW METRICS (weighted axes only):');
     console.log('  solution'.padEnd(12) + wm.map((k) => k.padStart(13)).join(''));
     for (const [name, m] of Object.entries(rawByName)) {
@@ -62,10 +64,10 @@ async function main() {
         const { lo, hi } = bounds[k];
         const cost = m[k] ?? 0;
         const p = hi === lo ? 1 : (hi - Math.min(Math.max(cost, lo), hi)) / (hi - lo);
-        return { k, cost, lo, hi, p, w: task.weights[k] };
+        return { k, cost, lo, hi, p, w: weights[k] };
       });
       const handEff = pParts.reduce((s, x) => s + x.w * x.p, 0);
-      const hand = handScore(graded.correct, m, bounds, task.weights);
+      const hand = handScore(graded.correct, m, bounds, weights);
 
       const detail = pParts
         .map((x) => `${x.k}: (${x.hi}-clip(${x.cost}))/(${x.hi}-${x.lo})=${x.p.toFixed(3)}×${x.w}`)

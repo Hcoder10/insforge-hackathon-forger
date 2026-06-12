@@ -3,7 +3,8 @@
 **An efficiency-aware benchmark for AI-generated backend & frontend code, measured against
 the InsForge SDK.** Inspired by [Mercury](https://arxiv.org/html/2402.07844v3) — but where
 Mercury scores LeetCode CPU runtime, forger-bench scores the **backend cost model**: network
-round-trips, bytes over the wire, rows scanned, storage egress, and AI tokens.
+round-trips, bytes over the wire, rows scanned, storage egress, AI tokens, CPU work, disk
+bytes, and memory pressure.
 
 > The gap Mercury found (frontier models ~65% correct, <50% efficient) is even wider for app
 > code, because "correct but wasteful" backend code — `select('*')` then filter in JS, N+1
@@ -41,7 +42,8 @@ seeded tables — see [live/README.md](live/README.md). Without credentials it s
 Each task ships an **oracle** (optimal), a **naive** (correct but wasteful), and **mid**
 solutions. The harness runs them through the instrumented mock to build a per-metric cost
 spread, then scores a candidate as its **percentile within that spread** (Mercury's
-"Beyond"), blended by the task's per-category metric weights:
+"Beyond"), blended by the task's per-category metric weights. The harness also adds a small
+CPU/disk/memory overlay when a resource axis varies and the oracle is the cheapest reference:
 
 ```
 score = 0 if incorrect; else 50 + 50 * Σ_m ( weight_m * percentile_m )

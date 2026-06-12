@@ -20,6 +20,9 @@ async function main() {
   assert.deepStrictEqual(Object.keys(data[0]).sort(), ['id', 'title'], 'projection');
   assert.strictEqual(count, 2, 'count exact');
   assert.strictEqual(metrics.dbOps, 1, 'one db op');
+  assert.ok(metrics.cpuOps > 0, 'cpu work counted');
+  assert.ok(metrics.diskBytes > 0, 'disk bytes counted');
+  assert.ok(metrics.memoryBytes > 0, 'memory peak counted');
 
   // insert array form + returning
   const ins = await insforge.database.from('posts').insert([{ title: 'C' }]).select();
@@ -29,6 +32,9 @@ async function main() {
   // storage batch remove = one op
   admin.createBucket('up');
   admin.putFile('up', 'a', 10); admin.putFile('up', 'b', 10);
+  const diskBeforeDownload = metrics.diskBytes;
+  await insforge.storage.from('up').download('a');
+  assert.ok(metrics.diskBytes > diskBeforeDownload, 'storage disk bytes counted');
   const before = metrics.storageOps;
   await insforge.storage.from('up').remove(['a', 'b']);
   assert.strictEqual(metrics.storageOps - before, 1, 'batch remove = 1 op');

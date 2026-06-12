@@ -1,8 +1,9 @@
 # forger-bench — Design
 
-**An efficiency-aware benchmark for AI-generated backend & frontend code, measured against
-the InsForge SDK.** "Mercury, but the efficiency axis is the *backend cost model* — round
-trips, bytes over the wire, rows scanned, storage bytes, AI tokens — not CPU runtime."
+**An efficiency-aware benchmark for AI-generated backend and frontend code, measured against
+the InsForge SDK.** It adapts Mercury-style efficiency scoring to backend resources: round
+trips, bytes over the wire, rows scanned, storage bytes, AI tokens, CPU work, disk bytes,
+and memory pressure.
 
 > Status: v2 design. Sibling project to the older `insforge-bench` (kept frozen as a
 > baseline). This is a clean, parallel track with a broader cost model and full-surface
@@ -45,12 +46,18 @@ The captured metrics:
 | `aiCalls` | count | one call per item vs batch | ai |
 | `realtimeMsgs` | count | chatty publishes, no coalescing | realtime |
 | `fnInvocations` | count | round-tripping through functions needlessly | functions |
+| `cpuOps` | synthetic ops | CPU work from scans, filtering, sorting, payload processing, AI calls | all |
+| `diskBytes` | bytes | table blocks, storage reads/writes, write amplification | all |
+| `diskOps` | 8KB blocks | disk/cache block pressure | all |
+| `memoryBytes` | bytes | peak payload or intermediate memory pressure | all |
 | `wallMs` | ms | end-to-end latency (informational) | all |
+| `cpuTotalMs` | ms | measured process CPU time (informational) | all |
 | `peakRSS` | bytes | loading huge payloads into memory | all |
 
-`wallMs`/`peakRSS` are **reported but lightly weighted** — they're hardware-noisy. The
-*counting* metrics (ops, bytes, rows, tokens) are deterministic in the mock and are what the
-score is built on.
+`cpuOps`, `diskBytes`, and `memoryBytes` are deterministic mock counters. They are blended
+into scoring as a 12% resource overlay when the axis varies across the reference spread and
+the oracle is the cheapest reference on that axis. `wallMs`, `cpuTotalMs`, and `peakRSS` are
+reported but not weighted by default because they are hardware-noisy.
 
 ---
 
@@ -79,10 +86,10 @@ p_m  = (hi - clip) / (hi - lo)    # 1.0 = matched the best, 0.0 = as bad as the 
 if not correct:  score = 0                      # Mercury: failed => cost = +inf => p = 0
 else:            score = 50 + 50 * Σ_m ( w_t,m * p_m )
 ```
-`w_t,m` = the task's **per-category metric weights** (Σ = 1). A DB task weights
-`dbOps`+`bytesRead`+`rowsScanned`; a storage task weights `storageBytes`+`storageOps`; an AI
-task weights `aiTokens`+`aiCalls`. So each domain is judged on the cost axis that actually
-bills it. (This generalizes the old bench's fixed `0.6·opRatio + 0.4·byteRatio`.)
+`w_t,m` = the task's effective metric weights. The task-specific weights keep 88% of the
+score. The remaining 12% is assigned to eligible CPU, disk, and memory axes. A resource axis
+is eligible only when it varies in the reference spread and the oracle is the cheapest
+reference on that axis. This keeps resource scoring stable without rewarding inert metrics.
 
 ### Aggregate metrics (the leaderboard headline + the Mercury story)
 - **Pass** — % of tasks functionally correct (the `verify` passes).
@@ -175,8 +182,8 @@ The candidate returns a data-loading function; the mock counts the backend calls
 **Mock-first (default).** A hermetic, in-process JS backend that mirrors `@insforge/sdk`
 and instruments every call. Deterministic, no Docker, CI-friendly, fast. `createBackend()`
 → `{ insforge, metrics, admin }`. The candidate's code is run in an isolated child process
-(`run_one`) so a crash/leak can't corrupt the harness, and `peakRSS`/`wallMs` are measured
-cleanly.
+(`run_one`) so a crash/leak can't corrupt the harness, and `wallMs`, `cpuTotalMs`, and
+`peakRSS` are measured cleanly.
 
 **Live mode (optional, later).** Candidate code is **byte-identical** — only the client's
 `baseUrl`/`anonKey` change from the mock to a real InsForge project. So every task can be
@@ -255,7 +262,8 @@ forger-bench/
 
 ## 11. Open questions / notes
 
-- `peakRSS`/`wallMs` stay informational until live mode — counting metrics carry the score.
+- `wallMs`, `cpuTotalMs`, and `peakRSS` stay informational. Deterministic CPU, disk, and
+  memory counters carry the resource overlay in mock mode.
 - Realtime & functions efficiency is softer to measure hermetically; they start
   correctness-weighted and gain efficiency weight as the mock models their cost.
 - The frontend domain is the most novel framing — worth a dedicated writeup once a few page

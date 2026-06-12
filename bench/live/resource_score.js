@@ -5,9 +5,10 @@
 // scores on what Postgres ACTUALLY did, captured via EXPLAIN (ANALYZE, BUFFERS) on the live
 // backend at SCALE (100k+ rows), where the difference is real:
 //
-//   buffers     — 8KB blocks touched (the core I/O cost; seq scan touches ~all of them)
-//   actualTimeMs— real execution time, server-side (no network noise)
-//   seqScans    — count of sequential scans (the cardinal sin at scale)
+//   actualTimeMs - real execution time, server-side (no network noise)
+//   diskBytes    - read blocks that missed shared buffers
+//   memoryBytes  - shared buffer footprint touched by the plan
+//   seqScans     - count of sequential scans
 //
 // Same Mercury percentile idea as request-cost, but the spread is built from the REAL plans
 // of oracle vs naive at scale, and the axes are server resources, not request counts.
@@ -20,9 +21,9 @@
 
 const { metricPercentile } = require('../bench/score');
 
-// Resource cost axes and their weights. buffers dominates (it's what scales), then time,
-// then an explicit seq-scan penalty so "correct but seq-scans 1M rows" is punished hard.
-const RESOURCE_WEIGHTS = { buffers: 0.5, actualTimeMs: 0.3, seqScans: 0.2 };
+// Resource cost axes and their weights. Time captures CPU work, diskBytes captures read IO,
+// memoryBytes captures shared-buffer pressure, and seqScans penalizes unsafe scale behavior.
+const RESOURCE_WEIGHTS = { actualTimeMs: 0.3, diskBytes: 0.25, memoryBytes: 0.25, seqScans: 0.2 };
 
 // Build per-axis [lo,hi] bounds from a set of EXPLAIN summaries (oracle/naive/...).
 function buildResourceSpread(summaries) {

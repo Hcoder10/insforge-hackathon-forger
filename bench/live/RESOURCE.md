@@ -17,24 +17,28 @@ Postgres and extracts, recursively over the plan tree:
 
 | Metric | What it captures |
 |---|---|
-| `buffers` (shared hit + read) | 8KB blocks touched — the core I/O cost; a seq scan touches ~the whole table |
+| `buffers` (shared hit + read) | 8KB blocks touched, the core I/O cost; a seq scan touches ~the whole table |
 | `actualTimeMs` | real server-side execution time (no network noise) |
-| `seqScans` | count of sequential scans — the cardinal sin at scale |
+| `diskBytes` | read blocks that missed shared buffers |
+| `memoryBytes` | shared buffer footprint touched by the plan |
+| `tempDiskBytes` | temporary disk spill from the plan |
+| `seqScans` | count of sequential scans |
 | `actualRows` / `planRows` | rows the DB physically processed vs estimated |
 
 `live/resource_score.js` scores these with the same Mercury-percentile method as
 request-cost, but the spread is built from the **real plans of oracle vs naive at scale**
-and the axes are server resources: `{ buffers 0.5, actualTimeMs 0.3, seqScans 0.2 }`.
+and the axes are server resources: `{ actualTimeMs 0.3, diskBytes 0.25, memoryBytes 0.25,
+seqScans 0.2 }`.
 
 ## Empirical validation (live, scale_test = 100k rows)
 
 `node live/resource_demo.js`:
 
 ```
-solution          nodeType            buffers   time(ms)  seqScans
-A indexed-eq      Bitmap Heap Scan       104      0.48         0
-B unindexed       Seq Scan              1914     15.08         1
-C select-star     Seq Scan              1914      9.13         1
+solution          nodeType            cpu(ms)  disk(KB)   mem(KB)  seqScans
+A indexed-eq      Bitmap Heap Scan      0.48         0       832         0
+B unindexed       Seq Scan             15.08      1024     15312         1
+C select-star     Seq Scan              9.13      1024     15312         1
 
 solution          request-cost-score   RESOURCE-score
 A indexed-eq                  100            100.0
@@ -43,8 +47,7 @@ C select-star                  50             56.1
 ```
 
 Request-cost scores A and B **identically** (1 query, same bytes). The resource model
-exposes B as a seq scan touching **18× the buffers** and halves its score — the difference
-that decides whether code survives real data.
+exposes B as a seq scan with much higher CPU, disk, and memory cost, then halves its score.
 
 ## The realistic resource benchmark (accurate-to-cloud)
 
@@ -52,13 +55,14 @@ that decides whether code survives real data.
 100k-row table under N concurrent users, and scores on **server work per request** measured
 from Postgres' own stat tables (`pg_stat_user_tables` + `pg_statio_user_tables`):
 
-- `tuplesPerReq` — rows the DB physically read per request (seq_tup_read + idx_tup_fetch Δ)
-- `blocksPerReq` — 8KB buffers touched per request (heap_blks_read + hit Δ)
-- `seqPerReq`    — sequential scans per request
+- `cpuWorkPerReq` - rows the DB physically read per request (seq_tup_read + idx_tup_fetch delta)
+- `diskBlocksPerReq` - 8KB buffers touched per request (heap_blks_read + hit delta)
+- `memoryBytesPerReq` - buffer footprint per request, derived from disk/cache blocks
+- `seqPerReq` - sequential scans per request
 
 It also reports `rps` (sustained throughput) and `scaleBugs` (below). Score = Mercury
-percentile over `{tuplesPerReq .5, blocksPerReq .3, seqPerReq .2}`, spread anchored by the
-task's oracle vs naive measured the same way.
+percentile over CPU, disk, memory, and sequential scan cost, spread anchored by the task's
+oracle vs naive measured the same way.
 
 ## The honest finding — accurate to the cloud (corrected)
 
@@ -129,5 +133,5 @@ node live/resource_demo.js   # EXPLAIN-based resource scores vs request-cost, at
   candidates by EXPLAIN at scale instead of (or alongside) mock request-cost.
 - ▢ Seed a scaled live table per concept; re-baseline the models on the resource axis so
   the leaderboard's efficiency column reflects server cost, not request count.
-- ▢ Add `diagnose db` deltas (cache-hit ratio, lock waits, bloat) and `diagnose metrics`
-  (CPU/mem/disk) for whole-workload scoring.
+- ✅ Whole-workload scoring now includes CPU work, disk/cache blocks, and memory footprint.
+- ▢ Add `diagnose db` deltas for cache-hit ratio, lock waits, and bloat.

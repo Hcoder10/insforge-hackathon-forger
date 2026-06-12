@@ -26,8 +26,11 @@ forger-bench scores a solution in two steps:
    mid-tier reference solutions.
 
 The mock benchmark measures request count, bytes read, rows returned, writes, storage calls,
-and AI calls. The live resource benchmark can also measure server-side work such as rows
-scanned, buffers touched, sequential scans, and throughput under load.
+AI calls, CPU work, disk bytes, and peak memory pressure. CPU, disk, and memory are blended
+into the score when they vary cleanly across a task's reference solutions.
+
+The live resource benchmark measures server-side CPU work, disk/cache blocks, memory
+footprint, sequential scans, and throughput under load.
 
 ## Run The Demo
 

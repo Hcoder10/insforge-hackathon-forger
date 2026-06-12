@@ -23,6 +23,15 @@ function freshMetrics() {
     aiCalls: 0, aiTokens: 0,
     realtimeMsgs: 0, fnInvocations: 0,
     authOps: 0,
+    cpuOps: 0,
+    diskOps: 0,
+    diskBytes: 0,
+    memoryBytes: 0,
+    wallMs: 0,
+    cpuUserMs: 0,
+    cpuSystemMs: 0,
+    cpuTotalMs: 0,
+    peakRSS: 0,
   };
 }
 
@@ -32,6 +41,8 @@ function wireBytes(value) {
   try { return Buffer.byteLength(JSON.stringify(value), 'utf8'); }
   catch { return 0; }
 }
+
+const DISK_BLOCK_BYTES = 8192;
 
 // Project a row down to a set of columns ('*' or 'a, b, c' or 'a,b').
 function projectRow(row, cols) {
@@ -78,6 +89,23 @@ function createBackend() {
   const fns = new Map();      // slug -> async (body, ctx) => any
   const realtimeChannels = new Set();
   let currentUserId = null;
+
+  function recordCpu(units) {
+    const n = Math.ceil(Number(units) || 0);
+    if (n > 0) metrics.cpuOps += n;
+  }
+
+  function recordDiskBytes(bytes) {
+    const n = Math.ceil(Number(bytes) || 0);
+    if (n <= 0) return;
+    metrics.diskBytes += n;
+    metrics.diskOps += Math.ceil(n / DISK_BLOCK_BYTES);
+  }
+
+  function recordMemory(bytes) {
+    const n = Math.ceil(Number(bytes) || 0);
+    if (n > metrics.memoryBytes) metrics.memoryBytes = n;
+  }
 
   // ---- admin (harness-only; NOT counted) ----------------------------------
   const admin = {
@@ -155,9 +183,14 @@ function createBackend() {
       if (state.action === 'select') {
         // full table is "scanned"; filters reduce what's returned
         metrics.rowsScanned += t.rows.length;
+        const tableBytes = wireBytes(t.rows);
+        recordCpu(1 + t.rows.length * Math.max(1, state.filters.length || 1));
+        recordDiskBytes(tableBytes);
         let rows = applyFilters(t.rows);
         if (state.orderBy) {
           const { col, asc } = state.orderBy;
+          recordCpu(rows.length * Math.log2(rows.length + 1));
+          recordMemory(wireBytes(rows));
           rows = [...rows].sort((a, b) => (a[col] > b[col] ? 1 : a[col] < b[col] ? -1 : 0) * (asc ? 1 : -1));
         }
         const total = rows.length;
@@ -175,16 +208,22 @@ function createBackend() {
               const child = tables.get(e.table);
               if (child) {
                 const fk = tableName.replace(/s$/, '') + '_id';
+                recordCpu(child.rows.length);
+                recordDiskBytes(wireBytes(child.rows));
                 base[e.table] = child.rows
                   .filter((cr) => cr[fk] === r.id)
                   .map((cr) => projectRow(cr, e.cols.join(',')));
+                recordMemory(wireBytes(base[e.table]));
               }
             }
             return base;
           });
         }
         metrics.rowsReturned += projected.length;
-        metrics.bytesRead += wireBytes(projected);
+        const responseBytes = wireBytes(projected);
+        metrics.bytesRead += responseBytes;
+        recordCpu(projected.length + responseBytes / 32);
+        recordMemory(state.head ? wireBytes({ count: total }) : responseBytes);
         const count = state.countMode ? total : undefined;
         if (state.single) {
           if (projected.length !== 1) return { data: null, error: { message: 'not single' } };
@@ -200,34 +239,60 @@ function createBackend() {
         const inserted = arr.map((r, i) => ({ id: r.id ?? `${tableName}_${t.rows.length + i + 1}`, ...r }));
         t.rows.push(...inserted.map((r) => ({ ...r })));
         metrics.writes += inserted.length;
-        metrics.bytesWritten += wireBytes(inserted);
+        const insertedBytes = wireBytes(inserted);
+        metrics.bytesWritten += insertedBytes;
+        recordCpu(inserted.length + insertedBytes / 128);
+        recordDiskBytes(insertedBytes);
+        recordMemory(insertedBytes);
         if (state.returnSelect) {
           metrics.rowsReturned += inserted.length;
-          metrics.bytesRead += wireBytes(inserted.map((r) => projectRow(r, state.cols)));
-          return { data: inserted.map((r) => projectRow(r, state.cols)), error: null };
+          const selected = inserted.map((r) => projectRow(r, state.cols));
+          const responseBytes = wireBytes(selected);
+          metrics.bytesRead += responseBytes;
+          recordCpu(selected.length + responseBytes / 128);
+          recordMemory(responseBytes);
+          return { data: selected, error: null };
         }
         return { data: null, error: null };
       }
 
       if (state.action === 'update') {
         metrics.rowsScanned += t.rows.length;
+        const tableBytes = wireBytes(t.rows);
+        recordCpu(1 + t.rows.length * Math.max(1, state.filters.length || 1));
+        recordDiskBytes(tableBytes);
         const matched = applyFilters(t.rows);
         for (const r of matched) Object.assign(r, state.payload);
         metrics.writes += matched.length;
-        metrics.bytesWritten += wireBytes(state.payload) * Math.max(matched.length, 1);
+        const writtenBytes = wireBytes(state.payload) * Math.max(matched.length, 1);
+        metrics.bytesWritten += writtenBytes;
+        recordCpu(matched.length + writtenBytes / 128);
+        recordDiskBytes(writtenBytes);
+        recordMemory(Math.max(wireBytes(state.payload), writtenBytes));
         if (state.returnSelect) {
-          metrics.bytesRead += wireBytes(matched.map((r) => projectRow(r, state.cols)));
-          return { data: matched.map((r) => projectRow(r, state.cols)), error: null };
+          const selected = matched.map((r) => projectRow(r, state.cols));
+          const responseBytes = wireBytes(selected);
+          metrics.bytesRead += responseBytes;
+          recordCpu(selected.length + responseBytes / 128);
+          recordMemory(responseBytes);
+          return { data: selected, error: null };
         }
         return { data: null, error: null };
       }
 
       if (state.action === 'delete') {
         metrics.rowsScanned += t.rows.length;
+        const tableBytes = wireBytes(t.rows);
+        recordCpu(1 + t.rows.length * Math.max(1, state.filters.length || 1));
+        recordDiskBytes(tableBytes);
         const keep = [], removed = [];
         for (const r of t.rows) (applyFilters([r]).length ? removed : keep).push(r);
         t.rows.length = 0; t.rows.push(...keep);
         metrics.writes += removed.length;
+        const removedBytes = wireBytes(removed);
+        recordCpu(removed.length + removedBytes / 128);
+        recordDiskBytes(removedBytes);
+        recordMemory(removedBytes);
         return { data: null, error: null };
       }
       return { data: null, error: { message: 'unknown action' } };
@@ -240,11 +305,15 @@ function createBackend() {
     from(name) { return makeQuery(name); },
     async rpc(fnName, args = {}) {
       metrics.dbOps += 1;                            // an RPC is one server round-trip
+      recordCpu(1 + wireBytes(args) / 128);
       const handler = rpcRegistry.get(fnName);
       if (!handler) return { data: null, error: { message: `no rpc ${fnName}` } };
       const data = await handler(args, { tables, metrics });
-      metrics.bytesRead += wireBytes(data);
+      const responseBytes = wireBytes(data);
+      metrics.bytesRead += responseBytes;
       metrics.rowsReturned += Array.isArray(data) ? data.length : 1;
+      recordCpu(responseBytes / 128);
+      recordMemory(responseBytes);
       return { data, error: null };
     },
   };
@@ -255,19 +324,31 @@ function createBackend() {
   const auth = {
     async getCurrentUser() {
       metrics.authOps += 1; metrics.dbOps += 1;
+      recordCpu(1);
+      recordDiskBytes(wireBytes(currentUserId ? users.get(currentUserId) : null));
       const u = currentUserId ? users.get(currentUserId) : null;
-      return { data: { user: u ? { id: u.id, email: u.email } : null }, error: null };
+      const data = { user: u ? { id: u.id, email: u.email } : null };
+      recordMemory(wireBytes(data));
+      return { data, error: null };
     },
     async signInWithPassword({ email, password }) {
       metrics.authOps += 1; metrics.dbOps += 1;
-      const u = [...users.values()].find((x) => x.email === email && x.password === password);
+      const userRows = [...users.values()];
+      recordCpu(1 + userRows.length);
+      recordDiskBytes(wireBytes(userRows));
+      const u = userRows.find((x) => x.email === email && x.password === password);
       if (!u) return { data: null, error: { message: 'invalid', statusCode: 401 } };
       currentUserId = u.id;
-      return { data: { user: { id: u.id, email: u.email }, accessToken: 'tok' }, error: null };
+      const data = { user: { id: u.id, email: u.email }, accessToken: 'tok' };
+      recordMemory(wireBytes(data));
+      return { data, error: null };
     },
     async getProfile(id) {
       metrics.authOps += 1; metrics.dbOps += 1;
+      recordCpu(1);
+      recordDiskBytes(wireBytes(users.get(id)));
       const u = users.get(id);
+      recordMemory(wireBytes(u ? u.profile : null));
       return { data: u ? u.profile : null, error: null };
     },
     uid() { return currentUserId; },
@@ -283,6 +364,9 @@ function createBackend() {
         const bytes = file?.size ?? file?.length ?? wireBytes(file);
         bucket.set(key, { bytes, contentType: file?.type || 'application/octet-stream', meta: {} });
         metrics.storageBytes += bytes; metrics.bytesWritten += bytes;
+        recordCpu(1 + bytes / 4096);
+        recordDiskBytes(bytes);
+        recordMemory(bytes);
         return { data: { key, url: `mock://${bucketName}/${key}` }, error: null };
       },
       async uploadAuto(file) {
@@ -294,11 +378,17 @@ function createBackend() {
         const f = bucket.get(key);
         if (!f) return { data: null, error: { message: 'not found' } };
         metrics.storageBytes += f.bytes; metrics.bytesRead += f.bytes;  // full egress
+        recordCpu(1 + f.bytes / 4096);
+        recordDiskBytes(f.bytes);
+        recordMemory(f.bytes);
         return { data: { size: f.bytes, type: f.contentType }, error: null };
       },
       async remove(keys) {
         const arr = Array.isArray(keys) ? keys : [keys];
         metrics.storageOps += 1;                     // one batch op regardless of count
+        recordCpu(1 + arr.length);
+        recordDiskBytes(wireBytes(arr));
+        recordMemory(wireBytes(arr));
         for (const k of arr) bucket.delete(k);
         return { data: { removed: arr.length }, error: null };
       },
@@ -307,7 +397,11 @@ function createBackend() {
         const items = [...bucket.entries()]
           .filter(([k]) => k.startsWith(prefix))
           .map(([key, v]) => ({ key, size: v.bytes, contentType: v.contentType }));
-        metrics.bytesRead += wireBytes(items);        // metadata only, not file bytes
+        const responseBytes = wireBytes(items);
+        metrics.bytesRead += responseBytes;           // metadata only, not file bytes
+        recordCpu(1 + bucket.size);
+        recordDiskBytes(responseBytes);
+        recordMemory(responseBytes);
         return { data: items, error: null };
       },
     };
@@ -319,7 +413,10 @@ function createBackend() {
       metrics.aiCalls += 1;
       const tok = messages.reduce((s, m) => s + Math.ceil((typeof m.content === 'string' ? m.content.length : wireBytes(m.content)) / 4), 0);
       metrics.aiTokens += tok + 16;
-      return { choices: [{ message: { content: 'ok' } }] };
+      recordCpu((tok + 16) * 8);
+      const data = { choices: [{ message: { content: 'ok' } }] };
+      recordMemory(wireBytes(data));
+      return data;
     } } },
     embeddings: { async create({ input }) {
       metrics.aiCalls += 1;                           // ONE call whether input is str or array
@@ -327,12 +424,21 @@ function createBackend() {
       // Per-call request overhead (framing/instruction tokens) + content tokens. The fixed
       // overhead is what makes batching genuinely cheaper: 1 call of N vs N calls of 1.
       const CALL_OVERHEAD = 16;
-      metrics.aiTokens += CALL_OVERHEAD + items.reduce((s, x) => s + Math.ceil(String(x).length / 4), 0);
-      return { data: items.map(() => ({ embedding: new Array(8).fill(0.1) })) };
+      const tokens = CALL_OVERHEAD + items.reduce((s, x) => s + Math.ceil(String(x).length / 4), 0);
+      metrics.aiTokens += tokens;
+      recordCpu(tokens * 8);
+      const data = { data: items.map(() => ({ embedding: new Array(8).fill(0.1) })) };
+      recordMemory(wireBytes(data));
+      return data;
     } },
     images: { async generate({ prompt }) {
-      metrics.aiCalls += 1; metrics.aiTokens += Math.ceil(String(prompt).length / 4);
-      return { data: [{ b64_json: 'AAAA' }] };
+      metrics.aiCalls += 1;
+      const tokens = Math.ceil(String(prompt).length / 4);
+      metrics.aiTokens += tokens;
+      recordCpu(tokens * 16);
+      const data = { data: [{ b64_json: 'AAAA' }] };
+      recordMemory(wireBytes(data));
+      return data;
     } },
   };
 
@@ -344,7 +450,10 @@ function createBackend() {
       return { ok: true, channel, presence: { members: [] } };
     },
     async publish(channel, event, payload) {
-      metrics.realtimeMsgs += 1; metrics.bytesWritten += wireBytes(payload);
+      const payloadBytes = wireBytes(payload);
+      metrics.realtimeMsgs += 1; metrics.bytesWritten += payloadBytes;
+      recordCpu(1 + payloadBytes / 128);
+      recordMemory(payloadBytes);
       return { ok: true };
     },
     on() {}, off() {}, once() {}, disconnect() { this.isConnected = false; },
@@ -354,9 +463,13 @@ function createBackend() {
   const functions = {
     async invoke(slug, { body } = {}) {
       metrics.fnInvocations += 1;
+      recordCpu(1 + wireBytes(body) / 128);
+      recordMemory(wireBytes(body));
       const handler = fns.get(slug);
       if (!handler) return { data: null, error: { message: `no function ${slug}` } };
       const data = await handler(body, { database, metrics });
+      recordCpu(wireBytes(data) / 128);
+      recordMemory(wireBytes(data));
       return { data, error: null };
     },
   };

@@ -5,9 +5,10 @@
 //   2. snapshot pg_stat_user_tables / pg_statio_user_tables for the task's table
 //   3. drive an N-concurrent-user workload of the solution for ~durationMs
 //   4. snapshot stats again -> per-request server cost deltas:
-//        tuplesPerReq  = seq_tup_read + idx_tup_fetch delta / requests   (rows the DB touched)
-//        blocksPerReq  = (heap_blks_read + heap_blks_hit) delta / requests (8KB buffers)
-//        seqPerReq     = seq_scan delta / requests                         (seq scans per call)
+//        cpuWorkPerReq     = seq_tup_read + idx_tup_fetch delta / requests (rows touched)
+//        diskBlocksPerReq  = heap_blks_read + heap_blks_hit delta / requests (8KB buffers)
+//        memoryBytesPerReq = buffer footprint per request, derived from disk/cache blocks
+//        seqPerReq         = seq_scan delta / requests
 //   5. also record throughput (rps) and error rate (the capacity "effect")
 //
 // Why this is accurate-to-cloud and RTT-immune: network round-trip inflates LATENCY equally
@@ -16,9 +17,8 @@
 // same server CPU/IO whether the client is 1ms or 80ms away. So we score on those, and
 // report throughput separately as the observable effect.
 //
-// Scoring: Mercury percentile over {tuplesPerReq .5, blocksPerReq .3, seqPerReq .2}, with
-// the spread built from the oracle and naive solutions of that task (the optimal vs the
-// wasteful), so each model is placed on the real cost continuum.
+// Scoring: Mercury percentile over CPU work, disk/cache blocks, memory footprint, and seq
+// scans, with the spread built from the oracle and naive solutions of that task.
 
 'use strict';
 
@@ -28,7 +28,13 @@ const { createLiveBackend } = require('./instrument');
 const { dbQuery } = require('./dbquery');
 const { metricPercentile } = require('../bench/score');
 
-const WEIGHTS = { tuplesPerReq: 0.5, blocksPerReq: 0.3, seqPerReq: 0.2 };
+const DISK_BLOCK_BYTES = 8192;
+const WEIGHTS = {
+  cpuWorkPerReq: 0.35,
+  diskBlocksPerReq: 0.3,
+  memoryBytesPerReq: 0.2,
+  seqPerReq: 0.15,
+};
 
 function loadEnv() {
   const p = path.join(__dirname, '..', '.env.local');
@@ -106,11 +112,17 @@ async function measure(creds, table, code, { concurrency = 8, durationMs = 4000,
   const tuples = (after.seqTup - before.seqTup) + (after.idxTup - before.idxTup);
   const blocks = after.blks - before.blks;
   const seqs = after.seqScan - before.seqScan;
+  const tuplesPerReq = Math.round(tuples / reqs);
+  const blocksPerReq = Math.round(blocks / reqs);
+  const seqPerReq = +(seqs / reqs).toFixed(3);
   return {
     correct, scaleBug, count, errors, rps: +(count / elapsed).toFixed(1),
-    tuplesPerReq: Math.round(tuples / reqs),
-    blocksPerReq: Math.round(blocks / reqs),
-    seqPerReq: +(seqs / reqs).toFixed(3),
+    tuplesPerReq,
+    blocksPerReq,
+    seqPerReq,
+    cpuWorkPerReq: tuplesPerReq,
+    diskBlocksPerReq: blocksPerReq,
+    memoryBytesPerReq: blocksPerReq * DISK_BLOCK_BYTES,
   };
 }
 

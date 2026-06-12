@@ -6,6 +6,51 @@
 
 'use strict';
 
+const DEFAULT_RESOURCE_WEIGHT = 0.12;
+const DEFAULT_RESOURCE_WEIGHTS = {
+  cpuOps: 0.4,
+  diskBytes: 0.3,
+  memoryBytes: 0.3,
+};
+
+function normalizeWeights(weights) {
+  const total = Object.values(weights).reduce((s, w) => s + w, 0);
+  if (total <= 0) return { ...weights };
+  return Object.fromEntries(Object.entries(weights).map(([k, w]) => [k, w / total]));
+}
+
+function axisIsScorable(metricsList, axis) {
+  let lo = Infinity, hi = -Infinity;
+  for (const m of metricsList) {
+    const v = Number(m[axis] ?? 0);
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo === hi) return false;
+  const oracle = Number(metricsList[0]?.[axis] ?? 0);
+  return Math.abs(oracle - lo) < 1e-9;
+}
+
+// Blend task-specific weights with a small deterministic CPU/disk/memory overlay.
+// Runtime counters such as wallMs/cpuTotalMs/peakRSS stay report-only because they are
+// hardware-noisy; the overlay uses stable mock counters that vary across the task spread.
+function buildScoringWeights(taskWeights, spreadMetricsList, opts = {}) {
+  const base = normalizeWeights(taskWeights);
+  const resourceBudget = opts.resourceWeight ?? DEFAULT_RESOURCE_WEIGHT;
+  const resourceWeights = opts.resourceWeights || DEFAULT_RESOURCE_WEIGHTS;
+  const active = Object.entries(resourceWeights)
+    .filter(([axis]) => !(axis in base) && axisIsScorable(spreadMetricsList, axis));
+
+  if (!active.length || resourceBudget <= 0) return base;
+
+  const budget = Math.min(resourceBudget, 0.49);
+  const activeTotal = active.reduce((s, [, w]) => s + w, 0);
+  const out = {};
+  for (const [axis, weight] of Object.entries(base)) out[axis] = weight * (1 - budget);
+  for (const [axis, weight] of active) out[axis] = budget * (weight / activeTotal);
+  return out;
+}
+
 // Per-metric percentile p_m in [0,1]: 1.0 = matched the cheapest, 0.0 = as bad as priciest.
 function metricPercentile(cost, lo, hi) {
   if (hi === lo) return 1.0;                 // metric doesn't vary across the spread -> free
@@ -81,4 +126,13 @@ function aggregate(records) {
   return { n: records.length, pass, meanScore, meanEff, meanEffAll, gap, domains };
 }
 
-module.exports = { metricPercentile, buildSpread, efficiency, scoreTask, aggregate };
+module.exports = {
+  DEFAULT_RESOURCE_WEIGHT,
+  DEFAULT_RESOURCE_WEIGHTS,
+  buildScoringWeights,
+  metricPercentile,
+  buildSpread,
+  efficiency,
+  scoreTask,
+  aggregate,
+};

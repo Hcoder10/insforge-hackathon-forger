@@ -61,7 +61,7 @@ async function main() {
       bounds[axis] = { lo: Math.min(...vals), hi: Math.max(...vals) };
     }
     spreads[task.id] = { bounds, oracle: o, naive: n };
-    console.log(`spread ${task.id.padEnd(26)} oracle{tpr:${o.tuplesPerReq},rps:${o.rps},ok:${o.correct}} naive{tpr:${n.tuplesPerReq},rps:${n.rps},ok:${n.correct}${n.scaleBug?',SCALEBUG':''}}`);
+    console.log(`spread ${task.id.padEnd(26)} oracle{cpu:${o.cpuWorkPerReq},disk:${o.diskBlocksPerReq},mem:${o.memoryBytesPerReq},rps:${o.rps},ok:${o.correct}} naive{cpu:${n.cpuWorkPerReq},disk:${n.diskBlocksPerReq},mem:${n.memoryBytesPerReq},rps:${n.rps},ok:${n.correct}${n.scaleBug?',SCALEBUG':''}}`);
   }
 
   // 2. Score each model's real code per task.
@@ -94,13 +94,13 @@ async function main() {
   // 3. Leaderboard
   const ranking = Object.values(results).map((r) => ({ model: r.model, ...r.agg })).sort((a, b) => b.meanScore - a.meanScore);
   fs.writeFileSync(path.join(RESULTS, 'resource_leaderboard.json'), JSON.stringify({ concurrency, durationMs, ranking }, null, 2));
-  console.log('\n\nRESOURCE LEADERBOARD (server cost under load, 100k rows, RTT-immune)\n');
+  console.log('\n\nRESOURCE LEADERBOARD (CPU, disk, memory cost under load, 100k rows)\n');
   console.log('model'.padEnd(22) + 'Pass'.padStart(6) + 'Score'.padStart(7) + 'RPS'.padStart(7) + 'ScaleBugs'.padStart(11));
   console.log('-'.repeat(53));
   for (const r of ranking) {
     console.log(r.model.padEnd(22) + `${r.pass.toFixed(0)}%`.padStart(6) + r.meanScore.toFixed(1).padStart(7) + String(r.meanRps).padStart(7) + String(r.scaleBugs).padStart(11));
   }
-  console.log('\nScore = server-cost percentile under load. ScaleBugs = solutions that pass toy');
+  console.log('\nScore = CPU/disk/memory server-cost percentile under load. ScaleBugs = solutions that pass toy');
   console.log('data but return WRONG results at 100k rows (e.g. PostgREST 1000-row cap).');
 }
 

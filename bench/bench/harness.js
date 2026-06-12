@@ -11,16 +11,27 @@
 'use strict';
 
 const { createBackend } = require('../mock');
-const { buildSpread, scoreTask } = require('./score');
+const { buildScoringWeights, buildSpread, scoreTask } = require('./score');
 
 async function runSolutionMetrics(task, code) {
   const be = createBackend();
   task.setup(be);
   let result, error = null;
+  const start = process.hrtime.bigint();
+  const cpuStart = process.cpuUsage();
+  const rssStart = process.memoryUsage().rss;
   try {
     result = await task.run(be, code);
   } catch (e) {
     error = e;
+  } finally {
+    const cpu = process.cpuUsage(cpuStart);
+    const rssEnd = process.memoryUsage().rss;
+    be.metrics.wallMs = Number(process.hrtime.bigint() - start) / 1e6;
+    be.metrics.cpuUserMs = cpu.user / 1000;
+    be.metrics.cpuSystemMs = cpu.system / 1000;
+    be.metrics.cpuTotalMs = (cpu.user + cpu.system) / 1000;
+    be.metrics.peakRSS = Math.max(rssStart, rssEnd);
   }
   return { metrics: be.metrics, result, error, be };
 }
@@ -33,7 +44,8 @@ async function gradeSolution(task, code) {
     const { metrics } = await runSolutionMetrics(task, src);
     spreadMetrics.push(metrics);
   }
-  const bounds = buildSpread(spreadMetrics, task.weights);
+  const weights = buildScoringWeights(task.weights, spreadMetrics);
+  const bounds = buildSpread(spreadMetrics, weights);
 
   // 2 + 3. run + verify the candidate
   const { metrics, result, error, be } = await runSolutionMetrics(task, code);
@@ -44,12 +56,12 @@ async function gradeSolution(task, code) {
 
   // 4. score
   const { score, eff, perMetric } = scoreTask({
-    correct, candidateMetrics: metrics, bounds, weights: task.weights,
+    correct, candidateMetrics: metrics, bounds, weights,
   });
 
   return {
     id: task.id, domain: task.domain, concept: task.concept,
-    correct, score, eff, perMetric, metrics, bounds,
+    correct, score, eff, perMetric, metrics, bounds, weights,
     error: error ? String(error.message || error) : null,
   };
 }

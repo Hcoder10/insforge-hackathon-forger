@@ -7,7 +7,7 @@
 //
 // capturePlan(sql) -> {
 //   nodeType, seqScans, indexScans, actualTimeMs, sharedHit, sharedRead, tempRead,
-//   actualRows, planRows, totalCost, buffers (= hit+read)
+//   diskBytes, memoryBytes, actualRows, planRows, totalCost, buffers (= hit+read)
 // }
 //
 // Why this matters: a seq scan and an index scan return identical rows in one round-trip
@@ -67,6 +67,9 @@ function summarize(root) {
     actualTimeMs: root['Actual Total Time'] || 0,
     totalCost: root['Total Cost'] || 0,
     sharedHit, sharedRead, tempRead,
+    diskBytes: sharedRead * 8192,
+    memoryBytes: (sharedHit + sharedRead) * 8192,
+    tempDiskBytes: tempRead * 8192,
     buffers: sharedHit + sharedRead,   // total 8KB blocks touched — the core I/O signal
     actualRows,
     planRows: root['Plan Rows'] || 0,
