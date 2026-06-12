@@ -56,6 +56,20 @@ Judge Mode prefers that live artifact. If it is missing, the demo shows `optimiz
 
 See [docs/FRONTIER_RUN.md](docs/FRONTIER_RUN.md) for the full runbook.
 
+Latest live GPU run:
+
+```text
+model: forge-optimizer-frontier:frontier
+score: 53.8
+baseline: codex 87.2
+tasks: 39
+strong: vector, storage
+weak: ai, auth
+```
+
+The run completed end to end and produced a checked-in artifact. It is a measured starting
+point for the next tuning pass, not the final frontier-beating checkpoint.
+
 ## Contamination Control
 
 Training data uses entity names and held-out concepts that are disjoint from the sealed benchmark tasks. `data/contamination_check.js` must pass before training.

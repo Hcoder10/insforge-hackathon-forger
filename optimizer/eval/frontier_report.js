@@ -59,6 +59,10 @@ function domainTasks(score) {
   }));
 }
 
+function repoPath(file) {
+  return path.relative(ROOT, file).split(path.sep).join('/');
+}
+
 function round(n) {
   return Number.isFinite(Number(n)) ? Math.round(Number(n) * 10) / 10 : null;
 }
@@ -86,8 +90,8 @@ function buildReport(score, baseline, opts) {
     tasks,
     resourceMeans: summarizeMetrics(score),
     source: {
-      scoreFile: path.relative(ROOT, opts.scoreFile),
-      baselineFile: baseline ? path.relative(ROOT, opts.baselineFile) : null,
+      scoreFile: repoPath(opts.scoreFile),
+      baselineFile: baseline ? repoPath(opts.baselineFile) : null,
     },
   };
 }

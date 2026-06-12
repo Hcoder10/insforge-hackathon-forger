@@ -1,0 +1,2418 @@
+{
+  "model": "forge-optimizer:frontier",
+  "meta": {
+    "runner": "forge-optimizer",
+    "adapter": "train/grpo_adapter",
+    "extracted": 39,
+    "total": 39
+  },
+  "agg": {
+    "n": 39,
+    "pass": 53.84615384615385,
+    "meanScore": 53.84615384615385,
+    "meanEff": 1,
+    "meanEffAll": 0.5384615384615384,
+    "gap": 0,
+    "domains": {
+      "db": {
+        "n": 18,
+        "pass": 50,
+        "meanScore": 50,
+        "meanEff": 1
+      },
+      "vector": {
+        "n": 6,
+        "pass": 100,
+        "meanScore": 100,
+        "meanEff": 1
+      },
+      "storage": {
+        "n": 6,
+        "pass": 100,
+        "meanScore": 100,
+        "meanEff": 1.0000000000000002
+      },
+      "ai": {
+        "n": 6,
+        "pass": 0,
+        "meanScore": 0,
+        "meanEff": 0
+      },
+      "auth": {
+        "n": 3,
+        "pass": 0,
+        "meanScore": 0,
+        "meanEff": 0
+      }
+    }
+  },
+  "records": [
+    {
+      "id": "db.pagination.test1",
+      "domain": "db",
+      "concept": "pagination",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 2,
+        "bytesRead": 463,
+        "rowsScanned": 114,
+        "rowsReturned": 10,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 476,
+        "diskOps": 4,
+        "diskBytes": 30956,
+        "memoryBytes": 15478,
+        "wallMs": 0.289871,
+        "cpuUserMs": 0.219,
+        "cpuSystemMs": 0.051,
+        "cpuTotalMs": 0.27,
+        "peakRSS": 50139136
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 2
+        },
+        "bytesRead": {
+          "lo": 461,
+          "hi": 15478
+        },
+        "rowsReturned": {
+          "lo": 10,
+          "hi": 57
+        },
+        "cpuOps": {
+          "lo": 417,
+          "hi": 599
+        },
+        "diskBytes": {
+          "lo": 15478,
+          "hi": 30956
+        }
+      },
+      "weights": {
+        "dbOps": 0.35200000000000004,
+        "bytesRead": 0.35200000000000004,
+        "rowsReturned": 0.17600000000000002,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.pagination.test2",
+      "domain": "db",
+      "concept": "pagination",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 431,
+        "rowsScanned": 61,
+        "rowsReturned": 10,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 450,
+        "diskOps": 2,
+        "diskBytes": 16383,
+        "memoryBytes": 16383,
+        "wallMs": 0.259071,
+        "cpuUserMs": 0.238,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.238,
+        "peakRSS": 50728960
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 2
+        },
+        "bytesRead": {
+          "lo": 431,
+          "hi": 16383
+        },
+        "rowsReturned": {
+          "lo": 10,
+          "hi": 61
+        },
+        "cpuOps": {
+          "lo": 450,
+          "hi": 635
+        },
+        "diskBytes": {
+          "lo": 16383,
+          "hi": 32766
+        }
+      },
+      "weights": {
+        "dbOps": 0.35200000000000004,
+        "bytesRead": 0.35200000000000004,
+        "rowsReturned": 0.17600000000000002,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": "not single"
+    },
+    {
+      "id": "db.pagination.test3",
+      "domain": "db",
+      "concept": "pagination",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 2,
+        "bytesRead": 373,
+        "rowsScanned": 96,
+        "rowsReturned": 10,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 391,
+        "diskOps": 4,
+        "diskBytes": 25196,
+        "memoryBytes": 12598,
+        "wallMs": 0.17459,
+        "cpuUserMs": 0.165,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.165,
+        "peakRSS": 51122176
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 2
+        },
+        "bytesRead": {
+          "lo": 371,
+          "hi": 12598
+        },
+        "rowsReturned": {
+          "lo": 10,
+          "hi": 48
+        },
+        "cpuOps": {
+          "lo": 341,
+          "hi": 491
+        },
+        "diskBytes": {
+          "lo": 12598,
+          "hi": 25196
+        }
+      },
+      "weights": {
+        "dbOps": 0.35200000000000004,
+        "bytesRead": 0.35200000000000004,
+        "rowsReturned": 0.17600000000000002,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.projection.test1",
+      "domain": "db",
+      "concept": "column_projection",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "bytesRead": 1,
+        "cpuOps": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 1611,
+        "rowsScanned": 44,
+        "rowsReturned": 44,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 140,
+        "diskOps": 2,
+        "diskBytes": 11546,
+        "memoryBytes": 1611,
+        "wallMs": 0.12192,
+        "cpuUserMs": 0.115,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.115,
+        "peakRSS": 51318784
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 1611,
+          "hi": 11546
+        },
+        "cpuOps": {
+          "lo": 140,
+          "hi": 450
+        },
+        "memoryBytes": {
+          "lo": 1611,
+          "hi": 11546
+        }
+      },
+      "weights": {
+        "bytesRead": 0.88,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.projection.test2",
+      "domain": "db",
+      "concept": "column_projection",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "bytesRead": 1,
+        "cpuOps": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 1389,
+        "rowsScanned": 37,
+        "rowsReturned": 37,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 119,
+        "diskOps": 2,
+        "diskBytes": 9742,
+        "memoryBytes": 1389,
+        "wallMs": 0.16855,
+        "cpuUserMs": 0.16,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.16,
+        "peakRSS": 51712000
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 1389,
+          "hi": 9742
+        },
+        "cpuOps": {
+          "lo": 119,
+          "hi": 380
+        },
+        "memoryBytes": {
+          "lo": 1389,
+          "hi": 9742
+        }
+      },
+      "weights": {
+        "bytesRead": 0.88,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.projection.test3",
+      "domain": "db",
+      "concept": "column_projection",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "bytesRead": 1,
+        "cpuOps": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 1833,
+        "rowsScanned": 50,
+        "rowsReturned": 50,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 159,
+        "diskOps": 2,
+        "diskBytes": 13124,
+        "memoryBytes": 1833,
+        "wallMs": 0.223571,
+        "cpuUserMs": 0.159,
+        "cpuSystemMs": 0.034,
+        "cpuTotalMs": 0.193,
+        "peakRSS": 52105216
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 1833,
+          "hi": 13124
+        },
+        "cpuOps": {
+          "lo": 159,
+          "hi": 512
+        },
+        "memoryBytes": {
+          "lo": 1833,
+          "hi": 13124
+        }
+      },
+      "weights": {
+        "bytesRead": 0.88,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.filter_pushdown.test1",
+      "domain": "db",
+      "concept": "filter_pushdown",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 589,
+        "rowsScanned": 56,
+        "rowsReturned": 28,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 104,
+        "diskOps": 2,
+        "diskBytes": 14870,
+        "memoryBytes": 589,
+        "wallMs": 0.12791,
+        "cpuUserMs": 0.12,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.12,
+        "peakRSS": 52498432
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 589,
+          "hi": 14870
+        },
+        "rowsReturned": {
+          "lo": 28,
+          "hi": 56
+        },
+        "cpuOps": {
+          "lo": 104,
+          "hi": 578
+        },
+        "memoryBytes": {
+          "lo": 589,
+          "hi": 14870
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": "not single"
+    },
+    {
+      "id": "db.filter_pushdown.test2",
+      "domain": "db",
+      "concept": "filter_pushdown",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 705,
+        "rowsScanned": 64,
+        "rowsReturned": 32,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 120,
+        "diskOps": 3,
+        "diskBytes": 17062,
+        "memoryBytes": 705,
+        "wallMs": 0.245791,
+        "cpuUserMs": 0.232,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.232,
+        "peakRSS": 52498432
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 705,
+          "hi": 17062
+        },
+        "rowsReturned": {
+          "lo": 32,
+          "hi": 64
+        },
+        "cpuOps": {
+          "lo": 120,
+          "hi": 663
+        },
+        "memoryBytes": {
+          "lo": 705,
+          "hi": 17062
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": "not single"
+    },
+    {
+      "id": "db.filter_pushdown.test3",
+      "domain": "db",
+      "concept": "filter_pushdown",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 547,
+        "rowsScanned": 52,
+        "rowsReturned": 26,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 97,
+        "diskOps": 2,
+        "diskBytes": 13806,
+        "memoryBytes": 547,
+        "wallMs": 0.177721,
+        "cpuUserMs": 0.161,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.161,
+        "peakRSS": 52498432
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 547,
+          "hi": 13806
+        },
+        "rowsReturned": {
+          "lo": 26,
+          "hi": 52
+        },
+        "cpuOps": {
+          "lo": 97,
+          "hi": 537
+        },
+        "memoryBytes": {
+          "lo": 547,
+          "hi": 13806
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": "not single"
+    },
+    {
+      "id": "db.count_only.test1",
+      "domain": "db",
+      "concept": "count_only",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 2,
+        "rowsScanned": 66,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 68,
+        "diskOps": 3,
+        "diskBytes": 17266,
+        "memoryBytes": 2,
+        "wallMs": 0.584311,
+        "cpuUserMs": 0.747,
+        "cpuSystemMs": 0.006,
+        "cpuTotalMs": 0.753,
+        "peakRSS": 52891648
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 2,
+          "hi": 17266
+        },
+        "rowsReturned": {
+          "lo": 0,
+          "hi": 66
+        },
+        "cpuOps": {
+          "lo": 68,
+          "hi": 673
+        },
+        "memoryBytes": {
+          "lo": 12,
+          "hi": 17266
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.count_only.test2",
+      "domain": "db",
+      "concept": "count_only",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 2,
+        "rowsScanned": 74,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 76,
+        "diskOps": 3,
+        "diskBytes": 19510,
+        "memoryBytes": 2,
+        "wallMs": 0.17796,
+        "cpuUserMs": 0.161,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.161,
+        "peakRSS": 52891648
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 2,
+          "hi": 19510
+        },
+        "rowsReturned": {
+          "lo": 0,
+          "hi": 74
+        },
+        "cpuOps": {
+          "lo": 76,
+          "hi": 759
+        },
+        "memoryBytes": {
+          "lo": 12,
+          "hi": 19510
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.count_only.test3",
+      "domain": "db",
+      "concept": "count_only",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 2,
+        "rowsScanned": 58,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 60,
+        "diskOps": 2,
+        "diskBytes": 15286,
+        "memoryBytes": 12,
+        "wallMs": 0.06494,
+        "cpuUserMs": 0.061,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.061,
+        "peakRSS": 52891648
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 2,
+          "hi": 15286
+        },
+        "rowsReturned": {
+          "lo": 0,
+          "hi": 58
+        },
+        "cpuOps": {
+          "lo": 60,
+          "hi": 595
+        },
+        "memoryBytes": {
+          "lo": 12,
+          "hi": 15286
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.top_n.test1",
+      "domain": "db",
+      "concept": "top_n",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "bytesRead": 1,
+        "rowsReturned": 1,
+        "cpuOps": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 121,
+        "rowsScanned": 49,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 336,
+        "diskOps": 2,
+        "diskBytes": 13155,
+        "memoryBytes": 13155,
+        "wallMs": 0.09515,
+        "cpuUserMs": 0.09,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.09,
+        "peakRSS": 52891648
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 121,
+          "hi": 13155
+        },
+        "rowsReturned": {
+          "lo": 5,
+          "hi": 49
+        },
+        "cpuOps": {
+          "lo": 336,
+          "hi": 511
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.12
+      },
+      "error": null
+    },
+    {
+      "id": "db.top_n.test2",
+      "domain": "db",
+      "concept": "top_n",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "bytesRead": 1,
+        "rowsReturned": 1,
+        "cpuOps": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 106,
+        "rowsScanned": 41,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 273,
+        "diskOps": 2,
+        "diskBytes": 10880,
+        "memoryBytes": 10880,
+        "wallMs": 0.281921,
+        "cpuUserMs": 0.273,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.273,
+        "peakRSS": 53284864
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 106,
+          "hi": 10880
+        },
+        "rowsReturned": {
+          "lo": 5,
+          "hi": 41
+        },
+        "cpuOps": {
+          "lo": 273,
+          "hi": 423
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.12
+      },
+      "error": null
+    },
+    {
+      "id": "db.top_n.test3",
+      "domain": "db",
+      "concept": "top_n",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "bytesRead": 1,
+        "rowsReturned": 1,
+        "cpuOps": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 101,
+        "rowsScanned": 55,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 385,
+        "diskOps": 2,
+        "diskBytes": 14549,
+        "memoryBytes": 14549,
+        "wallMs": 0.097871,
+        "cpuUserMs": 0.093,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.093,
+        "peakRSS": 53284864
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 101,
+          "hi": 14549
+        },
+        "rowsReturned": {
+          "lo": 5,
+          "hi": 55
+        },
+        "cpuOps": {
+          "lo": 385,
+          "hi": 566
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.12
+      },
+      "error": null
+    },
+    {
+      "id": "db.in_list.test1",
+      "domain": "db",
+      "concept": "in_list",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "bytesRead": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 180,
+        "rowsScanned": 44,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 56,
+        "diskOps": 2,
+        "diskBytes": 11546,
+        "memoryBytes": 180,
+        "wallMs": 0.08254,
+        "cpuUserMs": 0.065,
+        "cpuSystemMs": 0.012,
+        "cpuTotalMs": 0.077,
+        "peakRSS": 53284864
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 5
+        },
+        "bytesRead": {
+          "lo": 180,
+          "hi": 184
+        },
+        "cpuOps": {
+          "lo": 56,
+          "hi": 240
+        },
+        "diskBytes": {
+          "lo": 11546,
+          "hi": 57730
+        }
+      },
+      "weights": {
+        "dbOps": 0.616,
+        "bytesRead": 0.264,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.in_list.test2",
+      "domain": "db",
+      "concept": "in_list",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "bytesRead": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 175,
+        "rowsScanned": 38,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 50,
+        "diskOps": 2,
+        "diskBytes": 9930,
+        "memoryBytes": 175,
+        "wallMs": 0.16526,
+        "cpuUserMs": 0.156,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.156,
+        "peakRSS": 53284864
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 5
+        },
+        "bytesRead": {
+          "lo": 175,
+          "hi": 179
+        },
+        "cpuOps": {
+          "lo": 50,
+          "hi": 210
+        },
+        "diskBytes": {
+          "lo": 9930,
+          "hi": 49650
+        }
+      },
+      "weights": {
+        "dbOps": 0.616,
+        "bytesRead": 0.264,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "db.in_list.test3",
+      "domain": "db",
+      "concept": "in_list",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "bytesRead": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 180,
+        "rowsScanned": 50,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 62,
+        "diskOps": 2,
+        "diskBytes": 13124,
+        "memoryBytes": 180,
+        "wallMs": 0.08792,
+        "cpuUserMs": 0.083,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.083,
+        "peakRSS": 53284864
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 5
+        },
+        "bytesRead": {
+          "lo": 180,
+          "hi": 184
+        },
+        "cpuOps": {
+          "lo": 62,
+          "hi": 270
+        },
+        "diskBytes": {
+          "lo": 13124,
+          "hi": 65620
+        }
+      },
+      "weights": {
+        "dbOps": 0.616,
+        "bytesRead": 0.264,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "vector.similarity.test1",
+      "domain": "vector",
+      "concept": "similarity_search",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "bytesRead": 1,
+        "rowsReturned": 1,
+        "cpuOps": 1,
+        "diskBytes": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 201,
+        "rowsScanned": 0,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 4,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 201,
+        "wallMs": 0.326371,
+        "cpuUserMs": 0.309,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.309,
+        "peakRSS": 54857728
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 2
+        },
+        "bytesRead": {
+          "lo": 201,
+          "hi": 35017
+        },
+        "rowsReturned": {
+          "lo": 5,
+          "hi": 185
+        },
+        "cpuOps": {
+          "lo": 4,
+          "hi": 1456
+        },
+        "diskBytes": {
+          "lo": 0,
+          "hi": 35017
+        },
+        "memoryBytes": {
+          "lo": 201,
+          "hi": 35017
+        }
+      },
+      "weights": {
+        "dbOps": 0.264,
+        "bytesRead": 0.44,
+        "rowsReturned": 0.17600000000000002,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": null
+    },
+    {
+      "id": "vector.similarity.test2",
+      "domain": "vector",
+      "concept": "similarity_search",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "bytesRead": 1,
+        "rowsReturned": 1,
+        "cpuOps": 1,
+        "diskBytes": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 211,
+        "rowsScanned": 0,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 4,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 211,
+        "wallMs": 0.29363,
+        "cpuUserMs": 0.276,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.276,
+        "peakRSS": 55840768
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 2
+        },
+        "bytesRead": {
+          "lo": 211,
+          "hi": 43785
+        },
+        "rowsReturned": {
+          "lo": 5,
+          "hi": 225
+        },
+        "cpuOps": {
+          "lo": 4,
+          "hi": 1810
+        },
+        "diskBytes": {
+          "lo": 0,
+          "hi": 43785
+        },
+        "memoryBytes": {
+          "lo": 211,
+          "hi": 43785
+        }
+      },
+      "weights": {
+        "dbOps": 0.264,
+        "bytesRead": 0.44,
+        "rowsReturned": 0.17600000000000002,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": null
+    },
+    {
+      "id": "vector.similarity.test3",
+      "domain": "vector",
+      "concept": "similarity_search",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "bytesRead": 1,
+        "rowsReturned": 1,
+        "cpuOps": 1,
+        "diskBytes": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 211,
+        "rowsScanned": 0,
+        "rowsReturned": 5,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 4,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 211,
+        "wallMs": 0.16626,
+        "cpuUserMs": 0.158,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.158,
+        "peakRSS": 60559360
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 2
+        },
+        "bytesRead": {
+          "lo": 211,
+          "hi": 17769
+        },
+        "rowsReturned": {
+          "lo": 5,
+          "hi": 165
+        },
+        "cpuOps": {
+          "lo": 4,
+          "hi": 877
+        },
+        "diskBytes": {
+          "lo": 0,
+          "hi": 17769
+        },
+        "memoryBytes": {
+          "lo": 211,
+          "hi": 17769
+        }
+      },
+      "weights": {
+        "dbOps": 0.264,
+        "bytesRead": 0.44,
+        "rowsReturned": 0.17600000000000002,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": null
+    },
+    {
+      "id": "vector.embed_insert.test1",
+      "domain": "vector",
+      "concept": "embed_insert",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 24,
+        "bytesWritten": 4094,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 56,
+        "diskOps": 1,
+        "diskBytes": 4094,
+        "memoryBytes": 4094,
+        "wallMs": 0.23532,
+        "cpuUserMs": 0.217,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.217,
+        "peakRSS": 60755968
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 24
+        },
+        "cpuOps": {
+          "lo": 112,
+          "hi": 128
+        },
+        "diskBytes": {
+          "lo": 4094,
+          "hi": 4117
+        }
+      },
+      "weights": {
+        "dbOps": 0.88,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "vector.embed_insert.test2",
+      "domain": "vector",
+      "concept": "embed_insert",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 36,
+        "bytesWritten": 7002,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 91,
+        "diskOps": 1,
+        "diskBytes": 7002,
+        "memoryBytes": 7002,
+        "wallMs": 0.11889,
+        "cpuUserMs": 0.112,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.112,
+        "peakRSS": 60952576
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 36
+        },
+        "cpuOps": {
+          "lo": 182,
+          "hi": 208
+        },
+        "diskBytes": {
+          "lo": 7002,
+          "hi": 7037
+        }
+      },
+      "weights": {
+        "dbOps": 0.88,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "vector.embed_insert.test3",
+      "domain": "vector",
+      "concept": "embed_insert",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "dbOps": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 28,
+        "bytesWritten": 5322,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 70,
+        "diskOps": 1,
+        "diskBytes": 5322,
+        "memoryBytes": 5322,
+        "wallMs": 0.18441,
+        "cpuUserMs": 0.167,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.167,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "dbOps": {
+          "lo": 1,
+          "hi": 28
+        },
+        "cpuOps": {
+          "lo": 140,
+          "hi": 160
+        },
+        "diskBytes": {
+          "lo": 5322,
+          "hi": 5349
+        }
+      },
+      "weights": {
+        "dbOps": 0.88,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "storage.batch_remove.test1",
+      "domain": "storage",
+      "concept": "batch_remove",
+      "correct": true,
+      "score": 100.00000000000001,
+      "eff": 1.0000000000000002,
+      "perMetric": {
+        "storageOps": 1,
+        "storageBytes": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 1,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 31,
+        "diskOps": 1,
+        "diskBytes": 412,
+        "memoryBytes": 412,
+        "wallMs": 0.189641,
+        "cpuUserMs": 0.161,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.161,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "storageOps": {
+          "lo": 1,
+          "hi": 31
+        },
+        "storageBytes": {
+          "lo": 0,
+          "hi": 30720
+        },
+        "cpuOps": {
+          "lo": 31,
+          "hi": 91
+        },
+        "diskBytes": {
+          "lo": 412,
+          "hi": 31132
+        }
+      },
+      "weights": {
+        "storageOps": 0.7040000000000001,
+        "storageBytes": 0.17600000000000002,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "storage.batch_remove.test2",
+      "domain": "storage",
+      "concept": "batch_remove",
+      "correct": true,
+      "score": 100.00000000000001,
+      "eff": 1.0000000000000002,
+      "perMetric": {
+        "storageOps": 1,
+        "storageBytes": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 1,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 21,
+        "diskOps": 1,
+        "diskBytes": 272,
+        "memoryBytes": 272,
+        "wallMs": 0.0728,
+        "cpuUserMs": 0.066,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.066,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "storageOps": {
+          "lo": 1,
+          "hi": 21
+        },
+        "storageBytes": {
+          "lo": 0,
+          "hi": 20480
+        },
+        "cpuOps": {
+          "lo": 21,
+          "hi": 61
+        },
+        "diskBytes": {
+          "lo": 272,
+          "hi": 20752
+        }
+      },
+      "weights": {
+        "storageOps": 0.7040000000000001,
+        "storageBytes": 0.17600000000000002,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "storage.batch_remove.test3",
+      "domain": "storage",
+      "concept": "batch_remove",
+      "correct": true,
+      "score": 100.00000000000001,
+      "eff": 1.0000000000000002,
+      "perMetric": {
+        "storageOps": 1,
+        "storageBytes": 1,
+        "cpuOps": 1,
+        "diskBytes": 1
+      },
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 1,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 29,
+        "diskOps": 1,
+        "diskBytes": 384,
+        "memoryBytes": 384,
+        "wallMs": 0.0682,
+        "cpuUserMs": 0.063,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.063,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "storageOps": {
+          "lo": 1,
+          "hi": 29
+        },
+        "storageBytes": {
+          "lo": 0,
+          "hi": 28672
+        },
+        "cpuOps": {
+          "lo": 29,
+          "hi": 85
+        },
+        "diskBytes": {
+          "lo": 384,
+          "hi": 29056
+        }
+      },
+      "weights": {
+        "storageOps": 0.7040000000000001,
+        "storageBytes": 0.17600000000000002,
+        "cpuOps": 0.06857142857142857,
+        "diskBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "storage.list_meta.test1",
+      "domain": "storage",
+      "concept": "list_meta",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "storageBytes": 1,
+        "storageOps": 1,
+        "cpuOps": 1,
+        "diskBytes": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 1288,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 1,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 19,
+        "diskOps": 1,
+        "diskBytes": 1288,
+        "memoryBytes": 1288,
+        "wallMs": 0.08441,
+        "cpuUserMs": 0.077,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.077,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "storageBytes": {
+          "lo": 0,
+          "hi": 147456
+        },
+        "storageOps": {
+          "lo": 1,
+          "hi": 19
+        },
+        "cpuOps": {
+          "lo": 19,
+          "hi": 73
+        },
+        "diskBytes": {
+          "lo": 1288,
+          "hi": 148744
+        },
+        "memoryBytes": {
+          "lo": 1288,
+          "hi": 8192
+        }
+      },
+      "weights": {
+        "storageBytes": 0.616,
+        "storageOps": 0.264,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": null
+    },
+    {
+      "id": "storage.list_meta.test2",
+      "domain": "storage",
+      "concept": "list_meta",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "storageBytes": 1,
+        "storageOps": 1,
+        "cpuOps": 1,
+        "diskBytes": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 856,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 1,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 13,
+        "diskOps": 1,
+        "diskBytes": 856,
+        "memoryBytes": 856,
+        "wallMs": 0.079841,
+        "cpuUserMs": 0.073,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.073,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "storageBytes": {
+          "lo": 0,
+          "hi": 24576
+        },
+        "storageOps": {
+          "lo": 1,
+          "hi": 13
+        },
+        "cpuOps": {
+          "lo": 13,
+          "hi": 37
+        },
+        "diskBytes": {
+          "lo": 856,
+          "hi": 25432
+        },
+        "memoryBytes": {
+          "lo": 856,
+          "hi": 2048
+        }
+      },
+      "weights": {
+        "storageBytes": 0.616,
+        "storageOps": 0.264,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": null
+    },
+    {
+      "id": "storage.list_meta.test3",
+      "domain": "storage",
+      "concept": "list_meta",
+      "correct": true,
+      "score": 100,
+      "eff": 1,
+      "perMetric": {
+        "storageBytes": 1,
+        "storageOps": 1,
+        "cpuOps": 1,
+        "diskBytes": 1,
+        "memoryBytes": 1
+      },
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 1452,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 1,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 21,
+        "diskOps": 1,
+        "diskBytes": 1452,
+        "memoryBytes": 1452,
+        "wallMs": 0.18375,
+        "cpuUserMs": 0.163,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.163,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "storageBytes": {
+          "lo": 0,
+          "hi": 327680
+        },
+        "storageOps": {
+          "lo": 1,
+          "hi": 21
+        },
+        "cpuOps": {
+          "lo": 21,
+          "hi": 121
+        },
+        "diskBytes": {
+          "lo": 1452,
+          "hi": 329132
+        },
+        "memoryBytes": {
+          "lo": 1452,
+          "hi": 16384
+        }
+      },
+      "weights": {
+        "storageBytes": 0.616,
+        "storageOps": 0.264,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": null
+    },
+    {
+      "id": "ai.batch_embed.test1",
+      "domain": "ai",
+      "concept": "batch_embed",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 1,
+        "aiTokens": 136,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 1088,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 1162,
+        "wallMs": 0.06162,
+        "cpuUserMs": 0.056,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.056,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "aiCalls": {
+          "lo": 1,
+          "hi": 24
+        },
+        "aiTokens": {
+          "lo": 136,
+          "hi": 504
+        },
+        "cpuOps": {
+          "lo": 1088,
+          "hi": 4032
+        }
+      },
+      "weights": {
+        "aiCalls": 0.616,
+        "aiTokens": 0.264,
+        "cpuOps": 0.12
+      },
+      "error": null
+    },
+    {
+      "id": "ai.batch_embed.test2",
+      "domain": "ai",
+      "concept": "batch_embed",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 1,
+        "aiTokens": 96,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 768,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 778,
+        "wallMs": 0.06355,
+        "cpuUserMs": 0.058,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.058,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "aiCalls": {
+          "lo": 1,
+          "hi": 16
+        },
+        "aiTokens": {
+          "lo": 96,
+          "hi": 336
+        },
+        "cpuOps": {
+          "lo": 768,
+          "hi": 2688
+        }
+      },
+      "weights": {
+        "aiCalls": 0.616,
+        "aiTokens": 0.264,
+        "cpuOps": 0.12
+      },
+      "error": null
+    },
+    {
+      "id": "ai.batch_embed.test3",
+      "domain": "ai",
+      "concept": "batch_embed",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 1,
+        "aiTokens": 166,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 1328,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 1450,
+        "wallMs": 0.02582,
+        "cpuUserMs": 0.022,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.022,
+        "peakRSS": 61739008
+      },
+      "bounds": {
+        "aiCalls": {
+          "lo": 1,
+          "hi": 30
+        },
+        "aiTokens": {
+          "lo": 166,
+          "hi": 630
+        },
+        "cpuOps": {
+          "lo": 1328,
+          "hi": 5040
+        }
+      },
+      "weights": {
+        "aiCalls": 0.616,
+        "aiTokens": 0.264,
+        "cpuOps": 0.12
+      },
+      "error": null
+    },
+    {
+      "id": "ai.no_base64_in_db.test1",
+      "domain": "ai",
+      "concept": "no_base64_in_db",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 0,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 0,
+        "diskOps": 0,
+        "diskBytes": 0,
+        "memoryBytes": 0,
+        "wallMs": 0.26767,
+        "cpuUserMs": 0.25,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.25,
+        "peakRSS": 61935616
+      },
+      "bounds": {
+        "bytesWritten": {
+          "lo": 46,
+          "hi": 308
+        },
+        "cpuOps": {
+          "lo": 86,
+          "hi": 88
+        },
+        "diskBytes": {
+          "lo": 46,
+          "hi": 308
+        },
+        "memoryBytes": {
+          "lo": 42,
+          "hi": 308
+        }
+      },
+      "weights": {
+        "bytesWritten": 0.88,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": "Unexpected token ')'"
+    },
+    {
+      "id": "ai.no_base64_in_db.test2",
+      "domain": "ai",
+      "concept": "no_base64_in_db",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 1,
+        "bytesWritten": 68,
+        "storageOps": 1,
+        "storageBytes": 1,
+        "aiCalls": 1,
+        "aiTokens": 5,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 84,
+        "diskOps": 2,
+        "diskBytes": 68,
+        "memoryBytes": 67,
+        "wallMs": 0.19811,
+        "cpuUserMs": 0.188,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.188,
+        "peakRSS": 62132224
+      },
+      "bounds": {
+        "bytesWritten": {
+          "lo": 48,
+          "hi": 310
+        },
+        "cpuOps": {
+          "lo": 86,
+          "hi": 88
+        },
+        "diskBytes": {
+          "lo": 48,
+          "hi": 310
+        },
+        "memoryBytes": {
+          "lo": 44,
+          "hi": 310
+        }
+      },
+      "weights": {
+        "bytesWritten": 0.88,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": "No row inserted"
+    },
+    {
+      "id": "ai.no_base64_in_db.test3",
+      "domain": "ai",
+      "concept": "no_base64_in_db",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 1,
+        "bytesRead": 0,
+        "rowsScanned": 0,
+        "rowsReturned": 0,
+        "writes": 1,
+        "bytesWritten": 62,
+        "storageOps": 1,
+        "storageBytes": 1,
+        "aiCalls": 1,
+        "aiTokens": 5,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 0,
+        "cpuOps": 84,
+        "diskOps": 2,
+        "diskBytes": 62,
+        "memoryBytes": 61,
+        "wallMs": 0.25541,
+        "cpuUserMs": 0.238,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.238,
+        "peakRSS": 62132224
+      },
+      "bounds": {
+        "bytesWritten": {
+          "lo": 45,
+          "hi": 307
+        },
+        "cpuOps": {
+          "lo": 86,
+          "hi": 88
+        },
+        "diskBytes": {
+          "lo": 45,
+          "hi": 307
+        },
+        "memoryBytes": {
+          "lo": 41,
+          "hi": 307
+        }
+      },
+      "weights": {
+        "bytesWritten": 0.88,
+        "cpuOps": 0.048,
+        "diskBytes": 0.036,
+        "memoryBytes": 0.036
+      },
+      "error": "Cannot read properties of null (reading '0')"
+    },
+    {
+      "id": "auth.owner_scope.test1",
+      "domain": "auth",
+      "concept": "owner_scope",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 2,
+        "bytesRead": 2,
+        "rowsScanned": 56,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 1,
+        "cpuOps": 59,
+        "diskOps": 3,
+        "diskBytes": 8389,
+        "memoryBytes": 44,
+        "wallMs": 0.09098,
+        "cpuUserMs": 0.085,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.085,
+        "peakRSS": 62132224
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 172,
+          "hi": 8326
+        },
+        "rowsReturned": {
+          "lo": 10,
+          "hi": 56
+        },
+        "cpuOps": {
+          "lo": 74,
+          "hi": 375
+        },
+        "memoryBytes": {
+          "lo": 172,
+          "hi": 8326
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "auth.owner_scope.test2",
+      "domain": "auth",
+      "concept": "owner_scope",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 2,
+        "bytesRead": 2,
+        "rowsScanned": 64,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 1,
+        "cpuOps": 67,
+        "diskOps": 3,
+        "diskBytes": 9831,
+        "memoryBytes": 44,
+        "wallMs": 0.09721,
+        "cpuUserMs": 0.091,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.091,
+        "peakRSS": 62132224
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 344,
+          "hi": 9768
+        },
+        "rowsReturned": {
+          "lo": 16,
+          "hi": 64
+        },
+        "cpuOps": {
+          "lo": 93,
+          "hi": 436
+        },
+        "memoryBytes": {
+          "lo": 344,
+          "hi": 9768
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    },
+    {
+      "id": "auth.owner_scope.test3",
+      "domain": "auth",
+      "concept": "owner_scope",
+      "correct": false,
+      "score": 0,
+      "eff": 0,
+      "perMetric": {},
+      "metrics": {
+        "dbOps": 2,
+        "bytesRead": 2,
+        "rowsScanned": 50,
+        "rowsReturned": 0,
+        "writes": 0,
+        "bytesWritten": 0,
+        "storageOps": 0,
+        "storageBytes": 0,
+        "aiCalls": 0,
+        "aiTokens": 0,
+        "realtimeMsgs": 0,
+        "fnInvocations": 0,
+        "authOps": 1,
+        "cpuOps": 53,
+        "diskOps": 2,
+        "diskBytes": 7546,
+        "memoryBytes": 44,
+        "wallMs": 0.07831,
+        "cpuUserMs": 0.072,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 0.072,
+        "peakRSS": 62132224
+      },
+      "bounds": {
+        "bytesRead": {
+          "lo": 145,
+          "hi": 7483
+        },
+        "rowsReturned": {
+          "lo": 8,
+          "hi": 50
+        },
+        "cpuOps": {
+          "lo": 65,
+          "hi": 336
+        },
+        "memoryBytes": {
+          "lo": 145,
+          "hi": 7483
+        }
+      },
+      "weights": {
+        "bytesRead": 0.528,
+        "rowsReturned": 0.35200000000000004,
+        "cpuOps": 0.06857142857142857,
+        "memoryBytes": 0.05142857142857143
+      },
+      "error": null
+    }
+  ]
+}

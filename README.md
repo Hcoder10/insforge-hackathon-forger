@@ -100,6 +100,17 @@ The live run writes `optimizer/results/frontier_run.json`. Judge Mode uses that 
 exists, otherwise it shows the clearly marked recorded demo target. See
 [optimizer/docs/FRONTIER_RUN.md](optimizer/docs/FRONTIER_RUN.md).
 
+Latest live GPU run:
+
+- Model: `forge-optimizer-frontier:frontier`
+- Score: `53.8` on 39 sealed benchmark tasks
+- Baseline shown in Judge Mode: `codex` at `87.2`
+- Strong domains: vector and storage
+- Weak domains: AI and auth
+
+This result is checked in as a measured artifact. It gives the judges a real training run and
+sets the next tuning target instead of relying on the recorded demo target.
+
 ## Run The Benchmark
 
 ```bash

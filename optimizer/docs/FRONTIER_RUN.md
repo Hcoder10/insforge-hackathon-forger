@@ -34,6 +34,32 @@ optimizer/results/frontier_run.recorded.json
 
 The recorded file is a demo target, not a replacement for the GPU result.
 
+## Latest Live Result
+
+The June 12, 2026 GPU run completed SFT, GRPO, sealed evaluation, and artifact validation.
+
+```text
+model: forge-optimizer-frontier:frontier
+score: 53.8
+baseline: codex 87.2
+tasks: 39
+status: live-run
+```
+
+Domain scores:
+
+```text
+db: 50.0
+vector: 100.0
+storage: 100.0
+ai: 0.0
+auth: 0.0
+```
+
+The result is useful evidence because it is a full live GPU run with CPU, disk, memory, wall
+time, CPU time, and peak RSS metrics. It is not yet the frontier-beating result. The next
+tuning pass should focus on AI and auth tasks, then recover DB pagination and projection.
+
 ## Manual Report Generation
 
 If you already have a score file:
@@ -52,9 +78,9 @@ Validate the artifact:
 node tools/forger.js frontier-validate --file optimizer/results/frontier_run.json
 ```
 
-## Acceptance Bar
+## Next Acceptance Bar
 
-For the judge demo, the live optimizer artifact should show:
+For the next judge demo pass, the live optimizer artifact should show:
 
 - Higher mean score than the current best frontier baseline in `bench/results/leaderboard.json`.
 - No drop in pass rate on sealed tasks.

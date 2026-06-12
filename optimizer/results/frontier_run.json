@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "model": "forge-optimizer-frontier:frontier",
+  "generatedAt": "2026-06-12T20:30:52.105Z",
+  "status": "live-run",
+  "recorded": false,
+  "score": 53.8,
+  "passRate": 53.8,
+  "baselineModel": "codex",
+  "baselineScore": 87.2,
+  "delta": -33.4,
+  "taskCount": 39,
+  "tasks": [
+    {
+      "name": "db",
+      "before": null,
+      "after": 50,
+      "passRate": 50
+    },
+    {
+      "name": "vector",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    },
+    {
+      "name": "storage",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    },
+    {
+      "name": "ai",
+      "before": null,
+      "after": 0,
+      "passRate": 0
+    },
+    {
+      "name": "auth",
+      "before": null,
+      "after": 0,
+      "passRate": 0
+    }
+  ],
+  "resourceMeans": {
+    "avgCpuOps": 187.5897435897436,
+    "avgDiskBytes": 8331,
+    "avgMemoryBytes": 2964.6923076923076,
+    "avgWallMs": 0.16843771794871795,
+    "avgCpuTotalMs": 0.1616153846153846,
+    "avgPeakRSS": 57065787.07692308
+  },
+  "source": {
+    "scoreFile": "bench/results/score_fo-frontier.json",
+    "baselineFile": "bench/results/score_codex.json"
+  }
+}
