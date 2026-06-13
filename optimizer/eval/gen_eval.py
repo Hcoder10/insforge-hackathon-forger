@@ -60,11 +60,15 @@ def main():
     tag = sys.argv[1] if len(sys.argv) > 1 else "base"
     adapter = sys.argv[2] if len(sys.argv) > 2 else None
 
+    load_path = adapter if adapter and os.path.isdir(adapter) else MODEL
     model, tok = FastLanguageModel.from_pretrained(
-        model_name=MODEL, max_seq_length=MAXLEN,
+        model_name=load_path, max_seq_length=MAXLEN,
         dtype=torch.bfloat16, load_in_4bit=False, full_finetuning=False)
-    if adapter:
-        model.load_adapter(adapter); print(f"[eval] loaded adapter {adapter}")
+    if adapter and load_path == MODEL:
+        model.load_adapter(adapter)
+        print(f"[eval] loaded adapter {adapter}")
+    elif adapter:
+        print(f"[eval] loaded adapter checkpoint {adapter}")
     FastLanguageModel.for_inference(model)
 
     tasks = test_prompts()
