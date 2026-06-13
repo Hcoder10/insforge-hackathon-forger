@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "model": "forge-optimizer-frontier:frontier-plus-distill-repair-verified",
+  "generatedAt": "2026-06-13T13:38:40.674Z",
+  "status": "live-run-repair",
+  "recorded": false,
+  "score": 100,
+  "passRate": 100,
+  "baselineModel": "codex",
+  "baselineScore": 87.2,
+  "delta": 12.8,
+  "taskCount": 39,
+  "tasks": [
+    {
+      "name": "db",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    },
+    {
+      "name": "vector",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    },
+    {
+      "name": "storage",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    },
+    {
+      "name": "ai",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    },
+    {
+      "name": "auth",
+      "before": null,
+      "after": 100,
+      "passRate": 100
+    }
+  ],
+  "resourceMeans": {
+    "avgCpuOps": 194.02564102564102,
+    "avgDiskBytes": 7611.333333333333,
+    "avgMemoryBytes": 2978.74358974359,
+    "avgWallMs": 0.18714556410256414,
+    "avgCpuTotalMs": 0.1903589743589744,
+    "avgPeakRSS": 56823808
+  },
+  "source": {
+    "scoreFile": "bench/results/score_fo-frontier-plus-distill.json",
+    "baselineFile": "bench/results/score_codex.json"
+  }
+}
