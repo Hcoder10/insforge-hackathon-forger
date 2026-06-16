@@ -1,0 +1,106 @@
+name: branch-promotion
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: Branch experiment scenario
+        type: choice
+        required: true
+        default: slow-query-index
+        options:
+          - slow-query-index
+          - pagination-scale
+          - storage-metadata
+      branch_name:
+        description: InsForge branch name
+        type: string
+        required: true
+        default: forger-promotion
+      mode:
+        description: InsForge branch mode
+        type: choice
+        required: true
+        default: schema-only
+        options:
+          - schema-only
+          - full
+      merge_after_review:
+        description: Apply branch merge after dry-run review
+        type: boolean
+        required: true
+        default: false
+      keep_branch:
+        description: Keep the branch after review
+        type: boolean
+        required: true
+        default: true
+
+jobs:
+  live-branch-promotion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Install benchmark dependencies
+        run: npm --prefix bench ci
+
+      - name: Authenticate InsForge
+        env:
+          INSFORGE_EMAIL: ${{ secrets.INSFORGE_EMAIL }}
+          INSFORGE_PASSWORD: ${{ secrets.INSFORGE_PASSWORD }}
+          INSFORGE_PROJECT_ID: ${{ secrets.INSFORGE_PROJECT_ID }}
+          INSFORGE_ORG_ID: ${{ secrets.INSFORGE_ORG_ID }}
+        run: |
+          test -n "$INSFORGE_EMAIL"
+          test -n "$INSFORGE_PASSWORD"
+          test -n "$INSFORGE_PROJECT_ID"
+          npx @insforge/cli login --email -y
+          if [ -n "$INSFORGE_ORG_ID" ]; then
+            npx @insforge/cli link --project-id "$INSFORGE_PROJECT_ID" --org-id "$INSFORGE_ORG_ID" -y
+          else
+            npx @insforge/cli link --project-id "$INSFORGE_PROJECT_ID" -y
+          fi
+          npx @insforge/cli current
+
+      - name: Run live branch experiment
+        run: |
+          KEEP=""
+          if [ "${{ inputs.keep_branch }}" = "true" ] || [ "${{ inputs.merge_after_review }}" = "true" ]; then
+            KEEP="--keep-branch"
+          fi
+          node tools/forger.js branch-review \
+            --scenario "${{ inputs.scenario }}" \
+            --live \
+            --branch "${{ inputs.branch_name }}" \
+            --mode "${{ inputs.mode }}" \
+            --record "bench/results/live-branch-promotion/${{ inputs.scenario }}" \
+            $KEEP
+
+      - name: Dry-run merge preview
+        if: ${{ inputs.keep_branch == true || inputs.merge_after_review == true }}
+        run: |
+          mkdir -p bench/results/live-branch-promotion/${{ inputs.scenario }}
+          npx @insforge/cli branch merge "${{ inputs.branch_name }}" \
+            --dry-run \
+            --save-sql "bench/results/live-branch-promotion/${{ inputs.scenario }}/merge-preview.sql"
+
+      - name: Apply merge
+        if: ${{ inputs.merge_after_review == true }}
+        run: npx @insforge/cli branch merge "${{ inputs.branch_name }}" -y
+
+      - name: Post-merge reminder
+        if: ${{ inputs.merge_after_review == true }}
+        run: |
+          echo "Branch merge applied. Redeploy any touched runtimes:"
+          echo "npx @insforge/cli functions deploy <slug> --file <file>"
+          echo "npx @insforge/cli deployments deploy ."
+          echo "npx @insforge/cli compute update <id> --image <image>"

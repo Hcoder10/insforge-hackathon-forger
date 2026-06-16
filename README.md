@@ -112,6 +112,12 @@ proof, the repair audit, and frontier artifact validation.
 The raw model frontier gate also runs in CI as an informational step, because the current raw
 adapter is valid but does not yet beat the Codex baseline.
 
+There is also a manual `branch-promotion` workflow for live InsForge backend branches. It
+requires `INSFORGE_EMAIL`, `INSFORGE_PASSWORD`, `INSFORGE_PROJECT_ID`, and optionally
+`INSFORGE_ORG_ID` as GitHub secrets. The workflow creates or uses a live branch, runs one
+branch experiment, writes dry-run merge SQL, and only applies the merge when the dispatch
+input `merge_after_review` is set to `true`.
+
 ## Project Review
 
 Run a dry review on a generated InsForge app folder:

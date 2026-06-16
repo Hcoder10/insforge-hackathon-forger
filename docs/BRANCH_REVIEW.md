@@ -55,6 +55,21 @@ The pipeline also records the required post-merge runtime checklist. InsForge br
 does not redeploy code, so functions, frontend deployments, and compute services must be
 redeployed when those runtimes depend on the merged backend change.
 
+## GitHub Actions
+
+`judge-ci` runs on push and pull request. It uses recorded evidence by default so regular CI
+does not create paid InsForge branches.
+
+`branch-promotion` is a manual workflow for live branch promotion. Required secrets:
+
+- `INSFORGE_EMAIL`
+- `INSFORGE_PASSWORD`
+- `INSFORGE_PROJECT_ID`
+- `INSFORGE_ORG_ID` when the project link needs an org id
+
+The workflow runs the selected scenario on a live branch, saves dry-run merge SQL, and only
+applies the merge when `merge_after_review` is explicitly set to `true` in the dispatch.
+
 ## Outputs
 
 Each run writes:
