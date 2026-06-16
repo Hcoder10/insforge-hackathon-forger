@@ -19,6 +19,9 @@ import os, re, json, subprocess, pathlib
 # Unsloth on WSL/Blackwell can reject the default PyTorch allocator config.
 # Clear it before importing torch or unsloth so the rig run is reproducible.
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = ""
+if os.getenv("FO_DISABLE_COMPILE", "1").lower() in {"1", "true", "yes", "on"}:
+    os.environ["TORCH_COMPILE_DISABLE"] = "1"
+    os.environ["UNSLOTH_COMPILE_DISABLE"] = "1"
 
 import torch
 from unsloth import FastLanguageModel
@@ -66,6 +69,10 @@ MODEL = os.getenv("FO_BASE_MODEL", "unsloth/Qwen3.6-35B-A3B")
 INIT_ADAPTER = os.getenv("FO_INIT_ADAPTER", "train/sft_adapter")
 STEPS = int(os.getenv("FO_GRPO_STEPS", "200"))
 MAXLEN = int(os.getenv("FO_MAXLEN", "4096"))
+NUM_GENERATIONS = int(os.getenv("FO_NUM_GENERATIONS", "4"))
+MAX_COMPLETION = int(os.getenv("FO_MAX_COMPLETION", "1024"))
+GRAD_ACCUM = int(os.getenv("FO_GRAD_ACCUM", "4"))
+SAVE_STEPS = int(os.getenv("FO_SAVE_STEPS", "40"))
 TRAIN_TASKS = os.getenv("FO_GRPO_TASKS", "data/out/grpo_tasks.jsonl")  # {taskId, prompt}
 
 _CODE_RE = re.compile(r"```(?:js|javascript)?\s*([\s\S]*?)```", re.I)
@@ -149,10 +156,10 @@ def main():
         model=model, processing_class=tok,
         reward_funcs=[reward_milestone, reward_format],
         args=GRPOConfig(
-            learning_rate=5e-6, per_device_train_batch_size=1, gradient_accumulation_steps=4,
-            num_generations=4, max_completion_length=1024, max_steps=STEPS,
+            learning_rate=5e-6, per_device_train_batch_size=1, gradient_accumulation_steps=GRAD_ACCUM,
+            num_generations=NUM_GENERATIONS, max_completion_length=MAX_COMPLETION, max_steps=STEPS,
             epsilon=0.2, epsilon_high=0.28,           # CUDA-Agent stable asymmetric clip
-            loss_type="grpo", logging_steps=2, save_steps=40, use_vllm=False,
+            loss_type="grpo", logging_steps=2, save_steps=SAVE_STEPS, use_vllm=False,
             output_dir="train/grpo_out", report_to="none",
         ),
         train_dataset=ds,

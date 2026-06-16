@@ -10,5 +10,6 @@ node_modules/
 **/train/*_adapter/
 **/data/out/
 **/data/out2/
+**/data/modal_out/
 **/results/_parked*/
 *.tgz

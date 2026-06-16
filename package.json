@@ -18,6 +18,10 @@
     "frontier-gate:raw": "node optimizer/eval/frontier_gate.js --file optimizer/results/frontier_run.json",
     "frontier-validate": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.json",
     "frontier-validate:recorded": "node tools/forger.js frontier-validate --file optimizer/results/frontier_run.recorded.json",
+    "modal:gpu-probe": "modal run -q tools/modal_gpu_probe.py --out optimizer/results/modal_probe.json",
+    "modal:frontier": "modal run -q tools/modal_frontier.py::frontier --data-n 80 --steps 140 --epochs 1 --tag modal-weakfix-h100 --out-dir optimizer/results/modal-weakfix-h100",
+    "modal:frontier-fast": "modal run -q tools/modal_frontier.py::frontier --data-n 80 --steps 48 --epochs 1 --num-generations 2 --max-completion 512 --grad-accum 2 --save-steps 12 --tag modal-weakfix-fast --out-dir optimizer/results/modal-weakfix-fast",
+    "ci:judge": "npm run check && npm run branch-review:all && npm run project-review:demo && npm run proof:repair && npm run frontier-validate",
     "check": "cd bench && npm run check"
   },
   "license": "MIT"

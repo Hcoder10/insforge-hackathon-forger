@@ -18,6 +18,10 @@ limits hide scale bugs.
   through forge-optimizer, and grades both outputs with forger-bench.
 - `tools/forger.js`: project CLI for branch reviews, project reviews, and frontier artifact validation.
 
+The current experiment ledger is in
+[optimizer/docs/EXPERIMENTS.md](optimizer/docs/EXPERIMENTS.md). It lists what is already
+proved, what is still running, and which artifacts support each claim.
+
 ## What The Benchmark Measures
 
 forger-bench scores a solution in two steps:
@@ -87,6 +91,19 @@ node tools/forger.js branch-review \
 Branch Review writes `result.json`, `report.md`, `timeline.json`, and `annotated-merge.sql`
 under `bench/results/demo-recordings/`. See [docs/BRANCH_REVIEW.md](docs/BRANCH_REVIEW.md).
 
+## CI
+
+GitHub Actions runs the judge evidence suite on every push and pull request:
+
+```bash
+npm run ci:judge
+```
+
+That command replays benchmark checks, recorded branch reviews, the project-review demo,
+agent repair proof, project repair proof, the repair audit, and frontier artifact validation.
+The raw model frontier gate also runs in CI as an informational step, because the current raw
+adapter is valid but does not yet beat the Codex baseline.
+
 ## Project Review
 
 Run a dry review on a generated InsForge app folder:
@@ -118,6 +135,18 @@ FO_DATA_N=80 FO_MODEL_TAG=frontier bash scripts/frontier_run.sh
 The live run writes `optimizer/results/frontier_run.json`. Judge Mode uses that file when it
 exists, otherwise it shows the clearly marked recorded demo target. See
 [optimizer/docs/FRONTIER_RUN.md](optimizer/docs/FRONTIER_RUN.md).
+
+Modal GPU commands are available for the active weak-concept frontier run:
+
+```bash
+npm run modal:gpu-probe
+FORGER_MODAL_TRAIN_GPU=H100 npm run modal:frontier
+```
+
+The probe artifact is `optimizer/results/modal_probe.json`. The H100 run writes to
+`optimizer/results/modal-weakfix-h100/` when complete. The experiment configuration and
+acceptance rule are tracked in
+[optimizer/experiments/modal_weakfix_h100.json](optimizer/experiments/modal_weakfix_h100.json).
 
 Latest audited raw GPU model run:
 

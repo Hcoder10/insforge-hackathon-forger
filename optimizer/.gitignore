@@ -1,4 +1,5 @@
 data/out/
+data/modal_out/
 train/sft_out/
 train/grpo_out/
 train/*_adapter/

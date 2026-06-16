@@ -1,0 +1,14 @@
+{
+  "gpu_requested": "L40S",
+  "torch": "2.5.1+cu124",
+  "cuda_available": true,
+  "device_count": 1,
+  "devices": [
+    {
+      "name": "NVIDIA L40S",
+      "total_memory_gb": 44.39,
+      "capability": "8.9"
+    }
+  ],
+  "matmul_checksum": 29.46875
+}

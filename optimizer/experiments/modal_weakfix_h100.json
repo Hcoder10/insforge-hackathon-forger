@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "name": "modal-weakfix-h100",
+  "status": "running",
+  "createdAt": "2026-06-15T18:31:00-07:00",
+  "hardware": {
+    "provider": "Modal",
+    "requestedGpu": "H100",
+    "fallbackProbe": "optimizer/results/modal_probe.json"
+  },
+  "trainingConfig": {
+    "dataN": 80,
+    "grpoSteps": 140,
+    "epochs": 1,
+    "loraR": 32,
+    "maxLength": 4096,
+    "numGenerations": 4,
+    "maxCompletion": 1024,
+    "repairLayer": false,
+    "tag": "modal-weakfix-h100"
+  },
+  "fastFallbackConfig": {
+    "grpoSteps": 48,
+    "numGenerations": 2,
+    "maxCompletion": 512,
+    "gradientAccumulationSteps": 2,
+    "tag": "modal-weakfix-fast",
+    "command": "npm run modal:frontier-fast"
+  },
+  "dataChanges": [
+    "Oversample count_only tasks so the raw model learns head:true exact count patterns.",
+    "Oversample list_meta tasks so storage size summaries use list metadata instead of downloads.",
+    "Oversample no_base64_in_db tasks so generated images are stored in storage and only keys are inserted."
+  ],
+  "acceptance": {
+    "baseline": "codex",
+    "baselineScore": 87.2,
+    "rawModelMustBeatBaseline": true,
+    "minimumRawScore": 87.3,
+    "frontierGate": "npm run frontier-gate:raw"
+  },
+  "expectedArtifacts": {
+    "runDirectory": "optimizer/results/modal-weakfix-h100",
+    "frontierReport": "optimizer/results/modal-weakfix-h100/frontier.json",
+    "score": "optimizer/results/modal-weakfix-h100/score.json",
+    "modalRun": "optimizer/results/modal-weakfix-h100/modal_run.json"
+  },
+  "commands": {
+    "probe": "npm run modal:gpu-probe",
+    "train": "set FORGER_MODAL_TRAIN_GPU=H100 && npm run modal:frontier",
+    "fastFallback": "set FORGER_MODAL_TRAIN_GPU=H100 && npm run modal:frontier-fast"
+  },
+  "notes": [
+    "This experiment is not included in GitHub Actions because it requires paid GPU capacity and Modal credentials.",
+    "Do not claim a raw model win until the raw frontier gate passes against optimizer/results/frontier_run.json or the completed Modal artifact."
+  ]
+}
