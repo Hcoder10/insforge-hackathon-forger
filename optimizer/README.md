@@ -4,6 +4,8 @@ forge-optimizer is a specialized model for rewriting inefficient InsForge backen
 
 The current training target is Qwen3.6-35B-A3B with LoRA adapters on a 96GB RTX PRO 6000 class GPU. The pipeline uses supervised fine-tuning, then GRPO with benchmark feedback.
 
+Canonical model link: [squaredcuber/forge-optimizer-qwen3.6-35b-a3b](https://huggingface.co/squaredcuber/forge-optimizer-qwen3.6-35b-a3b).
+
 ## Pipeline
 
 ```text
@@ -85,9 +87,40 @@ FORGE_OPT_URL=http://127.0.0.1:8901 \
 node ../tools/forger.js project-review --project path/to/insforge-app --model-required
 ```
 
-That path sends each source file to forge-optimizer first, then applies the deterministic
-SDK-shape verifier to the proposed source. The report records model attempts, changes, and
-failures so a CI run is clear about whether it used the model or only the verifier fallback.
+That path sends direct InsForge SDK files to forge-optimizer first for compact issue findings,
+then applies the deterministic SDK-shape verifier to produce the concrete patch. The report
+records model attempts, findings, changes, and failures so a CI run is clear about whether it
+used the model or only the verifier fallback.
+
+The local server is `optimizer/serve_model.py`. It defaults to `PORT=8901`,
+`FO_BASE_MODEL=/root/models/Qwen3.6-35B-A3B`, and
+`FO_ADAPTER=/root/forge-optimizer/train/sft2_adapter`. Set `FO_REQUIRE_ADAPTER=1` when the
+server should fail instead of serving the base model without an adapter.
+
+Served request:
+
+```http
+POST /v1/chat/completions
+```
+
+```json
+{
+  "model": "forge-optimizer",
+  "temperature": 0,
+  "max_tokens": 256,
+  "messages": [{ "role": "user", "content": "review or rewrite prompt" }]
+}
+```
+
+Served response:
+
+```json
+{
+  "choices": [
+    { "message": { "role": "assistant", "content": "model response" } }
+  ]
+}
+```
 
 The raw adapter is also checked with a manual usefulness probe outside the sealed benchmark.
 See [docs/MODEL_USEFULNESS.md](docs/MODEL_USEFULNESS.md). The current result is mixed:

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-16T05:12:48.008Z",
+  "generatedAt": "2026-06-16T06:39:14.941Z",
   "mode": "deterministic-fallback",
   "model": {
     "enabled": false,
@@ -9,7 +9,9 @@
     "endpoint": null,
     "attempted": 0,
     "changed": 0,
+    "findings": 0,
     "failed": 0,
+    "skipped": 0,
     "failures": []
   },
   "status": "needs-review",

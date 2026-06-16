@@ -13,10 +13,13 @@ limits hide scale bugs.
 - `bench/`: forger-bench, an efficiency-aware benchmark for InsForge SDK code.
   It covers database, vector, storage, AI, and auth tasks across 52 task instances.
 - `optimizer/`: forge-optimizer, a Qwen3.6-35B-A3B LoRA trained with SFT and GRPO to rewrite
-  inefficient backend code into more scale-safe code.
+  inefficient backend code into more scale-safe code. Canonical model:
+  [squaredcuber/forge-optimizer-qwen3.6-35b-a3b](https://huggingface.co/squaredcuber/forge-optimizer-qwen3.6-35b-a3b).
 - `bench/site/` and `demo_server.js`: a local demo that runs an author model, sends the code
   through forge-optimizer, and grades both outputs with forger-bench.
 - `tools/forger.js`: project CLI for branch reviews, project reviews, and frontier artifact validation.
+- `docs/DEMO_SCRIPT.md`: a three minute judging script with the windows, commands, and benchmark
+  artifacts to show.
 
 The current experiment ledger is in
 [optimizer/docs/EXPERIMENTS.md](optimizer/docs/EXPERIMENTS.md). It lists what is already
@@ -36,6 +39,13 @@ into the score when they vary cleanly across a task's reference solutions.
 
 The live resource benchmark measures server-side CPU work, disk/cache blocks, memory
 footprint, sequential scans, and throughput under load.
+
+Task set:
+
+- 52 task instances across database, vector, storage, AI, and auth.
+- 39 sealed test tasks and 13 training tasks.
+- Each concept has a train instance plus three sealed test instances with separate entity names.
+- `npm run check` runs smoke, calibration, scoring verification, and contamination checks.
 
 ## Judge Demo
 
@@ -70,6 +80,40 @@ npm run judge-demo
 point at the OpenAI-compatible optimizer server. If `FORGE_OPT_URL` is unset, the demo still
 runs the benchmark flow.
 
+## Served Optimizer Endpoint
+
+The served forge-optimizer model uses an OpenAI-compatible chat endpoint:
+
+```http
+POST /v1/chat/completions
+```
+
+Request shape:
+
+```json
+{
+  "model": "forge-optimizer",
+  "temperature": 0,
+  "max_tokens": 256,
+  "messages": [{ "role": "user", "content": "review or rewrite prompt" }]
+}
+```
+
+Response shape:
+
+```json
+{
+  "choices": [
+    { "message": { "role": "assistant", "content": "model response" } }
+  ]
+}
+```
+
+`optimizer/serve_model.py` serves that shape at port `8901` by default. `FORGE_OPT_URL` can be
+the server root, such as `http://127.0.0.1:8901`, or the full
+`/v1/chat/completions` URL. Project review also accepts simple JSON responses with `source`,
+`code`, or `text` fields, but the canonical served endpoint is the OpenAI-compatible form above.
+
 ## Branch Review
 
 Run recorded branch-review evidence:
@@ -97,6 +141,11 @@ under `bench/results/demo-recordings/`. See [docs/BRANCH_REVIEW.md](docs/BRANCH_
 CPU, disk, memory, sequential scan, and timing deltas, then emits a promotion decision plus
 the post-merge runtime deploy checklist for InsForge functions, frontend deployments, and
 compute services.
+
+Each branch review compares baseline and candidate values for actual time, CPU time, disk
+bytes, memory bytes, and sequential scans. Recorded mode replays saved evidence for judging and
+CI. Live mode creates an InsForge backend branch, applies the candidate change, captures the
+same metrics, writes dry-run merge SQL, and deletes the branch unless `--keep-branch` is used.
 
 ## CI
 
@@ -137,11 +186,16 @@ by the project benchmark, and writes a review report plus repaired copies under
 project unless `--apply` is passed. Dry runs also write `forger.patch` and `pr-comment.md`
 so the review can be applied or pasted into a pull request.
 
+The PR Guard comment is the pull-request form of the same review. It includes status,
+project path, scan counts, model usage, patch application command, resource axes, and per-file
+findings. The project report keeps the longer artifact for judges and local review.
+
 When `FORGE_OPT_URL` or `--model-url` is set, project review calls the forge-optimizer
-OpenAI-compatible endpoint first, then runs the deterministic SDK verifier on the proposed
-source. The generated report and PR comment show the model name, endpoint, attempts, changes,
-and failures. If no endpoint is configured, Forger records `deterministic-fallback` mode so
-the result is not confused with a model-backed review.
+OpenAI-compatible endpoint first for compact SDK and resource findings, then runs the
+deterministic SDK verifier to produce the concrete patch. The generated report and PR comment
+show the model name, endpoint, attempts, findings, changes, and failures. If no endpoint is
+configured, Forger records `deterministic-fallback` mode so the result is not confused with a
+model-backed review.
 
 Use it on another project folder:
 
