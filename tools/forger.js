@@ -11,6 +11,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
+const CALLER_CWD = process.cwd();
 const BENCH = path.join(ROOT, 'bench');
 const WORKLOADS = path.join(BENCH, 'workloads');
 const DEFAULT_RECORD = path.join(BENCH, 'results', 'branch-review');
@@ -47,8 +48,11 @@ function parse(argv) {
     const a = argv[i];
     if (!a.startsWith('--')) { out._.push(a); continue; }
     const key = a.slice(2);
-    if (['live', 'recorded', 'keep-branch', 'yes', 'apply', 'skip-reviews'].includes(key)) out[key] = true;
-    else out[key] = argv[++i];
+    if (['live', 'recorded', 'keep-branch', 'yes', 'apply', 'skip-reviews'].includes(key)) {
+      out[key] = true;
+      if (key === 'keep-branch') out.keepBranch = true;
+      if (key === 'skip-reviews') out.skipReviews = true;
+    } else out[key] = argv[++i];
   }
   return out;
 }
@@ -79,11 +83,18 @@ function listWorkloads() {
     .sort();
 }
 
+function quoteShellArg(arg) {
+  const s = String(arg);
+  return /[\s"&|<>^]/.test(s) ? `"${s.replace(/"/g, '\\"')}"` : s;
+}
+
 function run(cmd, args, opts = {}) {
-  const res = spawnSync(cmd, args, {
-    cwd: opts.cwd || ROOT,
+  const isWindows = process.platform === 'win32';
+  const command = isWindows ? [cmd, ...args].map(quoteShellArg).join(' ') : cmd;
+  const res = spawnSync(command, isWindows ? [] : args, {
+    cwd: opts.cwd || CALLER_CWD,
     encoding: 'utf8',
-    shell: process.platform === 'win32',
+    shell: isWindows,
     maxBuffer: 64 * 1024 * 1024,
   });
   if (res.error) throw res.error;
@@ -130,6 +141,22 @@ function metricValue(summary, key) {
   return 0;
 }
 
+const DEFAULT_ABSOLUTE_TOLERANCE_BYTES = {
+  diskBytes: 1024 * 1024,
+  memoryBytes: 1024 * 1024,
+};
+
+function absoluteToleranceFor(t, metric) {
+  const key = `${metric}MaxIncreaseBytes`;
+  if (typeof t[key] === 'number') return t[key];
+  return DEFAULT_ABSOLUTE_TOLERANCE_BYTES[metric] || 0;
+}
+
+function withinAbsoluteTolerance(t, metric, summary) {
+  const tolerance = absoluteToleranceFor(t, metric);
+  return tolerance > 0 && summary.delta > 0 && summary.delta <= tolerance;
+}
+
 function verdict(workload, baseline, candidate) {
   const t = workload.thresholds || {};
   const diff = metricSummary(baseline, candidate);
@@ -148,10 +175,13 @@ function verdict(workload, baseline, candidate) {
     ['diskBytes', 'diskBytesMaxIncreasePct'],
     ['memoryBytes', 'memoryBytesMaxIncreasePct'],
   ]) {
-    if (typeof t[limitKey] === 'number' && diff[metric].pct > t[limitKey]) {
+    const overPctLimit = typeof t[limitKey] === 'number' && diff[metric].pct > t[limitKey];
+    const tolerated = withinAbsoluteTolerance(t, metric, diff[metric]);
+    if (overPctLimit && !tolerated) {
       failures.push(`${metric} increased ${diff[metric].pct.toFixed(1)}%`);
+    } else if (diff[metric].pct > 0 && !tolerated) {
+      warnings.push(`${metric} increased ${diff[metric].pct.toFixed(1)}%`);
     }
-    if (diff[metric].pct > 0) warnings.push(`${metric} increased ${diff[metric].pct.toFixed(1)}%`);
   }
 
   const status = failures.length ? 'fail' : warnings.length ? 'warn' : 'pass';

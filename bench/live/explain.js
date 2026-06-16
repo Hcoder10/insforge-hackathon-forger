@@ -1,6 +1,6 @@
-// forger-bench — real Postgres resource capture via EXPLAIN. (resource-aware scoring)
+// forger-bench - real Postgres resource capture via EXPLAIN. (resource-aware scoring)
 //
-// The request-cost model (mock) counts round-trips and wire bytes — it is BLIND to what
+// The request-cost model (mock) counts round-trips and wire bytes - it is BLIND to what
 // actually bills a backend under load: seq scans, buffer/disk I/O, CPU time, rows the DB
 // physically touched. This module runs `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` on the
 // live InsForge Postgres (via the CLI's db query) and extracts those true cost signals.
@@ -12,7 +12,7 @@
 //
 // Why this matters: a seq scan and an index scan return identical rows in one round-trip
 // (request-cost scores them the SAME), but EXPLAIN shows the seq scan touches 19x the
-// buffers and runs 8x slower — the difference that decides whether code survives 3 users.
+// buffers and runs 8x slower - the difference that decides whether code survives 3 users.
 
 'use strict';
 
@@ -21,18 +21,33 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
+function bashPath(file) {
+  const normalized = file.replace(/\\/g, '/');
+  const match = normalized.match(/^([A-Za-z]):\/(.*)$/);
+  if (!match) return normalized;
+  return `/${match[1].toLowerCase()}/${match[2]}`;
+}
+
 // Run a read-only EXPLAIN ANALYZE and return the parsed top plan + recursive aggregates.
 // The CLI has no --file flag and shell-arg quoting mangles the parens/quotes in the SQL,
 // so we stage the SQL in a temp file and feed it via bash `"$(cat file)"` command
-// substitution — the quoting path proven to work for db query in this project.
+// substitution - the quoting path proven to work for db query in this project.
 function capturePlan(sql) {
   const eSql = `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${sql}`;
   const tmp = path.join(os.tmpdir(), `fb_explain_${process.pid}_${Math.abs(hash(eSql))}.sql`);
   fs.writeFileSync(tmp, eSql, 'utf8');
   try {
-    const r = spawnSync('bash', ['-c', `npx --yes @insforge/cli db query "$(cat '${tmp.replace(/\\/g, '/')}')" --json`], {
-      encoding: 'utf8', timeout: 120000, maxBuffer: 32 * 1024 * 1024,
-    });
+    const r = process.platform === 'win32'
+      ? spawnSync('powershell.exe', [
+        '-NoProfile',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-Command',
+        `$sql = Get-Content -Raw -LiteralPath ${JSON.stringify(tmp)}; npx --yes @insforge/cli db query $sql --json`,
+      ], { encoding: 'utf8', timeout: 120000, maxBuffer: 32 * 1024 * 1024 })
+      : spawnSync('bash', ['-c', `npx --yes @insforge/cli db query "$(cat '${bashPath(tmp)}')" --json`], {
+        encoding: 'utf8', timeout: 120000, maxBuffer: 32 * 1024 * 1024,
+      });
     if (r.error) throw r.error;
     const out = r.stdout || '';
     const start = out.indexOf('{');
@@ -70,7 +85,7 @@ function summarize(root) {
     diskBytes: sharedRead * 8192,
     memoryBytes: (sharedHit + sharedRead) * 8192,
     tempDiskBytes: tempRead * 8192,
-    buffers: sharedHit + sharedRead,   // total 8KB blocks touched — the core I/O signal
+    buffers: sharedHit + sharedRead,   // total 8KB blocks touched - the core I/O signal
     actualRows,
     planRows: root['Plan Rows'] || 0,
   };
