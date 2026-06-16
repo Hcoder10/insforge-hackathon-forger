@@ -248,6 +248,82 @@ function writeRepairedCopy(outDir, rel, source) {
   return slashRelative(outDir, target);
 }
 
+function splitPatchLines(source) {
+  return String(source).replace(/\r\n/g, '\n').split('\n');
+}
+
+function quoteCommandPath(file) {
+  return /[\s"]/g.test(file) ? `"${file.replace(/"/g, '\\"')}"` : file;
+}
+
+function fullFilePatch(rel, before, after) {
+  const oldLines = splitPatchLines(before);
+  const newLines = splitPatchLines(after);
+  if (oldLines.length && oldLines[oldLines.length - 1] === '') oldLines.pop();
+  if (newLines.length && newLines[newLines.length - 1] === '') newLines.pop();
+  const oldCount = oldLines.length || 1;
+  const newCount = newLines.length || 1;
+  const out = [
+    `diff --git a/${rel} b/${rel}`,
+    `--- a/${rel}`,
+    `+++ b/${rel}`,
+    `@@ -1,${oldCount} +1,${newCount} @@`,
+    ...oldLines.map((line) => `-${line}`),
+    ...newLines.map((line) => `+${line}`),
+  ];
+  return out.join('\n') + '\n';
+}
+
+function applyPatchCommand(project, patchFile) {
+  const projectPath = projectDisplayPath(project);
+  const patchPath = slashRelative(ROOT, patchFile);
+  if (!projectPath.startsWith('..') && !path.isAbsolute(projectPath)) {
+    return `git apply --directory ${quoteCommandPath(projectPath)} ${quoteCommandPath(patchPath)}`;
+  }
+  return `git -C ${quoteCommandPath(project)} apply ${quoteCommandPath(patchFile)}`;
+}
+
+function projectPrCommentMarkdown(result) {
+  const lines = [
+    '# FORGER PR Guard',
+    '',
+    `Status: **${result.status.toUpperCase()}**`,
+    '',
+    `Project: \`${result.project.path}\``,
+    `Files scanned: \`${result.filesScanned}\``,
+    `Files with repairs: \`${result.files.length}\``,
+    `Repairs: \`${result.repairCount}\``,
+    '',
+  ];
+
+  if (result.artifacts?.patch) {
+    lines.push('## Apply Patch', '', '```bash', result.artifacts.applyCommand, '```', '');
+  }
+
+  lines.push(
+    '## Checks',
+    '',
+    '- Correctness: InsForge SDK response shapes and API usage.',
+    '- CPU: row-by-row JavaScript work that should stay server-side.',
+    '- Memory: full-table and full-file reads that grow with dataset size.',
+    '- Disk: avoidable backend reads, cache churn, and storage downloads.',
+    '',
+  );
+
+  if (!result.files.length) {
+    lines.push('## Findings', '', '- No known InsForge repair patterns were found.');
+    return lines.join('\n');
+  }
+
+  lines.push('## Findings', '');
+  for (const file of result.files) {
+    lines.push(`### ${file.file}`, '');
+    for (const note of file.notes) lines.push(`- ${note}`);
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
 function projectReviewMarkdown(result) {
   const summary = [
     `# FORGER Project Review: ${path.basename(result.project.path)}`,
@@ -272,6 +348,10 @@ function projectReviewMarkdown(result) {
   if (!result.files.length) {
     summary.push('## Findings', '', '- No known InsForge repair patterns were found.');
     return summary.join('\n');
+  }
+
+  if (result.artifacts?.patch) {
+    summary.push('## Patch', '', `Apply with: \`${result.artifacts.applyCommand}\``, '');
   }
 
   summary.push('## Findings', '');
@@ -299,6 +379,7 @@ function runProjectReview(opts) {
   const { repairSource, repairProject } = require(path.join(ROOT, 'optimizer', 'eval', 'project_code_repair'));
   let files = [];
   let filesScanned = 0;
+  let patchText = '';
 
   if (opts.apply) {
     const applied = repairProject(project);
@@ -320,6 +401,7 @@ function runProjectReview(opts) {
       if (!repaired.repairs.length || repaired.source === before) continue;
       const rel = slashRelative(project, file);
       const repairedCopy = writeRepairedCopy(outDir, rel, repaired.source);
+      patchText += fullFilePatch(rel, before, repaired.source);
       files.push({
         file: rel,
         repairs: repaired.repairs,
@@ -331,6 +413,15 @@ function runProjectReview(opts) {
     }
   }
 
+  const artifacts = {};
+  if (patchText) {
+    const patchFile = path.join(outDir, 'forger.patch');
+    fs.writeFileSync(patchFile, patchText);
+    artifacts.patch = slashRelative(outDir, patchFile);
+    artifacts.applyCommand = applyPatchCommand(project, patchFile);
+  }
+  artifacts.prComment = 'pr-comment.md';
+
   const result = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
@@ -339,11 +430,13 @@ function runProjectReview(opts) {
     project: { path: projectDisplayPath(project) },
     filesScanned,
     repairCount: files.reduce((sum, file) => sum + file.repairs.length, 0),
+    artifacts,
     files,
   };
 
   writeJson(path.join(outDir, 'project-review.json'), result);
   fs.writeFileSync(path.join(outDir, 'project-review.md'), projectReviewMarkdown(result));
+  fs.writeFileSync(path.join(outDir, 'pr-comment.md'), projectPrCommentMarkdown(result));
 
   console.log(`FORGER project review ${result.status.toUpperCase()}: ${result.files.length} files, ${result.repairCount} repairs`);
   console.log(`  wrote ${path.relative(ROOT, path.join(outDir, 'project-review.json'))}`);

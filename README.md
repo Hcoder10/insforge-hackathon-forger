@@ -129,7 +129,8 @@ npm run project-review:demo
 The command scans JavaScript and TypeScript source, applies the same SDK repair rules used
 by the project benchmark, and writes a review report plus repaired copies under
 `bench/results/demo-recordings/project-review-customer-portal/`. It does not modify the
-project unless `--apply` is passed.
+project unless `--apply` is passed. Dry runs also write `forger.patch` and `pr-comment.md`
+so the review can be applied or pasted into a pull request.
 
 Use it on another project folder:
 
@@ -225,6 +226,13 @@ before/after tests against the InsForge SDK mock. It covers database pagination,
 array form, current-user auth shape, storage metadata reads, and batch deletes. Add more
 projects under `optimizer/fixtures/agent_projects/`, or pass a project fixture directory with
 `node optimizer/eval/project_repair_benchmark.js --projects <dir>`.
+
+Project review dry runs also produce an applyable patch:
+
+```bash
+npm run project-review:demo
+git apply --directory optimizer/fixtures/agent_projects/insforge-customer-portal bench/results/demo-recordings/project-review-customer-portal/forger.patch
+```
 
 Run the repair proof suite:
 

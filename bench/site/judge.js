@@ -250,7 +250,7 @@
     setText(els.projectScanned, String(review.filesScanned ?? '-'));
     setText(els.projectChanged, String((review.files || []).length));
     setText(els.projectRepairCount, String(review.repairCount ?? 0));
-    setText(els.projectArtifact, review.artifacts?.dir || '-');
+    setText(els.projectArtifact, review.artifacts?.patch || review.artifacts?.dir || '-');
 
     if (!els.projectFiles) return;
     els.projectFiles.innerHTML = '';

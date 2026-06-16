@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-16T03:42:20.316Z",
+  "generatedAt": "2026-06-16T04:04:42.070Z",
   "mode": "dry-run",
   "status": "needs-review",
   "project": {
@@ -8,6 +8,11 @@
   },
   "filesScanned": 3,
   "repairCount": 3,
+  "artifacts": {
+    "patch": "forger.patch",
+    "applyCommand": "git apply --directory optimizer/fixtures/agent_projects/insforge-customer-portal bench/results/demo-recordings/project-review-customer-portal/forger.patch",
+    "prComment": "pr-comment.md"
+  },
   "files": [
     {
       "file": "src/feed.js",

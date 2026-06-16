@@ -11,7 +11,7 @@ overstate the raw model result.
 | Benchmark correctness and resource scoring | `npm run check` | `bench/results/` | Passes mock smoke, calibration, verification, and contamination checks |
 | Branch review | `npm run branch-review:all` | `bench/results/demo-recordings/branch-review-*` | Three recorded InsForge branch reviews with annotated merge SQL |
 | Branch CI/CD pipeline | `npm run branch-pipeline` | `bench/results/demo-recordings/branch-pipeline` | Promotion gate, resource rollup, and post-merge runtime checklist |
-| Project review | `npm run project-review:demo` | `bench/results/demo-recordings/project-review-customer-portal` | Scans and repairs a generated InsForge app folder |
+| Project review | `npm run project-review:demo` | `bench/results/demo-recordings/project-review-customer-portal` | Scans a generated InsForge app folder and emits repaired copies, `forger.patch`, and `pr-comment.md` |
 | Agent repair proof | `npm run agent-repair:bench` | `optimizer/results/agent_repair_benchmark.json` | Agent submissions improve from 69.4 average to 100.0 after repair |
 | Project repair proof | `npm run project-repair:bench` | `optimizer/results/project_repair_benchmark.json` | 5/5 project cases correct and efficient after repair |
 | Repair audit | `npm run frontier-audit:repair` | `optimizer/results/frontier_run.repair_assisted_live.json` | 100.0 repair-assisted verifier result |

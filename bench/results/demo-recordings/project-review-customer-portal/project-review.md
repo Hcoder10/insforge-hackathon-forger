@@ -15,6 +15,10 @@ Repairs found: `3`
 - Disk: flags unnecessary backend reads, cache churn, and file downloads.
 - Correctness: flags InsForge SDK response-shape bugs and API usage that fails under real data.
 
+## Patch
+
+Apply with: `git apply --directory optimizer/fixtures/agent_projects/insforge-customer-portal bench/results/demo-recordings/project-review-customer-portal/forger.patch`
+
 ## Findings
 
 ### src/feed.js

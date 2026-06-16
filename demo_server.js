@@ -166,7 +166,7 @@ function listProjectReviews() {
       const dir = path.join(root, name);
       const result = safeReadJson(path.join(dir, 'project-review.json'));
       if (!result) return null;
-      return { ...result, artifacts: { dir: path.relative(__dirname, dir) } };
+      return { ...result, artifacts: { ...(result.artifacts || {}), dir: path.relative(__dirname, dir) } };
     })
     .filter(Boolean)
     .sort((a, b) => String(a.project?.path || '').localeCompare(String(b.project?.path || '')));

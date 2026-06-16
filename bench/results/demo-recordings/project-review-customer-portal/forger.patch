@@ -1,0 +1,98 @@
+diff --git a/src/feed.js b/src/feed.js
+--- a/src/feed.js
++++ b/src/feed.js
+@@ -1,18 +1,16 @@
+-'use strict';
+-
+-async function loadFeedPage(insforge) {
+-  const { data } = await insforge.database
+-    .from('articles')
+-    .select('*')
+-    .order('created_at', { ascending: false })
+-    .range(10, 19);
+-  const { data: countRows } = await insforge.database
+-    .from('articles')
+-    .select('id');
+-  return {
+-    items: data.map(({ id, headline }) => ({ id, headline })),
+-    total: countRows.length,
+-  };
+-}
+-
+-module.exports = { loadFeedPage };
++'use strict';
++
++async function loadFeedPage(insforge) {
++  const { data, count, error } = await insforge.database
++    .from('articles')
++    .select('id, headline', { count: 'exact' })
++    .order('created_at', { ascending: false })
++    .range(10, 19);
++  if (error) throw error;
++  return {
++    items: data.map(({ id, headline }) => ({ id, headline })),
++    total: count,
++  };
++}
++
++module.exports = { loadFeedPage };
+diff --git a/src/profiles.js b/src/profiles.js
+--- a/src/profiles.js
++++ b/src/profiles.js
+@@ -1,12 +1,12 @@
+-'use strict';
+-
+-async function createProfile(insforge, profile) {
+-  const { data, error } = await insforge.database
+-    .from('profiles')
+-    .insert(profile)
+-    .select();
+-  if (error) throw error;
+-  return data[0];
+-}
+-
+-module.exports = { createProfile };
++'use strict';
++
++async function createProfile(insforge, profile) {
++  const { data, error } = await insforge.database
++    .from('profiles')
++    .insert([profile])
++    .select();
++  if (error) throw error;
++  return data[0];
++}
++
++module.exports = { createProfile };
+diff --git a/src/sessionDocs.js b/src/sessionDocs.js
+--- a/src/sessionDocs.js
++++ b/src/sessionDocs.js
+@@ -1,13 +1,15 @@
+-'use strict';
+-
+-async function loadCurrentUserDocs(insforge) {
+-  const user = await insforge.auth.getCurrentUser();
+-  const { data, error } = await insforge.database
+-    .from('docs')
+-    .select('id')
+-    .eq('user_id', user.id);
+-  if (error) throw error;
+-  return data || [];
+-}
+-
+-module.exports = { loadCurrentUserDocs };
++'use strict';
++
++async function loadCurrentUserDocs(insforge) {
++  const { data: userAuthData, error: userAuthError } = await insforge.auth.getCurrentUser();
++  if (userAuthError) throw userAuthError;
++  const user = userAuthData?.user || userAuthData;
++  const { data, error } = await insforge.database
++    .from('docs')
++    .select('id')
++    .eq('user_id', user.id);
++  if (error) throw error;
++  return data || [];
++}
++
++module.exports = { loadCurrentUserDocs };
