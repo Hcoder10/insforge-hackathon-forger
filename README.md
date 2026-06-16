@@ -25,7 +25,7 @@ The current experiment ledger is in
 [optimizer/docs/EXPERIMENTS.md](optimizer/docs/EXPERIMENTS.md). It lists what is already
 proved, what is still running, and which artifacts support each claim.
 
-## What The Benchmark Measures
+## What the Benchmark Measures
 
 forger-bench scores a solution in two steps:
 
@@ -164,7 +164,7 @@ adapter is valid but does not yet beat the Codex baseline.
 On pull requests, CI posts or updates one `FORGER PR Guard` comment from
 `bench/results/demo-recordings/project-review-customer-portal/pr-comment.md`. Every run also
 writes a GitHub job summary and uploads `forger-ci-evidence`, including the branch pipeline,
-project review, applyable patch, repair benchmarks, and frontier artifact.
+project review, applicable patch, repair benchmarks, and frontier artifact.
 
 There is also a manual `branch-promotion` workflow for live InsForge backend branches. It
 requires `INSFORGE_EMAIL`, `INSFORGE_PASSWORD`, `INSFORGE_PROJECT_ID`, and optionally
@@ -299,7 +299,7 @@ array form, current-user auth shape, storage metadata reads, and batch deletes. 
 projects under `optimizer/fixtures/agent_projects/`, or pass a project fixture directory with
 `node optimizer/eval/project_repair_benchmark.js --projects <dir>`.
 
-Project review dry runs also produce an applyable patch:
+Project review dry runs also produce an applicable patch:
 
 ```bash
 npm run project-review:demo
