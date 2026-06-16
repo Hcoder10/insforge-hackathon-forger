@@ -137,10 +137,23 @@ by the project benchmark, and writes a review report plus repaired copies under
 project unless `--apply` is passed. Dry runs also write `forger.patch` and `pr-comment.md`
 so the review can be applied or pasted into a pull request.
 
+When `FORGE_OPT_URL` or `--model-url` is set, project review calls the forge-optimizer
+OpenAI-compatible endpoint first, then runs the deterministic SDK verifier on the proposed
+source. The generated report and PR comment show the model name, endpoint, attempts, changes,
+and failures. If no endpoint is configured, Forger records `deterministic-fallback` mode so
+the result is not confused with a model-backed review.
+
 Use it on another project folder:
 
 ```bash
 node tools/forger.js project-review --project path/to/insforge-app --out bench/results/demo-recordings/project-review-custom
+```
+
+Require the model endpoint for a run:
+
+```bash
+FORGE_OPT_URL=http://127.0.0.1:8901 \
+node tools/forger.js project-review --project path/to/insforge-app --model-required
 ```
 
 ## Frontier Optimizer Run

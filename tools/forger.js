@@ -27,6 +27,7 @@ const PROJECT_SKIP_DIRS = new Set([
   'coverage',
 ]);
 const PROJECT_REPAIR_NOTES = {
+  'model.forge-optimizer-rewrite': 'forge-optimizer model proposed the source rewrite.',
   'database.insert-array-form': 'Uses array insert format expected by the InsForge SDK.',
   'auth.get-current-user-shape': 'Handles the { data, error } current-user response shape before reading user.id.',
   'storage.metadata-without-download': 'Uses storage listing metadata instead of downloading every file.',
@@ -40,7 +41,7 @@ function usage() {
 usage:
   node tools/forger.js branch-review --scenario <name> [--record <dir>] [--branch <name>] [--mode schema-only|full] [--live] [--keep-branch]
   node tools/forger.js branch-pipeline [--out <dir>] [--scenarios <a,b,c>] [--live] [--mode schema-only|full]
-  node tools/forger.js project-review --project <dir> [--out <dir>] [--apply]
+  node tools/forger.js project-review --project <dir> [--out <dir>] [--apply] [--model-url <url>] [--model <name>] [--model-required]
   node tools/forger.js frontier-validate --file <frontier_run.json>
 
 examples:
@@ -48,6 +49,7 @@ examples:
   node tools/forger.js branch-pipeline
   node tools/forger.js branch-review --scenario slow-query-index --live --branch forger-demo --mode schema-only
   node tools/forger.js project-review --project optimizer/fixtures/agent_projects/insforge-customer-portal
+  FORGE_OPT_URL=http://127.0.0.1:8901 node tools/forger.js project-review --project path/to/app --model-required
 `);
 }
 
@@ -57,10 +59,11 @@ function parse(argv) {
     const a = argv[i];
     if (!a.startsWith('--')) { out._.push(a); continue; }
     const key = a.slice(2);
-    if (['live', 'recorded', 'keep-branch', 'yes', 'apply', 'skip-reviews'].includes(key)) {
+    if (['live', 'recorded', 'keep-branch', 'yes', 'apply', 'skip-reviews', 'model-required'].includes(key)) {
       out[key] = true;
       if (key === 'keep-branch') out.keepBranch = true;
       if (key === 'skip-reviews') out.skipReviews = true;
+      if (key === 'model-required') out.modelRequired = true;
     } else out[key] = argv[++i];
   }
   return out;
@@ -287,6 +290,111 @@ function writeRepairedCopy(outDir, rel, source) {
   return slashRelative(outDir, target);
 }
 
+function compactUrl(raw) {
+  if (!raw) return null;
+  try {
+    const u = new URL(raw);
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return String(raw).replace(/[?#].*$/, '');
+  }
+}
+
+function modelConfig(opts) {
+  const url = opts['model-url'] || process.env.FORGE_OPT_URL || '';
+  return {
+    enabled: Boolean(url),
+    required: Boolean(opts.modelRequired || process.env.FORGER_MODEL_REQUIRED === '1'),
+    url,
+    endpoint: compactUrl(url),
+    model: opts.model || process.env.FORGE_OPT_MODEL || 'forge-optimizer',
+    timeoutMs: Number(opts['model-timeout-ms'] || process.env.FORGE_OPT_TIMEOUT_MS || 45000),
+  };
+}
+
+function projectModelPrompt(rel, source) {
+  return `You are forge-optimizer, a specialist model for improving InsForge app code.
+
+Review this single source file for real InsForge SDK correctness or resource issues. Focus on:
+- database inserts that need the InsForge array insert shape
+- auth.getCurrentUser response-shape handling
+- pagination, projection, count, and server-side filtering
+- storage metadata reads that should not download files
+- batch storage deletes instead of one request per object
+- avoidable CPU, memory, or disk work in app/backend code
+
+Preserve the file's public API, imports, component behavior, styling hooks, and unrelated code. Do not invent new tables, buckets, environment variables, or packages.
+
+If no change is needed, respond exactly:
+NO_CHANGE
+
+If a change is needed, respond with only the full revised source in one fenced code block.
+
+File: ${rel}
+
+\`\`\`
+${source}
+\`\`\``;
+}
+
+function extractModelSource(text) {
+  const raw = String(text || '').trim();
+  if (!raw || /^NO_CHANGE\.?$/i.test(raw)) return '';
+  const blocks = [...raw.matchAll(/```(?:[a-zA-Z0-9_-]+)?\s*([\s\S]*?)```/g)];
+  if (blocks.length) return blocks[blocks.length - 1][1].trim();
+  const jsonStart = raw.indexOf('{');
+  const jsonEnd = raw.lastIndexOf('}');
+  if (jsonStart !== -1 && jsonEnd > jsonStart) {
+    try {
+      const parsed = JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+      if (parsed?.changed === false) return '';
+      if (typeof parsed?.source === 'string') return parsed.source.trim();
+      if (typeof parsed?.code === 'string') return parsed.code.trim();
+    } catch {}
+  }
+  return raw;
+}
+
+async function callForgeOptimizer(config, prompt) {
+  if (typeof fetch !== 'function') throw new Error('global fetch is unavailable in this Node runtime');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), config.timeoutMs);
+  try {
+    const base = config.url.replace(/\/$/, '');
+    const endpoint = base.endsWith('/v1/chat/completions') ? base : `${base}/v1/chat/completions`;
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: config.model,
+        temperature: 0,
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!res.ok) throw new Error(`model endpoint returned HTTP ${res.status}`);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || data.source || data.code || data.text || '';
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function modelRepairSource(config, rel, before) {
+  const content = await callForgeOptimizer(config, projectModelPrompt(rel, before));
+  const source = extractModelSource(content);
+  if (!source || source.trim() === before.trim()) {
+    return { changed: false, source: before, repairs: [], rawBytes: Buffer.byteLength(content || '') };
+  }
+  return {
+    changed: true,
+    source,
+    repairs: ['model.forge-optimizer-rewrite'],
+    rawBytes: Buffer.byteLength(content || ''),
+  };
+}
+
 function splitPatchLines(source) {
   return String(source).replace(/\r\n/g, '\n').split('\n');
 }
@@ -329,11 +437,22 @@ function projectPrCommentMarkdown(result) {
     `Status: **${result.status.toUpperCase()}**`,
     '',
     `Project: \`${result.project.path}\``,
+    `Mode: \`${result.mode}\``,
     `Files scanned: \`${result.filesScanned}\``,
     `Files with repairs: \`${result.files.length}\``,
     `Repairs: \`${result.repairCount}\``,
     '',
   ];
+
+  if (result.model?.enabled) {
+    lines.push(
+      `Model: \`${result.model.model}\` at \`${result.model.endpoint}\``,
+      `Model attempts: \`${result.model.attempted}\`, changes: \`${result.model.changed}\`, failures: \`${result.model.failed}\``,
+      '',
+    );
+  } else {
+    lines.push('Model: `not configured; deterministic verifier fallback`', '');
+  }
 
   if (result.artifacts?.patch) {
     lines.push('## Apply Patch', '', '```bash', result.artifacts.applyCommand, '```', '');
@@ -375,6 +494,13 @@ function projectReviewMarkdown(result) {
     `Files changed: \`${result.files.length}\`  `,
     `Repairs found: \`${result.repairCount}\``,
     '',
+    ...(result.model?.enabled
+      ? [
+          `Model: \`${result.model.model}\` at \`${result.model.endpoint}\`  `,
+          `Model attempts: \`${result.model.attempted}\`, changes: \`${result.model.changed}\`, failures: \`${result.model.failed}\``,
+          '',
+        ]
+      : ['Model: `not configured; deterministic verifier fallback`', '']),
     '## Resource Axes',
     '',
     '- CPU: flags row-by-row JavaScript work that should stay inside the database or storage service.',
@@ -403,7 +529,7 @@ function projectReviewMarkdown(result) {
   return summary.join('\n');
 }
 
-function runProjectReview(opts) {
+async function runProjectReview(opts) {
   const projectArg = opts.project || opts._[1];
   if (!projectArg) throw new Error('project-review requires --project <dir>');
   const project = path.resolve(projectArg);
@@ -415,10 +541,21 @@ function runProjectReview(opts) {
   const outDir = path.resolve(opts.out || defaultOut);
   mkdirp(outDir);
 
+  const model = modelConfig(opts);
   const { repairSource, repairProject } = require(path.join(ROOT, 'optimizer', 'eval', 'project_code_repair'));
   let files = [];
   let filesScanned = 0;
   let patchText = '';
+  const modelStats = {
+    enabled: model.enabled,
+    required: model.required,
+    model: model.model,
+    endpoint: model.endpoint,
+    attempted: 0,
+    changed: 0,
+    failed: 0,
+    failures: [],
+  };
 
   if (opts.apply) {
     const applied = repairProject(project);
@@ -436,17 +573,46 @@ function runProjectReview(opts) {
     filesScanned = sourceFiles.length;
     for (const file of sourceFiles) {
       const before = fs.readFileSync(file, 'utf8');
-      const repaired = repairSource(before);
-      if (!repaired.repairs.length || repaired.source === before) continue;
       const rel = slashRelative(project, file);
-      const repairedCopy = writeRepairedCopy(outDir, rel, repaired.source);
-      patchText += fullFilePatch(rel, before, repaired.source);
+      let candidate = before;
+      let repairs = [];
+      let modelMeta = null;
+
+      if (model.enabled) {
+        modelStats.attempted += 1;
+        try {
+          const modelOut = await modelRepairSource(model, rel, before);
+          modelMeta = {
+            attempted: true,
+            changed: modelOut.changed,
+            rawBytes: modelOut.rawBytes,
+          };
+          if (modelOut.changed) {
+            candidate = modelOut.source;
+            repairs.push(...modelOut.repairs);
+            modelStats.changed += 1;
+          }
+        } catch (e) {
+          modelStats.failed += 1;
+          modelStats.failures.push({ file: rel, error: e.message });
+          modelMeta = { attempted: true, changed: false, error: e.message };
+          if (model.required) throw new Error(`forge-optimizer model failed for ${rel}: ${e.message}`);
+        }
+      }
+
+      const repaired = repairSource(candidate);
+      candidate = repaired.source;
+      repairs.push(...repaired.repairs);
+      if (!repairs.length || candidate === before) continue;
+      const repairedCopy = writeRepairedCopy(outDir, rel, candidate);
+      patchText += fullFilePatch(rel, before, candidate);
       files.push({
         file: rel,
-        repairs: repaired.repairs,
-        notes: projectRepairNotes(repaired.repairs),
+        repairs,
+        notes: projectRepairNotes(repairs),
+        model: modelMeta,
         originalBytes: Buffer.byteLength(before),
-        repairedBytes: Buffer.byteLength(repaired.source),
+        repairedBytes: Buffer.byteLength(candidate),
         repairedCopy,
       });
     }
@@ -464,7 +630,8 @@ function runProjectReview(opts) {
   const result = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
-    mode: opts.apply ? 'apply' : 'dry-run',
+    mode: opts.apply ? 'apply' : (model.enabled ? 'model-assisted' : 'deterministic-fallback'),
+    model: modelStats,
     status: files.length ? 'needs-review' : 'clean',
     project: { path: projectDisplayPath(project) },
     filesScanned,
@@ -765,13 +932,13 @@ function validateFrontier(opts) {
   console.log(`FRONTIER_ARTIFACT_OK ${data.model} score=${data.score} baseline=${data.baselineScore}`);
 }
 
-function main() {
+async function main() {
   const opts = parse(process.argv.slice(2));
   const cmd = opts._[0];
   try {
     if (cmd === 'branch-review') runBranchReview(opts);
     else if (cmd === 'branch-pipeline') runBranchPipeline(opts);
-    else if (cmd === 'project-review') runProjectReview(opts);
+    else if (cmd === 'project-review') await runProjectReview(opts);
     else if (cmd === 'frontier-validate') validateFrontier(opts);
     else { usage(); process.exit(cmd ? 1 : 0); }
   } catch (e) {

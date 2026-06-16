@@ -3,10 +3,12 @@
 Status: **NEEDS-REVIEW**
 
 Project: `optimizer/fixtures/agent_projects/insforge-customer-portal`  
-Mode: `dry-run`  
+Mode: `deterministic-fallback`  
 Files scanned: `3`  
 Files changed: `3`  
 Repairs found: `3`
+
+Model: `not configured; deterministic verifier fallback`
 
 ## Resource Axes
 

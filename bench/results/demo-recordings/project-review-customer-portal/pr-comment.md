@@ -3,9 +3,12 @@
 Status: **NEEDS-REVIEW**
 
 Project: `optimizer/fixtures/agent_projects/insforge-customer-portal`
+Mode: `deterministic-fallback`
 Files scanned: `3`
 Files with repairs: `3`
 Repairs: `3`
+
+Model: `not configured; deterministic verifier fallback`
 
 ## Apply Patch
 

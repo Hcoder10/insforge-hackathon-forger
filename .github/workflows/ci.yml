@@ -30,6 +30,9 @@ jobs:
         run: npm --prefix bench ci
 
       - name: Replay judge evidence
+        env:
+          FORGE_OPT_URL: ${{ secrets.FORGE_OPT_URL }}
+          FORGE_OPT_MODEL: forge-optimizer
         run: npm run ci:judge
 
       - name: Raw model frontier gate

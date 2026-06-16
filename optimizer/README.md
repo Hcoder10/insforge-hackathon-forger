@@ -78,6 +78,17 @@ The deterministic repair layer is tracked separately. It can score `100.0` on th
 benchmark, but `npm run frontier-audit:repair` confirms that it can do that with empty model
 output. Treat it as a verifier/prototype and distillation target, not as a model-only score.
 
+For project review and PR Guard, the model is used through an OpenAI-compatible endpoint:
+
+```bash
+FORGE_OPT_URL=http://127.0.0.1:8901 \
+node ../tools/forger.js project-review --project path/to/insforge-app --model-required
+```
+
+That path sends each source file to forge-optimizer first, then applies the deterministic
+SDK-shape verifier to the proposed source. The report records model attempts, changes, and
+failures so a CI run is clear about whether it used the model or only the verifier fallback.
+
 The raw adapter is also checked with a manual usefulness probe outside the sealed benchmark.
 See [docs/MODEL_USEFULNESS.md](docs/MODEL_USEFULNESS.md). The current result is mixed:
 database projection, pagination, and storage metadata answers are useful, but image, vector,
