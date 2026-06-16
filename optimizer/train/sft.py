@@ -20,6 +20,9 @@ import os, json
 # Unsloth on WSL/Blackwell can reject the default PyTorch allocator config.
 # Clear it before importing torch or unsloth so the rig run is reproducible.
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = ""
+if os.getenv("FO_DISABLE_COMPILE", "1").lower() in {"1", "true", "yes", "on"}:
+    os.environ["TORCH_COMPILE_DISABLE"] = "1"
+    os.environ["UNSLOTH_COMPILE_DISABLE"] = "1"
 
 import torch
 from unsloth import FastLanguageModel
