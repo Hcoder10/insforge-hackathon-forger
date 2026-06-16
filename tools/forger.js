@@ -16,7 +16,16 @@ const BENCH = path.join(ROOT, 'bench');
 const WORKLOADS = path.join(BENCH, 'workloads');
 const DEFAULT_RECORD = path.join(BENCH, 'results', 'branch-review');
 const PROJECT_SOURCE_EXTS = new Set(['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx']);
-const PROJECT_SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage']);
+const PROJECT_SKIP_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.forger',
+  'forger-results',
+  'dist',
+  'build',
+  '.next',
+  'coverage',
+]);
 const PROJECT_REPAIR_NOTES = {
   'database.insert-array-form': 'Uses array insert format expected by the InsForge SDK.',
   'auth.get-current-user-shape': 'Handles the { data, error } current-user response shape before reading user.id.',
