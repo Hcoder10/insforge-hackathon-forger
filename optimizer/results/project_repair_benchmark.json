@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-16T03:26:08.827Z",
+  "generatedAt": "2026-06-16T03:42:27.257Z",
   "claim": "project-folder repair over agent-written InsForge app files",
   "repairEngine": "optimizer/eval/project_code_repair.js",
   "projectCount": 2,

@@ -10,6 +10,7 @@ overstate the raw model result.
 | --- | --- | --- | --- |
 | Benchmark correctness and resource scoring | `npm run check` | `bench/results/` | Passes mock smoke, calibration, verification, and contamination checks |
 | Branch review | `npm run branch-review:all` | `bench/results/demo-recordings/branch-review-*` | Three recorded InsForge branch reviews with annotated merge SQL |
+| Branch CI/CD pipeline | `npm run branch-pipeline` | `bench/results/demo-recordings/branch-pipeline` | Promotion gate, resource rollup, and post-merge runtime checklist |
 | Project review | `npm run project-review:demo` | `bench/results/demo-recordings/project-review-customer-portal` | Scans and repairs a generated InsForge app folder |
 | Agent repair proof | `npm run agent-repair:bench` | `optimizer/results/agent_repair_benchmark.json` | Agent submissions improve from 69.4 average to 100.0 after repair |
 | Project repair proof | `npm run project-repair:bench` | `optimizer/results/project_repair_benchmark.json` | 5/5 project cases correct and efficient after repair |
@@ -68,7 +69,7 @@ GPU proof:
 GitHub Actions runs `npm run ci:judge`, which replays:
 
 - benchmark checks
-- branch-review recordings
+- branch-review recordings through the branch experiment pipeline
 - project-review demo
 - agent and project repair proof
 - repair audit

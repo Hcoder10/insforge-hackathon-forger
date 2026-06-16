@@ -13,6 +13,14 @@
     tabs: byId('judge-scenario-tabs'),
     mergeSql: byId('judge-merge-sql'),
     sqlVerdict: byId('judge-sql-verdict'),
+    pipelineStatus: byId('judge-pipeline-status'),
+    pipelineMode: byId('judge-pipeline-mode'),
+    pipelineSummary: byId('judge-pipeline-summary'),
+    pipelineScenarios: byId('judge-pipeline-scenarios'),
+    pipelineCpu: byId('judge-pipeline-cpu'),
+    pipelineDisk: byId('judge-pipeline-disk'),
+    pipelineStages: byId('judge-pipeline-stages'),
+    pipelineArtifact: byId('judge-pipeline-artifact'),
     frontierStatus: byId('judge-frontier-status'),
     frontierModel: byId('judge-frontier-model'),
     frontierScore: byId('judge-frontier-score'),
@@ -76,6 +84,12 @@
     if (!Number.isFinite(n)) return '-';
     const sign = n > 0 ? '+' : '';
     return `${sign}${n.toFixed(1)}%`;
+  }
+
+  function betterPct(data, metric) {
+    const value = Number(data?.resourceRollup?.[metric]?.improvementPct);
+    if (!Number.isFinite(value)) return '-';
+    return `${value.toFixed(1)}%`;
   }
 
   function setText(el, text) {
@@ -180,6 +194,44 @@
     }
   }
 
+  function renderBranchPipeline(data) {
+    if (!data || data.error) {
+      setStatus(els.pipelineStatus, 'MISSING');
+      setText(els.pipelineMode, '-');
+      setText(els.pipelineSummary, data?.error || 'No branch pipeline artifact found.');
+      setText(els.pipelineArtifact, '-');
+      return;
+    }
+
+    setStatus(els.pipelineStatus, String(data.status || '-').toUpperCase());
+    setText(els.pipelineMode, data.executionMode || '-');
+    setText(els.pipelineScenarios, String((data.scenarios || []).length));
+    setText(els.pipelineCpu, betterPct(data, 'cpuTimeMs'));
+    setText(els.pipelineDisk, betterPct(data, 'diskBytes'));
+    setText(els.pipelineArtifact, data.artifactPath || data.artifacts?.json || '-');
+    const failures = data.gate?.failures || [];
+    setText(
+      els.pipelineSummary,
+      failures.length
+        ? `${failures.length} promotion issue${failures.length === 1 ? '' : 's'} found.`
+        : 'Branch experiments passed promotion checks and wrote dry-run merge SQL.',
+    );
+
+    if (!els.pipelineStages) return;
+    els.pipelineStages.innerHTML = '';
+    for (const stage of (data.cicd?.stages || []).slice(0, 6)) {
+      const li = document.createElement('li');
+      const name = document.createElement('b');
+      const status = document.createElement('span');
+      name.textContent = stage.stage || '-';
+      status.textContent = stage.status || '-';
+      status.dataset.status = String(stage.status || '').toLowerCase();
+      li.appendChild(name);
+      li.appendChild(status);
+      els.pipelineStages.appendChild(li);
+    }
+  }
+
   function renderProjectReview(data) {
     const review = data?.active || data;
     if (!review || review.error) {
@@ -216,8 +268,9 @@
 
   async function loadJudgeMode() {
     try {
-      const [branch, projectReview, frontier, benchmark] = await Promise.all([
+      const [branch, pipeline, projectReview, frontier, benchmark] = await Promise.all([
         fetchJson('/api/branch-review').catch((e) => ({ error: e.message, reviews: [] })),
+        fetchJson('/api/branch-pipeline').catch((e) => ({ error: e.message })),
         fetchJson('/api/project-review').catch((e) => ({ error: e.message })),
         fetchJson('/api/frontier').catch((e) => ({ error: e.message })),
         fetchJson('/api/benchmark').catch((e) => ({ error: e.message })),
@@ -225,6 +278,7 @@
 
       branchReviews = branch.reviews || [];
       renderBranch(branch.active || branchReviews[0] || null);
+      renderBranchPipeline(pipeline);
       renderProjectReview(projectReview);
 
       if (frontier.error) {

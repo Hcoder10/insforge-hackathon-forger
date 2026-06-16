@@ -2054,7 +2054,7 @@ pre {
 
 .judge-kpis {
   display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
   gap: 14px;
 }
 
@@ -2078,7 +2078,8 @@ pre {
 .judge-meta span,
 .frontier-stats span,
 .benchmark-meta span,
-.project-review-stats span {
+.project-review-stats span,
+.pipeline-stats span {
   color: var(--soft);
   font-size: 12px;
   font-weight: 900;
@@ -2160,7 +2161,8 @@ pre {
 .judge-meta,
 .benchmark-meta,
 .frontier-stats,
-.project-review-stats {
+.project-review-stats,
+.pipeline-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -2174,7 +2176,8 @@ pre {
 .judge-meta span,
 .benchmark-meta div,
 .frontier-stats div,
-.project-review-stats div {
+.project-review-stats div,
+.pipeline-stats div {
   min-width: 0;
   border: 1px solid rgba(255, 197, 66, 0.18);
   background: rgba(255, 197, 66, 0.06);
@@ -2184,7 +2187,8 @@ pre {
 .judge-meta b,
 .benchmark-meta b,
 .frontier-stats b,
-.project-review-stats b {
+.project-review-stats b,
+.pipeline-stats b {
   display: block;
   margin-top: 5px;
   color: var(--text);
@@ -2293,6 +2297,38 @@ pre {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.pipeline-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pipeline-stages {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.pipeline-stages li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(143, 246, 184, 0.13);
+  padding-bottom: 7px;
+  font-size: 12px;
+}
+
+.pipeline-stages b {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.pipeline-stages span {
+  color: var(--mint);
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
 .project-findings {
   list-style: none;
   display: grid;
@@ -2340,7 +2376,9 @@ pre {
 }
 
 [data-status="pass"],
-[data-status="ready"] {
+[data-status="ready"],
+[data-status="ready-to-promote"],
+[data-status="informational"] {
   color: var(--mint) !important;
 }
 

@@ -8,6 +8,7 @@
 //   POST /api/demo  {taskId}             -> { task, haiku:{code,grade}, forge:{code,grade} }
 //   POST /api/grade {taskId, code}       -> grade one solution (used for manual paste)
 //   GET  /api/branch-review              -> recorded or live branch-review evidence
+//   GET  /api/branch-pipeline            -> branch experiment CI/CD promotion evidence
 //   GET  /api/project-review             -> project-folder repair review evidence
 //   GET  /api/frontier                   -> frontier optimizer run artifact
 //   GET  /api/benchmark                  -> benchmark leaderboard and resource snapshot
@@ -171,6 +172,13 @@ function listProjectReviews() {
     .sort((a, b) => String(a.project?.path || '').localeCompare(String(b.project?.path || '')));
 }
 
+function readBranchPipeline() {
+  const file = path.join(RESULT_DIR, 'demo-recordings', 'branch-pipeline', 'pipeline.json');
+  const data = safeReadJson(file);
+  if (!data) return null;
+  return { ...data, artifactPath: path.relative(__dirname, file) };
+}
+
 function readFrontierArtifact() {
   const candidates = [
     path.join(FRONTIER_DIR, 'frontier_run.json'),
@@ -226,6 +234,10 @@ const server = http.createServer(async (req, res) => {
         active: reviews.find((r) => r.workload.name === 'slow-query-index') || reviews[0] || null,
         reviews,
       });
+    }
+    if (u.pathname === '/api/branch-pipeline') {
+      const pipeline = readBranchPipeline();
+      return send(res, pipeline ? 200 : 404, pipeline || { error: 'branch pipeline artifact not found' });
     }
     if (u.pathname === '/api/project-review') {
       const reviews = listProjectReviews();

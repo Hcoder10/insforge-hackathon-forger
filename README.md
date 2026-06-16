@@ -76,6 +76,7 @@ Run recorded branch-review evidence:
 
 ```bash
 npm run branch-review:all
+npm run branch-pipeline
 ```
 
 Run against a real InsForge branch:
@@ -91,6 +92,12 @@ node tools/forger.js branch-review \
 Branch Review writes `result.json`, `report.md`, `timeline.json`, and `annotated-merge.sql`
 under `bench/results/demo-recordings/`. See [docs/BRANCH_REVIEW.md](docs/BRANCH_REVIEW.md).
 
+`npm run branch-pipeline` runs the full branch experiment matrix and writes
+`bench/results/demo-recordings/branch-pipeline/pipeline.json`. The pipeline artifact rolls up
+CPU, disk, memory, sequential scan, and timing deltas, then emits a promotion decision plus
+the post-merge runtime deploy checklist for InsForge functions, frontend deployments, and
+compute services.
+
 ## CI
 
 GitHub Actions runs the judge evidence suite on every push and pull request:
@@ -100,7 +107,8 @@ npm run ci:judge
 ```
 
 That command replays benchmark checks, recorded branch reviews, the project-review demo,
-agent repair proof, project repair proof, the repair audit, and frontier artifact validation.
+the branch experiment pipeline, the project-review demo, agent repair proof, project repair
+proof, the repair audit, and frontier artifact validation.
 The raw model frontier gate also runs in CI as an informational step, because the current raw
 adapter is valid but does not yet beat the Codex baseline.
 

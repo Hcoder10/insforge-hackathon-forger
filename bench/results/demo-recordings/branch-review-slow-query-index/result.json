@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-16T03:25:58.050Z",
+  "generatedAt": "2026-06-16T03:42:18.209Z",
   "workload": {
     "name": "slow-query-index",
     "kind": "postgres-explain",

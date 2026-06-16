@@ -211,6 +211,10 @@
                 <strong id="judge-branch-status">loading</strong>
               </article>
               <article>
+                <span>CI/CD gate</span>
+                <strong id="judge-pipeline-status">-</strong>
+              </article>
+              <article>
                 <span>frontier score</span>
                 <strong id="judge-frontier-score">-</strong>
               </article>
@@ -270,6 +274,21 @@
                   <div><span>axes</span><b id="judge-benchmark-axes">-</b></div>
                 </div>
                 <ol class="judge-leaderboard" id="judge-leaderboard"></ol>
+              </article>
+
+              <article class="judge-panel pipeline-panel">
+                <header>
+                  <span>branch CI/CD</span>
+                  <b id="judge-pipeline-mode">-</b>
+                </header>
+                <p id="judge-pipeline-summary">Loading branch pipeline evidence.</p>
+                <div class="pipeline-stats">
+                  <div><span>scenarios</span><b id="judge-pipeline-scenarios">-</b></div>
+                  <div><span>CPU better</span><b id="judge-pipeline-cpu">-</b></div>
+                  <div><span>disk better</span><b id="judge-pipeline-disk">-</b></div>
+                </div>
+                <ul class="pipeline-stages" id="judge-pipeline-stages"></ul>
+                <p class="artifact-path" id="judge-pipeline-artifact">-</p>
               </article>
 
               <article class="judge-panel project-review-panel">

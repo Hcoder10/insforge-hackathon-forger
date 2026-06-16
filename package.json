@@ -7,6 +7,7 @@
     "judge-demo": "node demo_server.js 8900",
     "branch-review": "node tools/forger.js branch-review --scenario slow-query-index --record bench/results/demo-recordings/branch-review-slow-query-index",
     "branch-review:all": "node tools/forger.js branch-review --scenario slow-query-index --record bench/results/demo-recordings/branch-review-slow-query-index && node tools/forger.js branch-review --scenario pagination-scale --record bench/results/demo-recordings/branch-review-pagination-scale && node tools/forger.js branch-review --scenario storage-metadata --record bench/results/demo-recordings/branch-review-storage-metadata",
+    "branch-pipeline": "node tools/forger.js branch-pipeline --out bench/results/demo-recordings/branch-pipeline",
     "project-review:demo": "node tools/forger.js project-review --project optimizer/fixtures/agent_projects/insforge-customer-portal --out bench/results/demo-recordings/project-review-customer-portal",
     "frontier-plus": "node optimizer/eval/repair_submission.js --input bench/results/sub_fo-frontier.json --tag frontier-plus --model forge-optimizer:frontier-plus && node bench/bench/eval_submission.js bench/results/sub_fo-frontier-plus.json bench/results/score_fo-frontier-plus.json",
     "frontier-report:raw": "node optimizer/eval/frontier_report.js --score bench/results/score_fo-frontier-plus-raw.json --baseline bench/results/score_codex.json --out optimizer/results/frontier_run.json --model forge-optimizer-frontier:frontier-plus-raw --status live-run-raw",
@@ -21,7 +22,7 @@
     "modal:gpu-probe": "modal run -q tools/modal_gpu_probe.py --out optimizer/results/modal_probe.json",
     "modal:frontier": "modal run -q tools/modal_frontier.py::frontier --data-n 80 --steps 140 --epochs 1 --tag modal-weakfix-h100 --out-dir optimizer/results/modal-weakfix-h100",
     "modal:frontier-fast": "modal run -q tools/modal_frontier.py::frontier --data-n 80 --steps 48 --epochs 1 --num-generations 2 --max-completion 512 --grad-accum 2 --save-steps 12 --tag modal-weakfix-fast --out-dir optimizer/results/modal-weakfix-fast",
-    "ci:judge": "npm run check && npm run branch-review:all && npm run project-review:demo && npm run proof:repair && npm run frontier-validate",
+    "ci:judge": "npm run check && npm run branch-pipeline && npm run project-review:demo && npm run proof:repair && npm run frontier-validate",
     "check": "cd bench && npm run check"
   },
   "license": "MIT"

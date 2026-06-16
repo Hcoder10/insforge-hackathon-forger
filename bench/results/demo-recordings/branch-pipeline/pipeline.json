@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-16T03:42:18.213Z",
+  "status": "ready-to-promote",
+  "executionMode": "recorded",
+  "gate": {
+    "passed": true,
+    "failures": [],
+    "required": [
+      "branch review exists for every selected workload",
+      "candidate returns the expected result shape and minimum rows",
+      "no candidate sequential scan when the workload forbids it",
+      "actual time, CPU, disk, and memory stay within workload thresholds",
+      "dry-run merge SQL is written for human review before promotion"
+    ]
+  },
+  "resourceRollup": {
+    "actualTimeMs": {
+      "baseline": 476.40000000000003,
+      "candidate": 26.9,
+      "delta": -449.50000000000006,
+      "improvementPct": 94.3534844668346
+    },
+    "cpuTimeMs": {
+      "baseline": 464.59999999999997,
+      "candidate": 25,
+      "delta": -439.59999999999997,
+      "improvementPct": 94.61902712010331
+    },
+    "diskBytes": {
+      "baseline": 63176704,
+      "candidate": 1572864,
+      "delta": -61603840,
+      "improvementPct": 97.5103734439834
+    },
+    "memoryBytes": {
+      "baseline": 142557184,
+      "candidate": 8650752,
+      "delta": -133906432,
+      "improvementPct": 93.93173198482933
+    },
+    "seqScans": {
+      "baseline": 3,
+      "candidate": 0,
+      "delta": -3,
+      "improvementPct": 100
+    }
+  },
+  "scenarios": [
+    {
+      "name": "pagination-scale",
+      "description": "Reviews a branch migration that replaces offset-heavy pagination with indexed keyset pagination.",
+      "status": "pass",
+      "executionMode": "recorded",
+      "branch": {
+        "name": "forger-pagination-scale",
+        "mode": "schema-only"
+      },
+      "keyMetrics": {
+        "actualTimeMs": {
+          "baseline": 247.2,
+          "candidate": 12.6,
+          "delta": -234.6,
+          "pct": -94.90291262135922
+        },
+        "cpuTimeMs": {
+          "baseline": 240.8,
+          "candidate": 11.9,
+          "delta": -228.9,
+          "pct": -95.05813953488372
+        },
+        "diskBytes": {
+          "baseline": 30932992,
+          "candidate": 786432,
+          "delta": -30146560,
+          "pct": -97.45762711864407
+        },
+        "memoryBytes": {
+          "baseline": 67387392,
+          "candidate": 4194304,
+          "delta": -63193088,
+          "pct": -93.7758327255045
+        },
+        "seqScans": {
+          "baseline": 1,
+          "candidate": 0,
+          "delta": -1,
+          "pct": -100
+        }
+      },
+      "findings": [],
+      "artifacts": {
+        "result": "bench/results/demo-recordings/branch-review-pagination-scale/result.json",
+        "report": "bench/results/demo-recordings/branch-review-pagination-scale/report.md",
+        "annotatedMergeSql": "bench/results/demo-recordings/branch-review-pagination-scale/annotated-merge.sql"
+      }
+    },
+    {
+      "name": "slow-query-index",
+      "description": "Reviews a branch migration that adds a customer lookup index to a large orders table.",
+      "status": "pass",
+      "executionMode": "recorded",
+      "branch": {
+        "name": "forger-slow-query-index",
+        "mode": "schema-only"
+      },
+      "keyMetrics": {
+        "actualTimeMs": {
+          "baseline": 132.4,
+          "candidate": 8.9,
+          "delta": -123.5,
+          "pct": -93.27794561933534
+        },
+        "cpuTimeMs": {
+          "baseline": 129.6,
+          "candidate": 8.1,
+          "delta": -121.5,
+          "pct": -93.75
+        },
+        "diskBytes": {
+          "baseline": 18874368,
+          "candidate": 524288,
+          "delta": -18350080,
+          "pct": -97.22222222222221
+        },
+        "memoryBytes": {
+          "baseline": 42139648,
+          "candidate": 3145728,
+          "delta": -38993920,
+          "pct": -92.53499222395023
+        },
+        "seqScans": {
+          "baseline": 1,
+          "candidate": 0,
+          "delta": -1,
+          "pct": -100
+        }
+      },
+      "findings": [],
+      "artifacts": {
+        "result": "bench/results/demo-recordings/branch-review-slow-query-index/result.json",
+        "report": "bench/results/demo-recordings/branch-review-slow-query-index/report.md",
+        "annotatedMergeSql": "bench/results/demo-recordings/branch-review-slow-query-index/annotated-merge.sql"
+      }
+    },
+    {
+      "name": "storage-metadata",
+      "description": "Reviews a branch migration that indexes storage object metadata for bucket and owner lookups.",
+      "status": "pass",
+      "executionMode": "recorded",
+      "branch": {
+        "name": "forger-storage-metadata",
+        "mode": "schema-only"
+      },
+      "keyMetrics": {
+        "actualTimeMs": {
+          "baseline": 96.8,
+          "candidate": 5.4,
+          "delta": -91.39999999999999,
+          "pct": -94.42148760330578
+        },
+        "cpuTimeMs": {
+          "baseline": 94.2,
+          "candidate": 5,
+          "delta": -89.2,
+          "pct": -94.69214437367303
+        },
+        "diskBytes": {
+          "baseline": 13369344,
+          "candidate": 262144,
+          "delta": -13107200,
+          "pct": -98.0392156862745
+        },
+        "memoryBytes": {
+          "baseline": 33030144,
+          "candidate": 1310720,
+          "delta": -31719424,
+          "pct": -96.03174603174604
+        },
+        "seqScans": {
+          "baseline": 1,
+          "candidate": 0,
+          "delta": -1,
+          "pct": -100
+        }
+      },
+      "findings": [],
+      "artifacts": {
+        "result": "bench/results/demo-recordings/branch-review-storage-metadata/result.json",
+        "report": "bench/results/demo-recordings/branch-review-storage-metadata/report.md",
+        "annotatedMergeSql": "bench/results/demo-recordings/branch-review-storage-metadata/annotated-merge.sql"
+      }
+    }
+  ],
+  "cicd": {
+    "stages": [
+      {
+        "stage": "benchmark",
+        "status": "pass",
+        "command": "npm run check"
+      },
+      {
+        "stage": "branch experiments",
+        "status": "pass",
+        "command": "npm run branch-pipeline"
+      },
+      {
+        "stage": "project repair proof",
+        "status": "pass",
+        "command": "npm run proof:repair"
+      },
+      {
+        "stage": "frontier artifact validation",
+        "status": "pass",
+        "command": "npm run frontier-validate"
+      },
+      {
+        "stage": "raw model gate",
+        "status": "informational",
+        "command": "npm run frontier-gate:raw"
+      }
+    ],
+    "postMerge": [
+      {
+        "name": "database merge",
+        "required": true,
+        "command": "npx @insforge/cli branch merge <name> --dry-run --save-sql merge.sql, then merge after review"
+      },
+      {
+        "name": "edge functions",
+        "required": false,
+        "command": "npx @insforge/cli functions deploy <slug> --file <file>"
+      },
+      {
+        "name": "frontend",
+        "required": false,
+        "command": "npx @insforge/cli deployments deploy ."
+      },
+      {
+        "name": "compute services",
+        "required": false,
+        "command": "npx @insforge/cli compute update <id> --image <image>"
+      },
+      {
+        "name": "production canary",
+        "required": true,
+        "command": "node live/run_resource_bench.js 3 3000"
+      }
+    ]
+  },
+  "artifacts": {
+    "json": "bench/results/demo-recordings/branch-pipeline/pipeline.json",
+    "markdown": "bench/results/demo-recordings/branch-pipeline/pipeline.md"
+  }
+}

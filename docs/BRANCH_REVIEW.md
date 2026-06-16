@@ -18,6 +18,7 @@ Recorded mode is the default and does not create an InsForge branch:
 ```bash
 npm run branch-review
 npm run branch-review:all
+npm run branch-pipeline
 ```
 
 Live mode creates and deletes a real backend branch:
@@ -32,6 +33,28 @@ node tools/forger.js branch-review \
 
 Use `--keep-branch` only when you want to inspect the branch after the run.
 
+## Branch Experiment Pipeline
+
+The pipeline command runs every workload, writes the individual branch review artifacts, and
+then creates one promotion artifact:
+
+```text
+bench/results/demo-recordings/branch-pipeline/pipeline.json
+bench/results/demo-recordings/branch-pipeline/pipeline.md
+```
+
+The promotion gate requires:
+
+- a branch review result for every selected workload
+- expected rows and result shape preserved
+- no sequential scan when the workload forbids it
+- actual time, CPU, disk, and memory within workload thresholds
+- dry-run merge SQL written for human review before promotion
+
+The pipeline also records the required post-merge runtime checklist. InsForge branch merge
+does not redeploy code, so functions, frontend deployments, and compute services must be
+redeployed when those runtimes depend on the merged backend change.
+
 ## Outputs
 
 Each run writes:
@@ -40,6 +63,11 @@ Each run writes:
 - `report.md`: judge-readable summary.
 - `annotated-merge.sql`: merge SQL with FORGER resource annotations.
 - `timeline.json`: ordered execution events.
+
+The pipeline writes:
+
+- `pipeline.json`: promotion status, resource rollup, scenario matrix, and CI/CD stages.
+- `pipeline.md`: judge-readable summary of the same data.
 
 Recorded demo artifacts live under:
 
