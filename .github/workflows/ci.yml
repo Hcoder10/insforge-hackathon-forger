@@ -25,8 +25,11 @@ jobs:
         run: npm run ci:judge
 
       - name: Raw model frontier gate
-        continue-on-error: true
-        run: npm run frontier-gate:raw
+        run: |
+          npm run frontier-gate:raw || {
+            echo "Raw model gate is informational until a raw artifact beats the baseline."
+            echo "The judge evidence suite above is still required to pass."
+          }
 
       - name: Upload judge artifacts
         uses: actions/upload-artifact@v4
