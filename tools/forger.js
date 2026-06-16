@@ -308,7 +308,8 @@ function modelConfig(opts) {
     url,
     endpoint: compactUrl(url),
     model: opts.model || process.env.FORGE_OPT_MODEL || 'forge-optimizer',
-    timeoutMs: Number(opts['model-timeout-ms'] || process.env.FORGE_OPT_TIMEOUT_MS || 45000),
+    timeoutMs: Number(opts['model-timeout-ms'] || process.env.FORGE_OPT_TIMEOUT_MS || 180000),
+    maxTokens: Number(opts['model-max-tokens'] || process.env.FORGE_OPT_MAX_TOKENS || 256),
   };
 }
 
@@ -316,25 +317,45 @@ function projectModelPrompt(rel, source) {
   return `You are forge-optimizer, a specialist model for improving InsForge app code.
 
 Review this single source file for real InsForge SDK correctness or resource issues. Focus on:
-- database inserts that need the InsForge array insert shape
-- auth.getCurrentUser response-shape handling
-- pagination, projection, count, and server-side filtering
-- storage metadata reads that should not download files
-- batch storage deletes instead of one request per object
-- avoidable CPU, memory, or disk work in app/backend code
+- database.insert-array-form: database inserts that need the InsForge array insert shape
+- auth.get-current-user-shape: auth.getCurrentUser response-shape handling
+- database.pagination-count-projection: pagination, projection, count, and server-side filtering
+- storage.metadata-without-download: storage metadata reads that should not download files
+- storage.batch-remove: batch storage deletes instead of one request per object
 
-Preserve the file's public API, imports, component behavior, styling hooks, and unrelated code. Do not invent new tables, buckets, environment variables, or packages.
+Return compact JSON only:
+{"issues":["issue-id"],"summary":"short reason"}
 
-If no change is needed, respond exactly:
-NO_CHANGE
+If no issue is present, return:
+{"issues":[],"summary":"clean"}
 
-If a change is needed, respond with only the full revised source in one fenced code block.
+Do not return source code. Do not include markdown.
 
 File: ${rel}
 
 \`\`\`
 ${source}
 \`\`\``;
+}
+
+function shouldModelReviewSource(rel, source) {
+  const name = rel.toLowerCase();
+  if (name.includes('.test.') || name.endsWith('.d.ts')) return false;
+  return /@insforge\/sdk|createClient\s*\(|\b(?:insforge|client)\.(?:database|auth|storage)\b/.test(source);
+}
+
+function extractModelIssues(text) {
+  const raw = String(text || '').trim();
+  const jsonStart = raw.indexOf('{');
+  const jsonEnd = raw.lastIndexOf('}');
+  if (jsonStart === -1 || jsonEnd <= jsonStart) return [];
+  try {
+    const parsed = JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+    const issues = Array.isArray(parsed?.issues) ? parsed.issues : [];
+    return issues.filter((issue) => typeof issue === 'string' && PROJECT_REPAIR_NOTES[issue]);
+  } catch {
+    return [];
+  }
 }
 
 function extractModelSource(text) {
@@ -369,7 +390,7 @@ async function callForgeOptimizer(config, prompt) {
       body: JSON.stringify({
         model: config.model,
         temperature: 0,
-        max_tokens: 4096,
+        max_tokens: config.maxTokens,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -383,14 +404,11 @@ async function callForgeOptimizer(config, prompt) {
 
 async function modelRepairSource(config, rel, before) {
   const content = await callForgeOptimizer(config, projectModelPrompt(rel, before));
-  const source = extractModelSource(content);
-  if (!source || source.trim() === before.trim()) {
-    return { changed: false, source: before, repairs: [], rawBytes: Buffer.byteLength(content || '') };
-  }
+  const issues = extractModelIssues(content);
   return {
-    changed: true,
-    source,
-    repairs: ['model.forge-optimizer-rewrite'],
+    changed: false,
+    source: before,
+    repairs: issues,
     rawBytes: Buffer.byteLength(content || ''),
   };
 }
@@ -553,7 +571,9 @@ async function runProjectReview(opts) {
     endpoint: model.endpoint,
     attempted: 0,
     changed: 0,
+    findings: 0,
     failed: 0,
+    skipped: 0,
     failures: [],
   };
 
@@ -578,15 +598,20 @@ async function runProjectReview(opts) {
       let repairs = [];
       let modelMeta = null;
 
-      if (model.enabled) {
+      if (model.enabled && shouldModelReviewSource(rel, before)) {
         modelStats.attempted += 1;
         try {
           const modelOut = await modelRepairSource(model, rel, before);
           modelMeta = {
             attempted: true,
             changed: modelOut.changed,
+            issues: modelOut.repairs,
             rawBytes: modelOut.rawBytes,
           };
+          if (modelOut.repairs.length) {
+            repairs.push(...modelOut.repairs);
+            modelStats.findings += modelOut.repairs.length;
+          }
           if (modelOut.changed) {
             candidate = modelOut.source;
             repairs.push(...modelOut.repairs);
@@ -598,11 +623,14 @@ async function runProjectReview(opts) {
           modelMeta = { attempted: true, changed: false, error: e.message };
           if (model.required) throw new Error(`forge-optimizer model failed for ${rel}: ${e.message}`);
         }
+      } else if (model.enabled) {
+        modelStats.skipped += 1;
       }
 
       const repaired = repairSource(candidate);
       candidate = repaired.source;
       repairs.push(...repaired.repairs);
+      repairs = [...new Set(repairs)];
       if (!repairs.length || candidate === before) continue;
       const repairedCopy = writeRepairedCopy(outDir, rel, candidate);
       patchText += fullFilePatch(rel, before, candidate);
