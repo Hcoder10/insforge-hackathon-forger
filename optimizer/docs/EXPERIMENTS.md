@@ -11,6 +11,7 @@ overstate the raw model result.
 | Benchmark correctness and resource scoring | `npm run check` | `bench/results/` | Passes mock smoke, calibration, verification, and contamination checks |
 | Branch review | `npm run branch-review:all` | `bench/results/demo-recordings/branch-review-*` | Three recorded InsForge branch reviews with annotated merge SQL |
 | Branch CI/CD pipeline | `npm run branch-pipeline` | `bench/results/demo-recordings/branch-pipeline` | Promotion gate, resource rollup, and post-merge runtime checklist |
+| PR Guard CI/CD | `.github/workflows/ci.yml` | GitHub job summary, `forger-ci-evidence`, PR comment | Posts or updates a `FORGER PR Guard` comment on pull requests |
 | Project review | `npm run project-review:demo` | `bench/results/demo-recordings/project-review-customer-portal` | Scans a generated InsForge app folder and emits repaired copies, `forger.patch`, and `pr-comment.md` |
 | Agent repair proof | `npm run agent-repair:bench` | `optimizer/results/agent_repair_benchmark.json` | Agent submissions improve from 69.4 average to 100.0 after repair |
 | Project repair proof | `npm run project-repair:bench` | `optimizer/results/project_repair_benchmark.json` | 5/5 project cases correct and efficient after repair |
@@ -75,6 +76,11 @@ GitHub Actions runs `npm run ci:judge`, which replays:
 - repair audit
 - frontier artifact validation
 
-The raw frontier gate also runs in CI as an informational step with `continue-on-error`.
-That keeps the public status honest while still making the failing gate visible until a raw
-model artifact beats the baseline.
+The raw frontier gate also runs in CI as an informational shell step. That keeps the public
+status honest while still making the failing gate visible until a raw model artifact beats
+the baseline.
+
+On pull requests, the workflow reads the generated project-review `pr-comment.md` and uses
+`tools/post_forger_pr_comment.js` to maintain one sticky `FORGER PR Guard` comment. The same
+run uploads the branch pipeline, project review, applyable patch, repair benchmark outputs,
+and frontier artifact as `forger-ci-evidence`.

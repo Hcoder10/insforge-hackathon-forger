@@ -107,10 +107,15 @@ npm run ci:judge
 ```
 
 That command replays benchmark checks, recorded branch reviews, the project-review demo,
-the branch experiment pipeline, the project-review demo, agent repair proof, project repair
-proof, the repair audit, and frontier artifact validation.
+the branch experiment pipeline, agent repair proof, project repair proof, the repair audit,
+and frontier artifact validation.
 The raw model frontier gate also runs in CI as an informational step, because the current raw
 adapter is valid but does not yet beat the Codex baseline.
+
+On pull requests, CI posts or updates one `FORGER PR Guard` comment from
+`bench/results/demo-recordings/project-review-customer-portal/pr-comment.md`. Every run also
+writes a GitHub job summary and uploads `forger-ci-evidence`, including the branch pipeline,
+project review, applyable patch, repair benchmarks, and frontier artifact.
 
 There is also a manual `branch-promotion` workflow for live InsForge backend branches. It
 requires `INSFORGE_EMAIL`, `INSFORGE_PASSWORD`, `INSFORGE_PROJECT_ID`, and optionally

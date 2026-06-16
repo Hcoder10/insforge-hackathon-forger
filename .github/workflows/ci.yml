@@ -4,6 +4,11 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   judge-evidence:
     runs-on: ubuntu-latest
@@ -30,3 +35,47 @@ jobs:
             echo "Raw model gate is informational until a raw artifact beats the baseline."
             echo "The judge evidence suite above is still required to pass."
           }
+
+      - name: Publish Forger CI summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          {
+            echo "## FORGER CI/CD"
+            echo
+            if [ -f bench/results/demo-recordings/project-review-customer-portal/pr-comment.md ]; then
+              cat bench/results/demo-recordings/project-review-customer-portal/pr-comment.md
+            else
+              echo "Forger PR Guard did not produce a comment artifact. Check the replay logs."
+            fi
+            echo
+            echo "### Evidence"
+            echo
+            echo "- Branch pipeline: \`bench/results/demo-recordings/branch-pipeline/pipeline.md\`"
+            echo "- Project review: \`bench/results/demo-recordings/project-review-customer-portal/project-review.md\`"
+            echo "- Applyable patch: \`bench/results/demo-recordings/project-review-customer-portal/forger.patch\`"
+            echo "- Agent repair benchmark: \`optimizer/results/agent_repair_benchmark.json\`"
+            echo "- Project repair benchmark: \`optimizer/results/project_repair_benchmark.json\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Forger evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: forger-ci-evidence
+          path: |
+            bench/results/demo-recordings/branch-pipeline/
+            bench/results/demo-recordings/project-review-customer-portal/
+            optimizer/results/agent_repair_benchmark.json
+            optimizer/results/project_repair_benchmark.json
+            optimizer/results/frontier_run.json
+          if-no-files-found: warn
+
+      - name: Comment Forger PR Guard
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORGER_CI_STATUS: ${{ job.status }}
+          FORGER_COMMENT_PATH: bench/results/demo-recordings/project-review-customer-portal/pr-comment.md
+          FORGER_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node tools/post_forger_pr_comment.js
