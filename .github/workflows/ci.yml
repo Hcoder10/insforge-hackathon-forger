@@ -30,13 +30,3 @@ jobs:
             echo "Raw model gate is informational until a raw artifact beats the baseline."
             echo "The judge evidence suite above is still required to pass."
           }
-
-      - name: Upload judge artifacts
-        uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: judge-evidence
-          path: |
-            bench/results/demo-recordings/
-            optimizer/results/*.json
-          if-no-files-found: warn
