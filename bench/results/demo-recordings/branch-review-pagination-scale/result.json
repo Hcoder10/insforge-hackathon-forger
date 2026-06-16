@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-12T07:27:41.523Z",
+  "generatedAt": "2026-06-16T00:59:41.943Z",
   "workload": {
     "name": "pagination-scale",
     "kind": "postgres-explain",

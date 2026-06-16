@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-16T00:58:42.559Z",
+  "mode": "dry-run",
+  "status": "needs-review",
+  "project": {
+    "path": "optimizer/fixtures/agent_projects/insforge-customer-portal"
+  },
+  "filesScanned": 3,
+  "repairCount": 3,
+  "files": [
+    {
+      "file": "src/feed.js",
+      "repairs": [
+        "database.pagination-count-projection"
+      ],
+      "notes": [
+        "Uses projected columns, exact count, and server pagination."
+      ],
+      "originalBytes": 445,
+      "repairedBytes": 410,
+      "repairedCopy": "repaired/src/feed.js"
+    },
+    {
+      "file": "src/profiles.js",
+      "repairs": [
+        "database.insert-array-form"
+      ],
+      "notes": [
+        "Uses array insert format expected by the InsForge SDK."
+      ],
+      "originalBytes": 256,
+      "repairedBytes": 258,
+      "repairedCopy": "repaired/src/profiles.js"
+    },
+    {
+      "file": "src/sessionDocs.js",
+      "repairs": [
+        "auth.get-current-user-shape"
+      ],
+      "notes": [
+        "Handles the { data, error } current-user response shape before reading user.id."
+      ],
+      "originalBytes": 322,
+      "repairedBytes": 455,
+      "repairedCopy": "repaired/src/sessionDocs.js"
+    }
+  ]
+}

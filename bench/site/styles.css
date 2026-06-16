@@ -1983,7 +1983,7 @@ pre {
 .suite-table tr.win td:last-child{color:#3ad29f;font-weight:bold}
 
 /* ============================================================
-   RUN PAGE FIXES — make all cards visible, scrollable, fit
+   RUN PAGE FIXES: make all cards visible, scrollable, fit
    ============================================================ */
 /* let the active page scroll inside the stage so nothing is clipped */
 .page.active{ overflow-y:auto; overflow-x:hidden; }
@@ -2000,7 +2000,7 @@ pre {
 .page-run textarea{ width:100%; box-sizing:border-box; max-height:220px; }
 #run-output{ background:#0b1216; }
 
-/* the game lane (Forger guy) — give it real height + keep it in flow/visible */
+/* the game lane (Forger guy): give it real height + keep it in flow/visible */
 .page-run .game-lane{ position:relative; min-height:180px; margin:18px 0; overflow:visible; }
 .page-run .run-forger{ max-height:120px; }
 
@@ -2011,7 +2011,7 @@ pre {
 .page-run.page{ padding:96px 56px 48px; }
 
 /* ============================================================
-   SUITE CONSOLE (live benchmark) — real values, fits, scrolls
+   SUITE CONSOLE (live benchmark): real values, fits, scrolls
    ============================================================ */
 .suite-scoreboard{ font-size:13px; opacity:.92; margin-left:8px }
 .suite-scoreboard b{ color:#3ad29f }
@@ -2054,7 +2054,7 @@ pre {
 
 .judge-kpis {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
   gap: 14px;
 }
 
@@ -2077,7 +2077,8 @@ pre {
 .judge-panel header span,
 .judge-meta span,
 .frontier-stats span,
-.benchmark-meta span {
+.benchmark-meta span,
+.project-review-stats span {
   color: var(--soft);
   font-size: 12px;
   font-weight: 900;
@@ -2093,7 +2094,7 @@ pre {
 
 .judge-grid {
   display: grid;
-  grid-template-columns: minmax(360px, 1.35fr) minmax(300px, 0.9fr);
+  grid-template-columns: minmax(360px, 1.25fr) minmax(260px, 0.85fr) minmax(260px, 0.85fr);
   gap: 14px;
   align-items: stretch;
 }
@@ -2158,7 +2159,8 @@ pre {
 
 .judge-meta,
 .benchmark-meta,
-.frontier-stats {
+.frontier-stats,
+.project-review-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
@@ -2171,7 +2173,8 @@ pre {
 
 .judge-meta span,
 .benchmark-meta div,
-.frontier-stats div {
+.frontier-stats div,
+.project-review-stats div {
   min-width: 0;
   border: 1px solid rgba(255, 197, 66, 0.18);
   background: rgba(255, 197, 66, 0.06);
@@ -2180,7 +2183,8 @@ pre {
 
 .judge-meta b,
 .benchmark-meta b,
-.frontier-stats b {
+.frontier-stats b,
+.project-review-stats b {
   display: block;
   margin-top: 5px;
   color: var(--text);
@@ -2285,6 +2289,38 @@ pre {
   color: var(--violet);
 }
 
+.project-review-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.project-findings {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.project-findings li {
+  display: grid;
+  gap: 4px;
+  border-left: 3px solid rgba(143, 246, 184, 0.72);
+  padding-left: 9px;
+}
+
+.project-findings b {
+  color: var(--text);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.project-findings span {
+  color: var(--soft);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .sql-panel {
   grid-column: 1 / -1;
 }
@@ -2309,6 +2345,7 @@ pre {
 }
 
 [data-status="warn"],
+[data-status="needs-review"],
 [data-status="recorded-demo"],
 [data-status="recorded-demo-target"] {
   color: var(--amber) !important;
@@ -2329,6 +2366,7 @@ pre {
   .judge-grid,
   .judge-meta,
   .benchmark-meta,
+  .project-review-stats,
   .frontier-stats,
   .frontier-score {
     grid-template-columns: 1fr;

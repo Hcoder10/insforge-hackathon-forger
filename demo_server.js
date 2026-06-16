@@ -8,6 +8,7 @@
 //   POST /api/demo  {taskId}             -> { task, haiku:{code,grade}, forge:{code,grade} }
 //   POST /api/grade {taskId, code}       -> grade one solution (used for manual paste)
 //   GET  /api/branch-review              -> recorded or live branch-review evidence
+//   GET  /api/project-review             -> project-folder repair review evidence
 //   GET  /api/frontier                   -> frontier optimizer run artifact
 //   GET  /api/benchmark                  -> benchmark leaderboard and resource snapshot
 //
@@ -155,6 +156,21 @@ function listBranchReviews() {
     .sort((a, b) => a.workload.name.localeCompare(b.workload.name));
 }
 
+function listProjectReviews() {
+  const root = path.join(RESULT_DIR, 'demo-recordings');
+  if (!fs.existsSync(root)) return [];
+  return fs.readdirSync(root)
+    .filter((name) => name.startsWith('project-review-'))
+    .map((name) => {
+      const dir = path.join(root, name);
+      const result = safeReadJson(path.join(dir, 'project-review.json'));
+      if (!result) return null;
+      return { ...result, artifacts: { dir: path.relative(__dirname, dir) } };
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(a.project?.path || '').localeCompare(String(b.project?.path || '')));
+}
+
 function readFrontierArtifact() {
   const candidates = [
     path.join(FRONTIER_DIR, 'frontier_run.json'),
@@ -208,6 +224,13 @@ const server = http.createServer(async (req, res) => {
       const reviews = listBranchReviews();
       return send(res, reviews.length ? 200 : 404, {
         active: reviews.find((r) => r.workload.name === 'slow-query-index') || reviews[0] || null,
+        reviews,
+      });
+    }
+    if (u.pathname === '/api/project-review') {
+      const reviews = listProjectReviews();
+      return send(res, reviews.length ? 200 : 404, {
+        active: reviews[0] || null,
         reviews,
       });
     }

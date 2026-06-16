@@ -66,17 +66,22 @@ See [docs/FRONTIER_RUN.md](docs/FRONTIER_RUN.md) for the full runbook.
 Latest audited raw GPU model run:
 
 ```text
-model: forge-optimizer-frontier:raw-gpu
-score: 53.8
+model: forge-optimizer-frontier:frontier-plus-raw
+score: 83.3
 baseline: codex 87.2
-delta: -33.4
+delta: -3.9
 tasks: 39
-domains: db 50.0, vector 100.0, storage 100.0, ai 0.0, auth 0.0
+domains: db 91.7, vector 100.0, storage 66.7, ai 50.0, auth 100.0
 ```
 
 The deterministic repair layer is tracked separately. It can score `100.0` on the sealed
 benchmark, but `npm run frontier-audit:repair` confirms that it can do that with empty model
 output. Treat it as a verifier/prototype and distillation target, not as a model-only score.
+
+The raw adapter is also checked with a manual usefulness probe outside the sealed benchmark.
+See [docs/MODEL_USEFULNESS.md](docs/MODEL_USEFULNESS.md). The current result is mixed:
+database projection, pagination, and storage metadata answers are useful, but image, vector,
+and multi-step repair prompts still need a verifier or another training pass.
 
 ## Agent Code Repair Benchmark
 

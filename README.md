@@ -16,7 +16,7 @@ limits hide scale bugs.
   inefficient backend code into more scale-safe code.
 - `bench/site/` and `demo_server.js`: a local demo that runs an author model, sends the code
   through forge-optimizer, and grades both outputs with forger-bench.
-- `tools/forger.js`: project CLI for branch reviews and frontier artifact validation.
+- `tools/forger.js`: project CLI for branch reviews, project reviews, and frontier artifact validation.
 
 ## What The Benchmark Measures
 
@@ -39,7 +39,7 @@ The local judge demo includes:
 
 - `Dashboard`: benchmark results and CPU, disk, memory, row, and request metrics.
 - `Optimizer`: the forge-optimizer training and reward loop.
-- `Judge Mode`: branch review evidence, annotated merge SQL, frontier run status, and benchmark leaderboard.
+- `Judge Mode`: branch review evidence, annotated merge SQL, project repair proof, frontier run status, and benchmark leaderboard.
 - `Run`: live author model output, optimizer rewrite, and forger-bench grading.
 
 Install dependencies and start the server:
@@ -87,6 +87,25 @@ node tools/forger.js branch-review \
 Branch Review writes `result.json`, `report.md`, `timeline.json`, and `annotated-merge.sql`
 under `bench/results/demo-recordings/`. See [docs/BRANCH_REVIEW.md](docs/BRANCH_REVIEW.md).
 
+## Project Review
+
+Run a dry review on a generated InsForge app folder:
+
+```bash
+npm run project-review:demo
+```
+
+The command scans JavaScript and TypeScript source, applies the same SDK repair rules used
+by the project benchmark, and writes a review report plus repaired copies under
+`bench/results/demo-recordings/project-review-customer-portal/`. It does not modify the
+project unless `--apply` is passed.
+
+Use it on another project folder:
+
+```bash
+node tools/forger.js project-review --project path/to/insforge-app --out bench/results/demo-recordings/project-review-custom
+```
+
 ## Frontier Optimizer Run
 
 The GPU path for the optimizer is:
@@ -102,17 +121,24 @@ exists, otherwise it shows the clearly marked recorded demo target. See
 
 Latest audited raw GPU model run:
 
-- Model: `forge-optimizer-frontier:raw-gpu`
-- Score: `53.8` on 39 sealed benchmark tasks
+- Model: `forge-optimizer-frontier:frontier-plus-raw`
+- Score: `83.3` on 39 sealed benchmark tasks
 - Baseline shown in Judge Mode: `codex` at `87.2`
-- Delta: `-33.4`
-- Domains: database `50.0`, vector `100.0`, storage `100.0`, AI `0.0`, auth `0.0`
+- Delta: `-3.9`
+- Domains: database `91.7`, vector `100.0`, storage `66.7`, AI `50.0`, auth `100.0`
 
 There is also a repair-layer audit artifact at
-`optimizer/results/frontier_run.repair_verified.json`. It scores `100.0`, but it is not a
-model-only score: `npm run frontier-audit:repair` shows that the deterministic repair layer
+`optimizer/results/frontier_run.repair_assisted_live.json`. It scores `100.0`, but it is not
+a model-only score: `npm run frontier-audit:repair` shows that the deterministic repair layer
 can solve the sealed prompts even when the model output is empty. Treat that artifact as a
-verifier/prototype result, not as proof that the trained adapter beat the frontier baseline.
+verifier result and distillation target, not as proof that the trained adapter beat the
+frontier baseline.
+
+A manual usefulness probe is documented in
+[optimizer/docs/MODEL_USEFULNESS.md](optimizer/docs/MODEL_USEFULNESS.md). The short version:
+the raw adapter is useful for database projections, pagination, storage metadata, and some
+review comments. It is not reliable enough for autonomous repair on image, vector, and
+multi-step SDK-shape cases.
 
 ## Agent Code Repair
 
@@ -170,7 +196,7 @@ npm run frontier-gate:raw
 ```
 
 That gate must pass before claiming the trained model itself beats Codex. It rejects
-repair-labeled artifacts and currently fails on the latest raw run because `53.8` does not
+repair-labeled artifacts and currently fails on the latest raw run because `83.3` does not
 beat the Codex baseline of `87.2`.
 
 ## Run The Benchmark

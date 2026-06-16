@@ -43,14 +43,14 @@ The recorded file is a demo target, not a replacement for the GPU result.
 
 ## Latest Audited Result
 
-The June 12, 2026 GPU run completed SFT, GRPO, sealed evaluation, and artifact validation.
-The raw model output is the judge-safe score to report as model performance.
+The June 13, 2026 GPU run completed SFT, GRPO, sealed evaluation, and artifact validation.
+The raw model output is the score to report as model performance.
 
 ```text
-model: forge-optimizer-frontier:raw-gpu
-score: 53.8
+model: forge-optimizer-frontier:frontier-plus-raw
+score: 83.3
 baseline: codex 87.2
-delta: -33.4
+delta: -3.9
 tasks: 39
 status: live-run-raw
 ```
@@ -58,17 +58,20 @@ status: live-run-raw
 Domain scores:
 
 ```text
-db: 50.0
+db: 91.7
 vector: 100.0
-storage: 100.0
-ai: 0.0
-auth: 0.0
+storage: 66.7
+ai: 50.0
+auth: 100.0
 ```
 
-The repair-verified artifact is tracked separately at
-`optimizer/results/frontier_run.repair_verified.json`. It passes all benchmark domains, but
-it should not be reported as a model-only score. The repair layer fixes stable InsForge SDK
-shapes that the raw model missed: top-level counts, embedding response mapping, storage
+The raw run does not beat the Codex baseline yet. The remaining failures are concentrated in
+storage metadata handling and AI image storage tasks.
+
+The repair-assisted live artifact is tracked separately at
+`optimizer/results/frontier_run.repair_assisted_live.json`. It passes all benchmark domains,
+but it should not be reported as a model-only score. The repair layer fixes stable InsForge
+SDK shapes that the raw model missed: top-level counts, embedding response mapping, storage
 metadata, current-user id extraction, and array-returning database queries.
 
 Regenerate the repair-verified artifact:
@@ -76,7 +79,7 @@ Regenerate the repair-verified artifact:
 ```bash
 npm run frontier-plus
 npm run frontier-report:plus
-node tools/forger.js frontier-validate --file optimizer/results/frontier_run.repair_verified.json
+node tools/forger.js frontier-validate --file optimizer/results/frontier_run.repair_assisted_live.json
 ```
 
 Audit whether the repair layer is solving the benchmark without model output:
@@ -163,11 +166,11 @@ If you already have a score file:
 
 ```bash
 node optimizer/eval/frontier_report.js \
-  --score bench/results/score_fo-frontier.json \
+  --score bench/results/score_fo-frontier-plus-raw.json \
   --baseline bench/results/score_codex.json \
   --out optimizer/results/frontier_run.json \
-  --model forge-optimizer-frontier:qwen3.6 \
-  --status live-run
+  --model forge-optimizer-frontier:frontier-plus-raw \
+  --status live-run-raw
 ```
 
 Validate the artifact:

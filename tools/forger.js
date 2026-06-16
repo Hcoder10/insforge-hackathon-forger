@@ -14,17 +14,28 @@ const ROOT = path.resolve(__dirname, '..');
 const BENCH = path.join(ROOT, 'bench');
 const WORKLOADS = path.join(BENCH, 'workloads');
 const DEFAULT_RECORD = path.join(BENCH, 'results', 'branch-review');
+const PROJECT_SOURCE_EXTS = new Set(['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx']);
+const PROJECT_SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage']);
+const PROJECT_REPAIR_NOTES = {
+  'database.insert-array-form': 'Uses array insert format expected by the InsForge SDK.',
+  'auth.get-current-user-shape': 'Handles the { data, error } current-user response shape before reading user.id.',
+  'storage.metadata-without-download': 'Uses storage listing metadata instead of downloading every file.',
+  'storage.batch-remove': 'Deletes storage keys in one batch call instead of one request per key.',
+  'database.pagination-count-projection': 'Uses projected columns, exact count, and server pagination.',
+};
 
 function usage() {
   console.log(`FORGER
 
 usage:
   node tools/forger.js branch-review --scenario <name> [--record <dir>] [--branch <name>] [--mode schema-only|full] [--live] [--keep-branch]
+  node tools/forger.js project-review --project <dir> [--out <dir>] [--apply]
   node tools/forger.js frontier-validate --file <frontier_run.json>
 
 examples:
   node tools/forger.js branch-review --scenario slow-query-index
   node tools/forger.js branch-review --scenario slow-query-index --live --branch forger-demo --mode schema-only
+  node tools/forger.js project-review --project optimizer/fixtures/agent_projects/insforge-customer-portal
 `);
 }
 
@@ -34,7 +45,7 @@ function parse(argv) {
     const a = argv[i];
     if (!a.startsWith('--')) { out._.push(a); continue; }
     const key = a.slice(2);
-    if (['live', 'recorded', 'keep-branch', 'yes'].includes(key)) out[key] = true;
+    if (['live', 'recorded', 'keep-branch', 'yes', 'apply'].includes(key)) out[key] = true;
     else out[key] = argv[++i];
   }
   return out;
@@ -197,6 +208,139 @@ ${result.timeline.map((e) => `- ${e.status.toUpperCase()}: ${e.label}`).join('\n
 `;
 }
 
+function walkProjectSources(root) {
+  const out = [];
+  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    if (PROJECT_SKIP_DIRS.has(entry.name)) continue;
+    const file = path.join(root, entry.name);
+    if (entry.isDirectory()) out.push(...walkProjectSources(file));
+    else if (PROJECT_SOURCE_EXTS.has(path.extname(entry.name))) out.push(file);
+  }
+  return out;
+}
+
+function slashRelative(root, file) {
+  return path.relative(root, file).split(path.sep).join('/');
+}
+
+function projectDisplayPath(file) {
+  const rel = slashRelative(ROOT, file);
+  return rel.startsWith('..') ? file : rel;
+}
+
+function projectRepairNotes(repairs) {
+  return [...new Set(repairs)].map((repair) => PROJECT_REPAIR_NOTES[repair] || repair);
+}
+
+function writeRepairedCopy(outDir, rel, source) {
+  const target = path.join(outDir, 'repaired', ...rel.split('/'));
+  mkdirp(path.dirname(target));
+  fs.writeFileSync(target, source);
+  return slashRelative(outDir, target);
+}
+
+function projectReviewMarkdown(result) {
+  const summary = [
+    `# FORGER Project Review: ${path.basename(result.project.path)}`,
+    '',
+    `Status: **${result.status.toUpperCase()}**`,
+    '',
+    `Project: \`${result.project.path}\`  `,
+    `Mode: \`${result.mode}\`  `,
+    `Files scanned: \`${result.filesScanned}\`  `,
+    `Files changed: \`${result.files.length}\`  `,
+    `Repairs found: \`${result.repairCount}\``,
+    '',
+    '## Resource Axes',
+    '',
+    '- CPU: flags row-by-row JavaScript work that should stay inside the database or storage service.',
+    '- Memory: flags full-table and full-file reads that scale with dataset size.',
+    '- Disk: flags unnecessary backend reads, cache churn, and file downloads.',
+    '- Correctness: flags InsForge SDK response-shape bugs and API usage that fails under real data.',
+    '',
+  ];
+
+  if (!result.files.length) {
+    summary.push('## Findings', '', '- No known InsForge repair patterns were found.');
+    return summary.join('\n');
+  }
+
+  summary.push('## Findings', '');
+  for (const file of result.files) {
+    summary.push(`### ${file.file}`, '');
+    for (const note of file.notes) summary.push(`- ${note}`);
+    if (file.repairedCopy) summary.push(`- Repaired copy: \`${file.repairedCopy}\``);
+    summary.push('');
+  }
+  return summary.join('\n');
+}
+
+function runProjectReview(opts) {
+  const projectArg = opts.project || opts._[1];
+  if (!projectArg) throw new Error('project-review requires --project <dir>');
+  const project = path.resolve(projectArg);
+  if (!fs.existsSync(project) || !fs.statSync(project).isDirectory()) {
+    throw new Error(`project not found: ${projectArg}`);
+  }
+
+  const defaultOut = path.join(BENCH, 'results', 'demo-recordings', `project-review-${path.basename(project)}`);
+  const outDir = path.resolve(opts.out || defaultOut);
+  mkdirp(outDir);
+
+  const { repairSource, repairProject } = require(path.join(ROOT, 'optimizer', 'eval', 'project_code_repair'));
+  let files = [];
+  let filesScanned = 0;
+
+  if (opts.apply) {
+    const applied = repairProject(project);
+    files = applied.files.map((file) => ({
+      file: file.file,
+      repairs: file.repairs,
+      notes: projectRepairNotes(file.repairs),
+      originalBytes: null,
+      repairedBytes: null,
+      repairedCopy: null,
+    }));
+    filesScanned = walkProjectSources(project).length;
+  } else {
+    const sourceFiles = walkProjectSources(project);
+    filesScanned = sourceFiles.length;
+    for (const file of sourceFiles) {
+      const before = fs.readFileSync(file, 'utf8');
+      const repaired = repairSource(before);
+      if (!repaired.repairs.length || repaired.source === before) continue;
+      const rel = slashRelative(project, file);
+      const repairedCopy = writeRepairedCopy(outDir, rel, repaired.source);
+      files.push({
+        file: rel,
+        repairs: repaired.repairs,
+        notes: projectRepairNotes(repaired.repairs),
+        originalBytes: Buffer.byteLength(before),
+        repairedBytes: Buffer.byteLength(repaired.source),
+        repairedCopy,
+      });
+    }
+  }
+
+  const result = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    mode: opts.apply ? 'apply' : 'dry-run',
+    status: files.length ? 'needs-review' : 'clean',
+    project: { path: projectDisplayPath(project) },
+    filesScanned,
+    repairCount: files.reduce((sum, file) => sum + file.repairs.length, 0),
+    files,
+  };
+
+  writeJson(path.join(outDir, 'project-review.json'), result);
+  fs.writeFileSync(path.join(outDir, 'project-review.md'), projectReviewMarkdown(result));
+
+  console.log(`FORGER project review ${result.status.toUpperCase()}: ${result.files.length} files, ${result.repairCount} repairs`);
+  console.log(`  wrote ${path.relative(ROOT, path.join(outDir, 'project-review.json'))}`);
+  return result;
+}
+
 function recordedPlans(workload) {
   if (!workload.recorded?.baselinePlan || !workload.recorded?.candidatePlan) {
     throw new Error(`workload ${workload.name} has no recorded plans`);
@@ -308,6 +452,7 @@ function main() {
   const cmd = opts._[0];
   try {
     if (cmd === 'branch-review') runBranchReview(opts);
+    else if (cmd === 'project-review') runProjectReview(opts);
     else if (cmd === 'frontier-validate') validateFrontier(opts);
     else { usage(); process.exit(cmd ? 1 : 0); }
   } catch (e) {
@@ -318,4 +463,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { loadWorkload, verdict, metricSummary, runBranchReview };
+module.exports = { loadWorkload, verdict, metricSummary, runBranchReview, runProjectReview };

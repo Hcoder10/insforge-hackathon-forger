@@ -22,6 +22,14 @@
     frontierDelta: byId('judge-frontier-delta'),
     frontierTasks: byId('judge-frontier-tasks'),
     frontierArtifact: byId('judge-frontier-artifact'),
+    projectRepairs: byId('judge-project-repairs'),
+    projectStatus: byId('judge-project-status'),
+    projectDescription: byId('judge-project-description'),
+    projectScanned: byId('judge-project-scanned'),
+    projectChanged: byId('judge-project-changed'),
+    projectRepairCount: byId('judge-project-repair-count'),
+    projectFiles: byId('judge-project-files'),
+    projectArtifact: byId('judge-project-artifact'),
     benchmarkTasks: byId('judge-benchmark-tasks'),
     benchmarkDomains: byId('judge-benchmark-domains'),
     benchmarkAxes: byId('judge-benchmark-axes'),
@@ -172,16 +180,52 @@
     }
   }
 
+  function renderProjectReview(data) {
+    const review = data?.active || data;
+    if (!review || review.error) {
+      setStatus(els.projectStatus, 'MISSING');
+      setText(els.projectRepairs, '-');
+      setText(els.projectDescription, review?.error || 'No project review artifact found.');
+      setText(els.projectArtifact, '-');
+      return;
+    }
+
+    const projectPath = review.project?.path || 'project';
+    const status = review.status || 'ready';
+    setStatus(els.projectStatus, status.toUpperCase());
+    setText(els.projectRepairs, String(review.repairCount ?? 0));
+    setText(els.projectDescription, `${projectPath} reviewed in ${review.mode || 'dry-run'} mode.`);
+    setText(els.projectScanned, String(review.filesScanned ?? '-'));
+    setText(els.projectChanged, String((review.files || []).length));
+    setText(els.projectRepairCount, String(review.repairCount ?? 0));
+    setText(els.projectArtifact, review.artifacts?.dir || '-');
+
+    if (!els.projectFiles) return;
+    els.projectFiles.innerHTML = '';
+    for (const file of (review.files || []).slice(0, 5)) {
+      const li = document.createElement('li');
+      const name = document.createElement('b');
+      const notes = document.createElement('span');
+      name.textContent = file.file || '-';
+      notes.textContent = (file.repairs || []).join(', ') || 'review note';
+      li.appendChild(name);
+      li.appendChild(notes);
+      els.projectFiles.appendChild(li);
+    }
+  }
+
   async function loadJudgeMode() {
     try {
-      const [branch, frontier, benchmark] = await Promise.all([
+      const [branch, projectReview, frontier, benchmark] = await Promise.all([
         fetchJson('/api/branch-review').catch((e) => ({ error: e.message, reviews: [] })),
+        fetchJson('/api/project-review').catch((e) => ({ error: e.message })),
         fetchJson('/api/frontier').catch((e) => ({ error: e.message })),
         fetchJson('/api/benchmark').catch((e) => ({ error: e.message })),
       ]);
 
       branchReviews = branch.reviews || [];
       renderBranch(branch.active || branchReviews[0] || null);
+      renderProjectReview(projectReview);
 
       if (frontier.error) {
         setStatus(els.frontierStatus, 'MISSING');
