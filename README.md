@@ -8,6 +8,10 @@ on small data, but wastes backend resources or breaks when tables grow. The benc
 both correctness and efficiency, including live 100k-row checks for cases where API response
 limits hide scale bugs.
 
+## UPDATES
+
+FORGER won at the Insforge Hackathon!
+
 ## Components
 
 - `bench/`: forger-bench, an efficiency-aware benchmark for InsForge SDK code.
